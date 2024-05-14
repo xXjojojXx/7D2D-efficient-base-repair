@@ -2,7 +2,7 @@
 	<append xpath="/blocks">
 		<block name="MyBlock">
 			<property name="Extends" value="woodNoUpgradeMaster"/>
-			<property name="Class" value="MyBlock"/>
+			<property name="Class" value="MyBlock, EfficientBaseRepair"/>
 		</block>
 	</append>
 </configs>
