@@ -8,6 +8,7 @@ if exist "EfficientBaseRepair.zip" DEL "EfficientBaseRepair.zip"
     config ^
     UIAtlases ^
     EfficientBaseRepair.dll ^
+    README.md ^
     ModInfo.xml > nul
 
 DEL .\EfficientBaseRepair.dll
