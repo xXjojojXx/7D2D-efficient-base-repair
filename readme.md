@@ -8,6 +8,6 @@
 
 2. Install [dotnet](https://dotnet.microsoft.com/en-us/download)
 
-3. Run `compile.cmd` from the project root to build the dll
+3. Build the dll by running [compile.cmd](./Scripts/compile.cmd) from the project root
 
-4. (optional) Run `Release.cmd` to compile, then to enpack all the files in EfficientBaseRepair.zip and to load it in the Mod folder of the installation pointed by the env variable `PATH_7D2D`
+4. (optional) Run [Release.cmd](./Scripts/release.cmd) to compile, then to enpack all the files in EfficientBaseRepair.zip and to load it in the Mod folder of the installation pointed by the env variable `PATH_7D2D`

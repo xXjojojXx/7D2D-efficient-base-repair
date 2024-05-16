@@ -1,6 +1,6 @@
 @echo off
 
-dotnet build --no-incremental .\EfficientBaseRepair.csproj
+call ".\Scripts\compile.cmd"
 
 if exist "EfficientBaseRepair.zip" DEL "EfficientBaseRepair.zip"
 
@@ -22,4 +22,4 @@ mkdir %MOD_PATH%
 
 cd %MOD_PATH%
 
-7z.exe x "%~dp0/EfficientBaseRepair.zip" > nul
+7z.exe x "%~dp0..\EfficientBaseRepair.zip" > nul
