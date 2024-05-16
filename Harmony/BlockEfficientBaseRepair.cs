@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine;
 using System.Collections.Generic;
 
 class BlockEfficientBaseRepair : BlockSecureLoot
@@ -91,6 +90,7 @@ class BlockEfficientBaseRepair : BlockSecureLoot
 		return commands;
 	}
 
+    // copied from ocbClaimAutoRepair
     public override bool OnBlockActivated(
         string _commandName,
         WorldBase _world,

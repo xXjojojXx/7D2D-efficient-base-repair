@@ -1,11 +1,9 @@
-using UnityEngine;
 using System.Collections.Generic;
-using System;
-using static Block;
 
 public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer {
 
     public bool is_on;
+    public bool is_under_cooldown;
 
     public TileEntityEfficientBaseRepair(Chunk _chunk) : base(_chunk){
         is_on = false;
@@ -17,5 +15,4 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer {
     public Dictionary<string, int> FindAndRepairDamagedBlocks(World world) {
         return null;
     }
-
 }
