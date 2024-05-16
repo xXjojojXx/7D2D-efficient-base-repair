@@ -1,25 +1,36 @@
 ﻿<configs>
 	<append xpath="/blocks">
 		<block name="EfficientBaseRepair">
-			<property name="Class" value="BlockEfficientBaseRepair, EfficientBaseRepair"/>
 
-			<property name="CreativeMode" value="Player"/>
+			<!-- Modding required properties -->
+			<property name="Class" value="BlockEfficientBaseRepair, EfficientBaseRepair"/>
 			<property name="CustomIcon" value="EfficientBaseRepair"/>
+
+			<!-- Vanilla properties -->
 			<property name="DisplayInfo" value="Custom"/>
+			<property name="CreativeMode" value="Player"/>
 			<property name="DisplayType" value="blockHardened"/>
 			<property name="Stacknumber" value="1"/>
 			<property name="Material" value="Msteel"/>
 			<property name="Shape" value="ModelEntity"/>
+			<property name="LootList" value="storageCrate"/>
 			<property name="Model" value="Entities/Industrial/landClaimBlockPrefab"/>
 			<property name="PlacementDistance" value="25"/>
 			<property name="AllowedRotations" value="No45"/>
-			<property name="TakeDelay" value="1"/>
 			<property name="MaxDamage" value="7000"/>
 			<property name="StartDamage" value="0"/>
 			<property name="PassThroughDamage" value="true"/>
+			<property name="TakeDelay" value="5"/>
 			<property class="RepairItems">
 				<property name="resourceRockSmall" value="10"/>
 			</property>
+
+			<!-- Specific properties -->
+			<property name="Cooldown" value="10"/> 			 <!-- The minimum delay in seconds, between two repair launch -->
+			<property name="MaxBfsIterations" value="1000"/> <!-- The max number of bfs iterations (more iterations will require more CPU ressources) -->
+			<property name="NeedsMaterials" value="true"/>	 <!-- Set this param to false, to fully disable the material requirements -->
+			<property name="RepairPerTick" value="1000"/> 	 <!-- The amount of damage which can be repaired for one game Tick -->
+
 		</block>
 	</append>
 </configs>

@@ -71,6 +71,7 @@
   <ItemGroup>
     <Compile Include="Harmony\EfficientBaseRepair.cs" />
     <Compile Include="Harmony\BlockEfficientBaseRepair.cs" />
+    <Compile Include="Harmony\TileEntityEfficientBaseRepair.cs" />
     <Compile Include="Harmony\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />
