@@ -1,7 +1,8 @@
 ﻿
 // <property name="Class" value="MyBlock, SampleProject" />
-class MyBlock : Block
+class BlockEfficientBaseRepair : BlockSecureLoot
 {
+
     public override void Init()
     {
         Log.Out($"Hello from {GetType()}!");

@@ -1,8 +1,25 @@
 ﻿<configs>
 	<append xpath="/blocks">
-		<block name="MyBlock">
-			<property name="Extends" value="woodNoUpgradeMaster"/>
-			<property name="Class" value="MyBlock, EfficientBaseRepair"/>
+		<block name="EfficientBaseRepair">
+			<property name="Class" value="BlockEfficientBaseRepair, EfficientBaseRepair"/>
+
+			<property name="CreativeMode" value="Player"/>
+			<property name="CustomIcon" value="EfficientBaseRepair"/>
+			<property name="DisplayInfo" value="Custom"/>
+			<property name="DisplayType" value="blockHardened"/>
+			<property name="Stacknumber" value="1"/>
+			<property name="Material" value="Msteel"/>
+			<property name="Shape" value="ModelEntity"/>
+			<property name="Model" value="Entities/Industrial/landClaimBlockPrefab"/>
+			<property name="PlacementDistance" value="25"/>
+			<property name="AllowedRotations" value="No45"/>
+			<property name="TakeDelay" value="1"/>
+			<property name="MaxDamage" value="7000"/>
+			<property name="StartDamage" value="0"/>
+			<property name="PassThroughDamage" value="true"/>
+			<property class="RepairItems">
+				<property name="resourceRockSmall" value="10"/>
+			</property>
 		</block>
 	</append>
 </configs>

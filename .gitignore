@@ -1,5 +1,7 @@
-obj
+.vscode
 .vs
+obj
 bin
 *.dll
 *.pdb
+*.zip

@@ -70,7 +70,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Harmony\EfficientBaseRepair.cs" />
-    <Compile Include="Harmony\MyBlock.cs" />
+    <Compile Include="Harmony\BlockEfficientBaseRepair.cs" />
     <Compile Include="Harmony\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />
