@@ -5,6 +5,9 @@ class BlockEfficientBaseRepair : BlockSecureLoot
 {
     private Vector2i LootSize = new Vector2i(8, 8);
 
+    private const string TURN_ON_CMD = "turn_repair_on";
+    private const string TURN_OFF_CMD = "turn_repair_off";
+
     // copied from ocbClaimAutoRepair and adapted from BlockLandClaim
     public override void OnBlockEntityTransformAfterActivated(
         WorldBase _world,
@@ -75,17 +78,17 @@ class BlockEfficientBaseRepair : BlockSecureLoot
 		Array.Resize(ref commands, commands.Length + 2);
 		commands[commands.Length - 2] = new BlockActivationCommand("take", "hand", false);
 
-		string cmd = tileEntity.is_on ? "turn_repair_off" : "turn_repair_on";
+		string cmd = tileEntity.is_activated ? TURN_OFF_CMD : TURN_ON_CMD;
 		commands[commands.Length - 1] = new BlockActivationCommand(cmd, "electric_switch", true);
 
-		if (this.CanPickup)
-			commands[commands.Length - 2].enabled = true;
+		// if (this.CanPickup)
+		// 	commands[commands.Length - 2].enabled = true;
 
-		else if ((double)EffectManager.GetValue(PassiveEffects.BlockPickup, _entity: _entityFocusing, tags: _blockValue.Block.Tags) > 0.0)
-			commands[commands.Length - 2].enabled = true;
+		// else if ((double)EffectManager.GetValue(PassiveEffects.BlockPickup, _entity: _entityFocusing, tags: _blockValue.Block.Tags) > 0.0)
+		// 	commands[commands.Length - 2].enabled = true;
 
-		else
-			commands[commands.Length - 2].enabled = false;
+		// else
+		// 	commands[commands.Length - 2].enabled = false;
 
 		return commands;
 	}
@@ -135,16 +138,18 @@ class BlockEfficientBaseRepair : BlockSecureLoot
             return false;
 
         }
-        else if (_commandName == "turn_claimautorep_off" || _commandName == "turn_claimautorep_on")
+        else if (_commandName == TURN_OFF_CMD || _commandName == TURN_ON_CMD)
         {
-            tileEntity.is_on = !tileEntity.is_on;
+            tileEntity.is_activated = !tileEntity.is_activated;
 
-            if (!tileEntity.is_on)
+            if (!tileEntity.is_activated)
                 return true;
 
-            return true;
-
-            Dictionary<string, int> missing_items = tileEntity.FindAndRepairDamagedBlocks(_player.world);
+            Dictionary<string, int> missing_items = tileEntity.FindAndRepairDamagedBlocks(
+                world: _player.world,
+                max_iterations: this.Properties.GetInt("MaxBfsIterations"),
+                need_materials: this.Properties.GetBool("NeedsMaterials")
+            );
 
             Log.Out($"{missing_items.Count} missing items: ");
 
@@ -246,7 +251,4 @@ class BlockEfficientBaseRepair : BlockSecureLoot
 				playerUI.xui.PlayerInventory.DropItem(items[index]);
 		}
 	}
-
-
-
 }

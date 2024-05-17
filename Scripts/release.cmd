@@ -5,7 +5,7 @@ call ".\Scripts\compile.cmd"
 if exist "EfficientBaseRepair.zip" DEL "EfficientBaseRepair.zip"
 
 7z.exe a "EfficientBaseRepair.zip" ^
-    config ^
+    Config ^
     UIAtlases ^
     EfficientBaseRepair.dll ^
     README.md ^
