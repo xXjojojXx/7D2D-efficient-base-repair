@@ -10,17 +10,17 @@
 			<property name="DisplayInfo" value="Custom"/>
 			<property name="CreativeMode" value="Player"/>
 			<property name="DisplayType" value="blockHardened"/>
-			<property name="Stacknumber" value="1"/>
+			<property name="Stacknumber" value="10"/>
 			<property name="Material" value="Msteel"/>
 			<property name="Shape" value="ModelEntity"/>
 			<property name="LootList" value="storageCrate"/>
 			<property name="Model" value="Entities/Industrial/landClaimBlockPrefab"/>
 			<property name="PlacementDistance" value="25"/>
 			<property name="AllowedRotations" value="No45"/>
-			<property name="MaxDamage" value="7000"/>
+			<property name="MaxDamage" value="5000"/>
 			<property name="StartDamage" value="0"/>
 			<property name="PassThroughDamage" value="true"/>
-			<property name="TakeDelay" value="5"/>
+			<property name="TakeDelay" value="1"/>
 			<property class="RepairItems">
 				<property name="resourceRockSmall" value="10"/>
 			</property>
