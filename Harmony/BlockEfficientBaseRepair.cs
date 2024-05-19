@@ -10,8 +10,6 @@ class BlockEfficientBaseRepair : BlockSecureLoot
     private const string TURN_ON_CMD = "turn_repair_on";
     private const string TURN_OFF_CMD = "turn_repair_off";
 
-    private int TakeDelay;
-
     // copied from ocbClaimAutoRepair and adapted from BlockLandClaim
     public override void OnBlockEntityTransformAfterActivated(WorldBase _world, Vector3i _blockPos, int _cIdx, BlockValue _blockValue, BlockEntityData _ebcd)
     {
@@ -55,16 +53,12 @@ class BlockEfficientBaseRepair : BlockSecureLoot
         tileEntity.SetContainerSize(LootSize);
         _chunk.AddTileEntity(tileEntity);
 
-        TakeDelay = this.Properties.GetInt("TakeDelay");
-
         base.OnBlockAdded(_world, _chunk, _blockPos, _blockValue);
     }
 
     public override BlockActivationCommand[] GetBlockActivationCommands(WorldBase _world, BlockValue _blockValue, int _clrIdx, Vector3i _blockPos, EntityAlive _entityFocusing)
     {
         TileEntityEfficientBaseRepair tileEntity = _world.GetTileEntity(_clrIdx, _blockPos) as TileEntityEfficientBaseRepair;
-
-        Log.Out(tileEntity == null ? "Null TileEntityEfficientBaseRepair": "Not null TileEntityEfficientBaseRepair");
 
         string cmd_activate = tileEntity.is_activated ? TURN_OFF_CMD : TURN_ON_CMD;
         bool is_locked = tileEntity.IsLocked();
@@ -99,7 +93,7 @@ class BlockEfficientBaseRepair : BlockSecureLoot
             return OnBlockActivated(_commandName, _world, _cIdx, parentPos, block, _player);
         }
 
-        if (!(_world.GetTileEntity(_cIdx, _blockPos) is TileEntitySecureLootContainer tileEntitySecureLootContainer))
+        if (!(_world.GetTileEntity(_cIdx, _blockPos) is TileEntityEfficientBaseRepair tileEntity))
         {
             return false;
         }
@@ -131,15 +125,15 @@ class BlockEfficientBaseRepair : BlockSecureLoot
             return OnBlockActivated(_world, _cIdx, parentPos, block, _player);
         }
 
-        if (!(_world.GetTileEntity(_cIdx, _blockPos) is TileEntitySecureLootContainer tileEntitySecureLootContainer))
+        if (!(_world.GetTileEntity(_cIdx, _blockPos) is TileEntityEfficientBaseRepair tileEntity))
         {
             return false;
         }
 
         _player.AimingGun = false;
-        Vector3i blockPos = tileEntitySecureLootContainer.ToWorldPos();
-        tileEntitySecureLootContainer.bWasTouched = tileEntitySecureLootContainer.bTouched;
-        _world.GetGameManager().TELockServer(_cIdx, blockPos, tileEntitySecureLootContainer.entityId, _player.entityId);
+        Vector3i blockPos = tileEntity.ToWorldPos();
+        tileEntity.bWasTouched = tileEntity.bTouched;
+        _world.GetGameManager().TELockServer(_cIdx, blockPos, tileEntity.entityId, _player.entityId);
         return true;
     }
 
@@ -162,7 +156,8 @@ class BlockEfficientBaseRepair : BlockSecureLoot
 		TimerEventData timerEventData = new TimerEventData();
 		timerEventData.Data = new object[4] { _cIdx, _blockValue, _blockPos, _player };
 		timerEventData.Event += EventData_Event;
-		childByType.SetTimer(TakeDelay, timerEventData);
+
+        childByType.SetTimer(Properties.GetInt("TakeDelay"), timerEventData);
 	}
 
     // copied from BlockWorkStation
