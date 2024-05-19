@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices.WindowsRuntime;
 using Audio;
 using Platform;
 using UnityEngine;
@@ -69,10 +70,10 @@ class BlockEfficientBaseRepair : BlockSecureLoot
         {
             new BlockActivationCommand("Search", "search", true),
             new BlockActivationCommand("lock", "lock", !is_locked),
-            new BlockActivationCommand("keypad", "keypad", true),
             new BlockActivationCommand("unlock", "unlock", is_locked),
-            new BlockActivationCommand(TURN_ON_CMD, "electric_switch", true),
+            new BlockActivationCommand("keypad", "keypad", true),
             new BlockActivationCommand("take", "hand", true),
+            new BlockActivationCommand(TURN_ON_CMD, "electric_switch", true),
         };
 
     }
@@ -101,18 +102,50 @@ class BlockEfficientBaseRepair : BlockSecureLoot
         switch (_commandName)
         {
             case TURN_ON_CMD:
-                break;
-
             case TURN_OFF_CMD:
-                break;
+                // tileEntity.is_activated = !tileEntity.is_activated;
+                return true;
 
             case "take":
 				TakeItemWithTimer(_cIdx, _blockPos, _blockValue, _player);
 				return true;
 
-        }
+            case "lock":
+                tileEntity.SetLocked(true);
+                Manager.BroadcastPlayByLocalPlayer(_blockPos.ToVector3() + Vector3.one * 0.5f, "Misc/locking");
+                GameManager.ShowTooltip(_player as EntityPlayerLocal, "containerLocked");
+                return true;
 
-        return base.OnBlockActivated(_commandName, _world, _cIdx, _blockPos, _blockValue, _player);
+            case "unlock":
+                tileEntity.SetLocked(false);
+                Manager.BroadcastPlayByLocalPlayer(_blockPos.ToVector3() + Vector3.one * 0.5f, "Misc/unlocking");
+                GameManager.ShowTooltip(_player as EntityPlayerLocal, "containerUnlocked");
+                return true;
+
+            case "keypad":
+                {
+                    LocalPlayerUI uIForPlayer = LocalPlayerUI.GetUIForPlayer(_player as EntityPlayerLocal);
+                    if (uIForPlayer != null)
+                    {
+                        XUiC_KeypadWindow.Open(uIForPlayer, tileEntity);
+                    }
+
+                    return true;
+                }
+
+            case "Search":
+                if (!tileEntity.IsLocked() || tileEntity.IsUserAllowed(PlatformManager.InternalLocalUserIdentifier))
+                {
+                    return OnBlockActivated(_world, _cIdx, _blockPos, _blockValue, _player);
+                }
+
+                Manager.BroadcastPlayByLocalPlayer(_blockPos.ToVector3() + Vector3.one * 0.5f, "Misc/locked");
+                return false;
+
+            default:
+                return false;
+
+        }
     }
 
     // copied from BlockSecureLoot
@@ -130,10 +163,17 @@ class BlockEfficientBaseRepair : BlockSecureLoot
             return false;
         }
 
-        _player.AimingGun = false;
-        Vector3i blockPos = tileEntity.ToWorldPos();
-        tileEntity.bWasTouched = tileEntity.bTouched;
-        _world.GetGameManager().TELockServer(_cIdx, blockPos, tileEntity.entityId, _player.entityId);
+        LocalPlayerUI uIForPlayer = LocalPlayerUI.GetUIForPlayer(_player as EntityPlayerLocal);
+        if (uIForPlayer != null)
+        {
+            XUiC_EfficientBaseRepair.Open(uIForPlayer, tileEntity);
+        }
+
+        // _player.AimingGun = false;
+        // Vector3i blockPos = tileEntity.ToWorldPos();
+        // tileEntity.bWasTouched = tileEntity.bTouched;
+        // _world.GetGameManager().TELockServer(_cIdx, blockPos, tileEntity.entityId, _player.entityId);
+
         return true;
     }
 
