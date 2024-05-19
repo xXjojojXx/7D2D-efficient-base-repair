@@ -1,90 +1,204 @@
+using System;
+using System.Runtime.InteropServices.WindowsRuntime;
 using Audio;
-using Platform;
+using UnityEngine;
 
 public class XUiC_EfficientBaseRepair : XUiController
 {
-	public static string ID = "KeypadEdit";
+	private XUiC_LootWindow lootWindow;
 
-	private XUiC_TextInput txtPassword;
+	private XUiV_Label headerName;
 
-	private ILockable LockedItem;
+	private XUiC_WindowNonPagingHeader nonPagingHeaderWindow;
+
+	private TileEntityLootContainer te;
+
+	private string lootContainerName;
+
+	private bool isOpening;
+
+	private float openTimeLeft;
+
+	private XUiC_Timer timerWindow;
+
+	private UISprite timerHourGlass;
+
+	private bool isClosingFromDamage;
+
+	private string lootingHeader;
+
+	public static string ID = "EfficientBaseRepair";
+
+	private float totalOpenTime;
+
+	private bool ignoreCloseSound;
 
 	public override void Init()
 	{
-		ID = windowGroup.ID;
 		base.Init();
-		txtPassword = (XUiC_TextInput)GetChildById("txtPassword");
-		txtPassword.OnSubmitHandler += TxtPassword_OnSubmitHandler;
-		txtPassword.OnInputAbortedHandler += TextInput_OnInputAbortedHandler;
-		((XUiC_SimpleButton)GetChildById("btnCancel")).OnPressed += BtnCancel_OnPressed;
-		((XUiC_SimpleButton)GetChildById("btnOk")).OnPressed += BtnOk_OnPressed;
+		openTimeLeft = 0f;
+		lootWindow = GetChildByType<XUiC_LootWindow>();
+		timerWindow = base.xui.GetChildByType<XUiC_Timer>();
+		nonPagingHeaderWindow = GetChildByType<XUiC_WindowNonPagingHeader>();
 	}
 
-	private void TextInput_OnInputAbortedHandler(XUiController _sender)
+	public void SetTileEntityChest(string _lootContainerName, TileEntityLootContainer _te)
 	{
-		base.xui.playerUI.windowManager.Close(base.WindowGroup.ID);
+		lootContainerName = _lootContainerName;
+		te = _te;
+		lootWindow.SetTileEntityChest(_lootContainerName, _te);
+		lootingHeader = Localization.Get("xuiLooting");
 	}
 
-	private void TxtPassword_OnSubmitHandler(XUiController _sender, string _text)
+	protected void OpenContainer()
 	{
-		BtnOk_OnPressed(_sender, -1);
-	}
+		base.OnOpen();
+		base.xui.playerUI.windowManager.OpenIfNotOpen("backpack", _bModal: false);
+		lootWindow.ViewComponent.UiTransform.gameObject.SetActive(true);
+		lootWindow.OpenContainer();
 
-	private void BtnOk_OnPressed(XUiController _sender, int _mouseButton)
-	{
-		string text = txtPassword.Text;
-		if (LockedItem.CheckPassword(text, PlatformManager.InternalLocalUserIdentifier, out var changed))
+		if (nonPagingHeaderWindow != null)
 		{
-			if (LockedItem.LocalPlayerIsOwner())
-			{
-				if (changed)
-				{
-					if (text.Length == 0)
-					{
-						GameManager.ShowTooltip(base.xui.playerUI.entityPlayer, "passcodeRemoved");
-					}
-					else
-					{
-						GameManager.ShowTooltip(base.xui.playerUI.entityPlayer, "passcodeSet");
-					}
-				}
-				Manager.PlayInsidePlayerHead("Misc/password_set");
-			}
-			else
-			{
-				GameManager.ShowTooltip(base.xui.playerUI.entityPlayer, "passcodeAccepted");
-				Manager.PlayInsidePlayerHead("Misc/password_pass");
-			}
-			base.xui.playerUI.windowManager.Close(base.WindowGroup.ID);
+			nonPagingHeaderWindow.SetHeader(lootingHeader);
+		}
+		lootWindow.ViewComponent.IsVisible = true;
+		base.xui.playerUI.windowManager.Close("timer");
+		if (windowGroup.UseStackPanelAlignment)
+		{
+			base.xui.RecenterWindowGroup(windowGroup);
+		}
+		isOpening = false;
+	}
+
+	public override void Update(float _dt)
+	{
+		base.Update(_dt);
+		if (base.xui.playerUI.entityPlayer != null && base.xui.playerUI.entityPlayer.hasBeenAttackedTime > 0 && isOpening)
+		{
+			GUIWindowManager windowManager = base.xui.playerUI.windowManager;
+			windowManager.Close("timer");
+			isOpening = false;
+			isClosingFromDamage = true;
+			windowManager.Close("looting");
 		}
 		else
 		{
-			Manager.PlayInsidePlayerHead("Misc/password_fail");
-			GameManager.ShowTooltip(base.xui.playerUI.entityPlayer, "passcodeRejected");
+			if (!isOpening)
+			{
+				return;
+			}
+			if (te.bWasTouched || openTimeLeft <= 0f)
+			{
+				if (!te.bWasTouched && !te.bPlayerStorage && !te.bPlayerBackpack)
+				{
+					base.xui.playerUI.entityPlayer.Progression.AddLevelExp(base.xui.playerUI.entityPlayer.gameStage, "_xpFromLoot", Progression.XPTypes.Looting);
+				}
+				openTimeLeft = 0f;
+				OpenContainer();
+			}
+			else
+			{
+				if (timerWindow != null)
+				{
+					float fillAmount = openTimeLeft / totalOpenTime;
+					timerWindow.UpdateTimer(openTimeLeft, fillAmount);
+				}
+				openTimeLeft -= _dt;
+			}
 		}
-	}
-
-	private void BtnCancel_OnPressed(XUiController _sender, int _mouseButton)
-	{
-		base.xui.playerUI.windowManager.Close(base.WindowGroup.ID);
 	}
 
 	public override void OnOpen()
 	{
-		base.OnOpen();
-		base.xui.playerUI.entityPlayer.PlayOneShot("open_sign");
+		isClosingFromDamage = false;
+		if (te.entityId != -1)
+		{
+			Entity entity = GameManager.Instance.World.GetEntity(te.entityId);
+			if (EffectManager.GetValue(PassiveEffects.DisableLoot, null, 0f, base.xui.playerUI.entityPlayer, null, entity.EntityClass.Tags) > 0f)
+			{
+				Manager.PlayInsidePlayerHead("twitch_no_attack");
+				GUIWindowManager windowManager = base.xui.playerUI.windowManager;
+				ignoreCloseSound = true;
+				windowManager.Close("timer");
+				isOpening = false;
+				isClosingFromDamage = true;
+				windowManager.Close("looting");
+				return;
+			}
+		}
+		else if (EffectManager.GetValue(PassiveEffects.DisableLoot, null, 0f, base.xui.playerUI.entityPlayer, null, te.blockValue.Block.Tags) > 0f)
+		{
+			Manager.PlayInsidePlayerHead("twitch_no_attack");
+			GUIWindowManager windowManager2 = base.xui.playerUI.windowManager;
+			ignoreCloseSound = true;
+			windowManager2.Close("timer");
+			isOpening = false;
+			isClosingFromDamage = true;
+			windowManager2.Close("looting");
+			return;
+		}
+		ignoreCloseSound = false;
+		base.xui.playerUI.windowManager.CloseIfOpen("backpack");
+		lootWindow.ViewComponent.UiTransform.gameObject.SetActive(false);
+
+		EntityPlayer entityPlayer = base.xui.playerUI.entityPlayer;
+		totalOpenTime = (openTimeLeft = EffectManager.GetValue(PassiveEffects.ScavengingTime, null, entityPlayer.IsCrouching ? (te.GetOpenTime() * 1.5f) : te.GetOpenTime(), entityPlayer));
+		if (nonPagingHeaderWindow != null)
+		{
+			nonPagingHeaderWindow.SetHeader("LOOTING");
+		}
+		base.xui.playerUI.windowManager.OpenIfNotOpen("CalloutGroup", _bModal: false);
+		base.xui.playerUI.windowManager.Open("timer", _bModal: false);
+		timerWindow = base.xui.GetChildByType<XUiC_Timer>();
+		timerWindow.currentOpenEventText = Localization.Get("xuiOpeningLoot");
+		isOpening = true;
+		LootContainer lootContainer = LootContainer.GetLootContainer(te.lootListName);
+		if (lootContainer == null || lootContainer.soundClose == null)
+		{
+			return;
+		}
+		Vector3 position = te.ToWorldPos().ToVector3() + Vector3.one * 0.5f;
+		if (te.entityId != -1 && GameManager.Instance.World != null)
+		{
+			Entity entity2 = GameManager.Instance.World.GetEntity(te.entityId);
+			if (entity2 != null)
+			{
+				position = entity2.GetPosition();
+			}
+		}
+		Manager.BroadcastPlayByLocalPlayer(position, lootContainer.soundOpen);
 	}
 
 	public override void OnClose()
 	{
 		base.OnClose();
-		base.xui.playerUI.entityPlayer.PlayOneShot("close_sign");
-		LockedItem = null;
+		base.xui.playerUI.windowManager.CloseIfOpen("backpack");
+		te.ToWorldPos();
+		if (isOpening)
+		{
+			base.xui.playerUI.windowManager.Close("timer");
+		}
+		if (openTimeLeft > 0f && !te.bWasTouched)
+		{
+			te.bTouched = false;
+			te.SetModified();
+		}
+		lootWindow.CloseContainer(ignoreCloseSound);
+		lootWindow.ViewComponent.IsVisible = false;
+		isOpening = false;
 	}
 
-	public static void Open(LocalPlayerUI _playerUi, ILockable _lockedItem)
+    public static void Open(LocalPlayerUI _playerUi, TileEntityEfficientBaseRepair tileEntity)
 	{
-		// _playerUi.xui.FindWindowGroupByName(ID).GetChildByType<XUiC_KeypadWindow>().LockedItem = _lockedItem;
+        XUiC_EfficientBaseRepair instance = (XUiC_EfficientBaseRepair)_playerUi.xui.FindWindowGroupByName(ID);
+
+        if(instance == null){
+            Log.Out("null instance of XUiC_EfficientBaseRepair. aborting...");
+            return;
+        }
+
+		instance.SetTileEntityChest("EfficientBaseRepair", tileEntity);
+
 		_playerUi.windowManager.Open(ID, _bModal: true);
 	}
 }
