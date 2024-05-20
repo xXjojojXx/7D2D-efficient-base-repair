@@ -10,7 +10,7 @@ public class XUiC_EfficientBaseRepairMaterials : XUiController
 
     public TileEntityEfficientBaseRepair tileEntity;
 
-    private XUiController[] materialTitles;
+    private XUiController[] materialSprites;
 
     private XUiController[] materialWeights;
 
@@ -23,7 +23,7 @@ public class XUiC_EfficientBaseRepairMaterials : XUiController
     public override void Init()
     {
         base.Init();
-        materialTitles = GetChildrenById("material");
+        materialSprites = GetChildrenById("material");
         materialWeights = GetChildrenById("weight");
         if (materialWeights[0] != null)
         {
@@ -71,14 +71,16 @@ public class XUiC_EfficientBaseRepairMaterials : XUiController
 
         foreach (KeyValuePair<string, int> entry in tileEntity.requiredMaterials)
         {
-            string text = XUi.UppercaseFirst(entry.Key);
-            if (Localization.Exists("lbl" + entry.Key))
-            {
-                text = Localization.Get("lbl" + entry.Key);
-            }
+            string text = Localization.Get(entry.Key);
 
-            ((XUiV_Label)materialTitles[index].ViewComponent).Text = text + ":";
-            ((XUiV_Label)materialWeights[index].ViewComponent).Text = entry.Value.ToString(); ;
+            ItemClass materialItemValue = ItemClass.GetForId(ItemClass.GetItem(entry.Key).type);
+
+            XUiV_Sprite sprite = (XUiV_Sprite)materialSprites[index].ViewComponent;
+            // sprite.IsVisible = true;
+            // sprite.SetSpriteImmediately(materialItemValue.GetIconName());
+            sprite.ParseAttribute("sprite", materialItemValue.GetIconName(), materialSprites[index]);
+
+            ((XUiV_Label)materialWeights[index].ViewComponent).Text = entry.Value.ToString();
 
             index++;
         }
