@@ -54,15 +54,15 @@
         </window>
 
         <!-- modified windowForgeInput -->
-        <window name="windowEfficientBaseRepairMaterials" width="228" height="204" panel="Right" controller="EfficientBaseRepairMaterials, EfficientBaseRepair" materials_accepted="iron,brass,lead,glass,stone,clay" valid_materials_color="[green]" invalid_materials_color="[red]" cursor_area="true" >
+        <window name="windowEfficientBaseRepairMaterials" width="228" height="1000" panel="Right" controller="EfficientBaseRepairMaterials, EfficientBaseRepair" materials_accepted="iron,brass,lead,glass,stone,clay" valid_materials_color="[green]" invalid_materials_color="[red]" cursor_area="true" >
             <panel style="header.panel">
                 <sprite style="header.icon" sprite="ui_game_symbol_forge"/>
-                <label style="header.name" text="INPUT" text_key="xuiSmelting" />
+                <label style="header.name" text="INPUT" text_key="xuiMaterials" />
             </panel>
-            <sprite depth="2" name="backgroundMain" sprite="menu_empty3px" pos="0,-46" height="153" color="[black]" type="sliced" fillcenter="false" on_press="true" />
-            <rect name="content2" depth="0" pos="78, -49" width="147" height="148">
+            <sprite depth="2" name="backgroundMain" sprite="menu_empty3px" pos="0,-46" height="750" color="[black]" type="sliced" fillcenter="false" on_press="true" />
+            <rect name="content2" depth="0" pos="0, -49" width="228" height="745">
                 <sprite depth="1" color="[mediumGrey]" type="sliced" on_press="true"/>
-                <grid rows="6" cols="1" pos="3,-3" cell_width="147" cell_height="24"  repeat_content="true">
+                <grid rows="100" cols="1" pos="3,-3" cell_width="228" cell_height="24"  repeat_content="true">
                     <forge_material name="0"/>
                 </grid>
             </rect>
