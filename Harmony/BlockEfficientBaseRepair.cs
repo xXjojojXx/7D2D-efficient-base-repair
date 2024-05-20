@@ -11,6 +11,22 @@ class BlockEfficientBaseRepair : BlockSecureLoot
     private const string TURN_ON_CMD = "turn_repair_on";
     private const string TURN_OFF_CMD = "turn_repair_off";
 
+    public bool needMaterials
+    {
+        get
+        {
+            return Properties.GetBool("NeedsMaterials");
+        }
+    }
+
+    public int maxBfsIterations
+    {
+        get
+        {
+            return Properties.GetInt("MaxBfsIterations");
+        }
+    }
+
     public override void OnBlockAdded(WorldBase _world, Chunk _chunk, Vector3i _blockPos, BlockValue _blockValue)
     {
         base.OnBlockAdded(_world, _chunk, _blockPos, _blockValue);
@@ -26,10 +42,10 @@ class BlockEfficientBaseRepair : BlockSecureLoot
 
     public override BlockActivationCommand[] GetBlockActivationCommands(WorldBase _world, BlockValue _blockValue, int _clrIdx, Vector3i _blockPos, EntityAlive _entityFocusing)
     {
-		if (!(_world.GetTileEntity(_clrIdx, _blockPos) is TileEntityEfficientBaseRepair tileEntity))
-		{
-			return Array.Empty<BlockActivationCommand>();
-		}
+        if (!(_world.GetTileEntity(_clrIdx, _blockPos) is TileEntityEfficientBaseRepair tileEntity))
+        {
+            return Array.Empty<BlockActivationCommand>();
+        }
 
         string cmd_activate = tileEntity.IsOn ? TURN_OFF_CMD : TURN_ON_CMD;
         bool is_locked = tileEntity.IsLocked();
@@ -77,8 +93,8 @@ class BlockEfficientBaseRepair : BlockSecureLoot
                 return true;
 
             case "take":
-				TakeItemWithTimer(_cIdx, _blockPos, _blockValue, _player);
-				return true;
+                TakeItemWithTimer(_cIdx, _blockPos, _blockValue, _player);
+                return true;
 
             case "lock":
                 tileEntity.SetLocked(true);
@@ -134,89 +150,91 @@ class BlockEfficientBaseRepair : BlockSecureLoot
         }
 
         LocalPlayerUI uIForPlayer = LocalPlayerUI.GetUIForPlayer(_player as EntityPlayerLocal);
-        if (uIForPlayer != null)
+        if (uIForPlayer == null)
         {
-            XUiC_EfficientBaseRepair.Open(uIForPlayer, tileEntity);
+            return false;
         }
 
-        // _player.AimingGun = false;
-        // Vector3i blockPos = tileEntity.ToWorldPos();
-        // tileEntity.bWasTouched = tileEntity.bTouched;
-        // _world.GetGameManager().TELockServer(_cIdx, blockPos, tileEntity.entityId, _player.entityId);
+        _player.AimingGun = false;
+
+        tileEntity.bWasTouched = tileEntity.bTouched;
+        tileEntity.Init((World)_world, maxBfsIterations, needMaterials);
+
+        XUiC_EfficientBaseRepair.Open(uIForPlayer, tileEntity);
 
         return true;
     }
 
     // copied from BlockWorkStation
-	private void TakeItemWithTimer(int _cIdx, Vector3i _blockPos, BlockValue _blockValue, EntityAlive _player)
-	{
-		if (_blockValue.damage > 0)
-		{
-			GameManager.ShowTooltip(_player as EntityPlayerLocal, Localization.Get("ttRepairBeforePickup"), string.Empty, "ui_denied");
-			return;
-		}
-		if (!(GameManager.Instance.World.GetTileEntity(_cIdx, _blockPos) as TileEntityEfficientBaseRepair).IsEmpty())
-		{
-			GameManager.ShowTooltip(_player as EntityPlayerLocal, Localization.Get("ttWorkstationNotEmpty"), string.Empty, "ui_denied");
-			return;
-		}
-		LocalPlayerUI playerUI = (_player as EntityPlayerLocal).PlayerUI;
-		playerUI.windowManager.Open("timer", _bModal: true);
-		XUiC_Timer childByType = playerUI.xui.GetChildByType<XUiC_Timer>();
-		TimerEventData timerEventData = new TimerEventData();
-		timerEventData.Data = new object[4] { _cIdx, _blockValue, _blockPos, _player };
-		timerEventData.Event += EventData_Event;
+    private void TakeItemWithTimer(int _cIdx, Vector3i _blockPos, BlockValue _blockValue, EntityAlive _player)
+    {
+        if (_blockValue.damage > 0)
+        {
+            GameManager.ShowTooltip(_player as EntityPlayerLocal, Localization.Get("ttRepairBeforePickup"), string.Empty, "ui_denied");
+            return;
+        }
+        if (!(GameManager.Instance.World.GetTileEntity(_cIdx, _blockPos) as TileEntityEfficientBaseRepair).IsEmpty())
+        {
+            GameManager.ShowTooltip(_player as EntityPlayerLocal, Localization.Get("ttWorkstationNotEmpty"), string.Empty, "ui_denied");
+            return;
+        }
+        LocalPlayerUI playerUI = (_player as EntityPlayerLocal).PlayerUI;
+        playerUI.windowManager.Open("timer", _bModal: true);
+        XUiC_Timer childByType = playerUI.xui.GetChildByType<XUiC_Timer>();
+        TimerEventData timerEventData = new TimerEventData();
+        timerEventData.Data = new object[4] { _cIdx, _blockValue, _blockPos, _player };
+        timerEventData.Event += EventData_Event;
 
         childByType.SetTimer(Properties.GetInt("TakeDelay"), timerEventData);
-	}
+    }
 
     // copied from BlockWorkStation
-	private void EventData_Event(TimerEventData timerData)
-	{
-		World world = GameManager.Instance.World;
-		object[] obj = (object[])timerData.Data;
-		int clrIdx = (int)obj[0];
-		BlockValue blockValue = (BlockValue)obj[1];
-		Vector3i vector3i = (Vector3i)obj[2];
-		BlockValue block = world.GetBlock(vector3i);
-		EntityPlayerLocal entityPlayerLocal = obj[3] as EntityPlayerLocal;
-		if (block.damage > 0)
-		{
-			GameManager.ShowTooltip(entityPlayerLocal, Localization.Get("ttRepairBeforePickup"), string.Empty, "ui_denied");
-			return;
-		}
-		if (block.type != blockValue.type)
-		{
-			GameManager.ShowTooltip(entityPlayerLocal, Localization.Get("ttBlockMissingPickup"), string.Empty, "ui_denied");
-			return;
-		}
-		TileEntityEfficientBaseRepair tileEntity = world.GetTileEntity(clrIdx, vector3i) as TileEntityEfficientBaseRepair;
-		if (tileEntity.IsUserAccessing())
-		{
-			GameManager.ShowTooltip(entityPlayerLocal, Localization.Get("ttCantPickupInUse"), string.Empty, "ui_denied");
-			return;
-		}
-		LocalPlayerUI uIForPlayer = LocalPlayerUI.GetUIForPlayer(entityPlayerLocal);
-		HandleTakeInternalItems(tileEntity, uIForPlayer);
-		ItemStack itemStack = new ItemStack(block.ToItemValue(), 1);
-		if (!uIForPlayer.xui.PlayerInventory.AddItem(itemStack))
-		{
-			uIForPlayer.xui.PlayerInventory.DropItem(itemStack);
-		}
-		world.SetBlockRPC(clrIdx, vector3i, BlockValue.Air);
-	}
+    private void EventData_Event(TimerEventData timerData)
+    {
+        World world = GameManager.Instance.World;
+        object[] obj = (object[])timerData.Data;
+        int clrIdx = (int)obj[0];
+        BlockValue blockValue = (BlockValue)obj[1];
+        Vector3i vector3i = (Vector3i)obj[2];
+        BlockValue block = world.GetBlock(vector3i);
+        EntityPlayerLocal entityPlayerLocal = obj[3] as EntityPlayerLocal;
+        if (block.damage > 0)
+        {
+            GameManager.ShowTooltip(entityPlayerLocal, Localization.Get("ttRepairBeforePickup"), string.Empty, "ui_denied");
+            return;
+        }
+        if (block.type != blockValue.type)
+        {
+            GameManager.ShowTooltip(entityPlayerLocal, Localization.Get("ttBlockMissingPickup"), string.Empty, "ui_denied");
+            return;
+        }
+        TileEntityEfficientBaseRepair tileEntity = world.GetTileEntity(clrIdx, vector3i) as TileEntityEfficientBaseRepair;
+        if (tileEntity.IsUserAccessing())
+        {
+            GameManager.ShowTooltip(entityPlayerLocal, Localization.Get("ttCantPickupInUse"), string.Empty, "ui_denied");
+            return;
+        }
+        LocalPlayerUI uIForPlayer = LocalPlayerUI.GetUIForPlayer(entityPlayerLocal);
+        HandleTakeInternalItems(tileEntity, uIForPlayer);
+        ItemStack itemStack = new ItemStack(block.ToItemValue(), 1);
+        if (!uIForPlayer.xui.PlayerInventory.AddItem(itemStack))
+        {
+            uIForPlayer.xui.PlayerInventory.DropItem(itemStack);
+        }
+        world.SetBlockRPC(clrIdx, vector3i, BlockValue.Air);
+    }
 
     // copied from BlockWorkStation
-	protected virtual void HandleTakeInternalItems(TileEntityEfficientBaseRepair te, LocalPlayerUI playerUI)
-	{
-		ItemStack[] items = te.items;
-		for (int i = 0; i < items.Length; i++)
-		{
-			if (!items[i].IsEmpty() && !playerUI.xui.PlayerInventory.AddItem(items[i]))
-			{
-				playerUI.xui.PlayerInventory.DropItem(items[i]);
-			}
-		}
-	}
+    protected virtual void HandleTakeInternalItems(TileEntityEfficientBaseRepair te, LocalPlayerUI playerUI)
+    {
+        ItemStack[] items = te.items;
+        for (int i = 0; i < items.Length; i++)
+        {
+            if (!items[i].IsEmpty() && !playerUI.xui.PlayerInventory.AddItem(items[i]))
+            {
+                playerUI.xui.PlayerInventory.DropItem(items[i]);
+            }
+        }
+    }
 
 }

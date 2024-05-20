@@ -62,7 +62,7 @@
             <sprite depth="2" name="backgroundMain" sprite="menu_empty3px" pos="0,-46" height="750" color="[black]" type="sliced" fillcenter="false" on_press="true" />
             <rect name="content2" depth="0" pos="0, -49" width="228" height="745">
                 <sprite depth="1" color="[mediumGrey]" type="sliced" on_press="true"/>
-                <grid rows="100" cols="1" pos="3,-3" cell_width="228" cell_height="24"  repeat_content="true">
+                <grid rows="20" cols="1" pos="3,-3" cell_width="228" cell_height="24"  repeat_content="true">
                     <forge_material name="0"/>
                 </grid>
             </rect>

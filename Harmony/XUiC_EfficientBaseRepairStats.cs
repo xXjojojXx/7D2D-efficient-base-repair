@@ -195,7 +195,7 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 
 	private void btnRefresh_OnPress(XUiController _sender, int _mouseButton)
 	{
-		Log.Out("EfficientBaseRepair::btnRefresh_OnPress");
+		tileEntity.UpdateStats();
 	}
 
 	private void btnOn_OnPress(XUiController _sender, int _mouseButton)

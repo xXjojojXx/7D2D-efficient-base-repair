@@ -2,18 +2,31 @@ using UnityEngine;
 using System.Collections.Generic;
 using System;
 using static Block;
+using System.Runtime.InteropServices.WindowsRuntime;
 
-public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer {
+public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
+{
 
-    public bool IsOn;
-    public bool is_under_cooldown;
+	public bool IsOn;
+	public bool is_under_cooldown;
 
-    public TileEntityEfficientBaseRepair(Chunk _chunk) : base(_chunk){
-        IsOn = false;
-    }
-    public override TileEntityType GetTileEntityType() => (TileEntityType)243;
+	private World world;
 
-	private List<Vector3i> get_neighbors(Vector3i pos)
+	private int maxBfsIterations;
+
+	private bool needMaterials;
+
+	public List<Vector3i> blocksToRepair;
+
+	public Dictionary<string, int> requiredMaterials;
+
+	public TileEntityEfficientBaseRepair(Chunk _chunk) : base(_chunk)
+	{
+		IsOn = false;
+	}
+	public override TileEntityType GetTileEntityType() => (TileEntityType)243;
+
+	private List<Vector3i> GetNeighbors(Vector3i pos)
 	{
 		return new List<Vector3i>
 		{
@@ -53,7 +66,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer {
 		};
 	}
 
-	private bool is_block_ignored(BlockValue block)
+	private bool IsBlockIgnored(BlockValue block)
 	{
 
 		if (block.damage > 0)
@@ -69,15 +82,13 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer {
 		);
 	}
 
-	private List<Vector3i> get_blocks_to_repair(World world, Vector3i initial_pos, int max_iterations)
+	public List<Vector3i> GetBlocksToRepair(Vector3i initial_pos)
 	{
 		List<Vector3i> blocks_to_repair = new List<Vector3i>();
-		List<Vector3i> neighbors = this.get_neighbors(initial_pos);
+		List<Vector3i> neighbors = this.GetNeighbors(initial_pos);
 		Dictionary<string, int> visited = new Dictionary<string, int>();
 
-		int iterations = max_iterations;
-
-        Log.Out("Max iterations: " + max_iterations.ToString());
+		int iterations = maxBfsIterations;
 
 		while (neighbors.Count > 0 && iterations > 0)
 		{
@@ -90,7 +101,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer {
 			{
 				BlockValue block = world.GetBlock(pos);
 
-				bool is_ignored = this.is_block_ignored(block);
+				bool is_ignored = this.IsBlockIgnored(block);
 				bool is_visited = visited.ContainsKey(pos.ToString());
 
 				if (!is_visited)
@@ -107,11 +118,11 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer {
 					blocks_to_repair.Add(pos);
 				}
 
-				neighbors.AddRange(this.get_neighbors(pos));
+				neighbors.AddRange(this.GetNeighbors(pos));
 			}
 		}
 
-		Log.Out($"{blocks_to_repair.Count} blocks to repair. Iterations = {max_iterations - iterations}, visited_blocks = {visited.Count}");
+		Log.Out($"{blocks_to_repair.Count} blocks to repair. Iterations = {maxBfsIterations - iterations}/{maxBfsIterations}, visited_blocks = {visited.Count}");
 
 		return blocks_to_repair;
 	}
@@ -164,10 +175,10 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer {
 
 		foreach (SItemNameCount item in repair_items)
 		{
-			int required_item_count = (int) Mathf.Ceil(item.Count * damages_perc);
+			int required_item_count = (int)Mathf.Ceil(item.Count * damages_perc);
 			int missing_item_count = ReduceItemCount(item.ItemName, required_item_count);
 
-			//Log.Out($"{item.ItemName}: required_material={required_item_count} (={item.Count} * {damages_perc:F3})");
+			Log.Out($"{item.ItemName}: required_material={required_item_count} (={item.Count} * {damages_perc:F3})");
 
 			if (missing_item_count > 0)
 				missing_materials.Add(item.ItemName, missing_item_count);
@@ -176,16 +187,33 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer {
 		return missing_materials.Count > 0 ? missing_materials : null;
 	}
 
-	private int compute_damage(BlockValue block, Dictionary<string, int> missing_materials)
+	private Dictionary<string, int> ComputeMissingMaterials(float damages_perc, List<SItemNameCount> repair_items)
 	{
-		if(missing_materials == null || block.Block.RepairItems == null)
+		if (repair_items == null)
+			return null;
+
+		Dictionary<string, int> missing_materials = new Dictionary<string, int>();
+
+		foreach (SItemNameCount item in repair_items)
+		{
+			int required_item_count = (int)Mathf.Ceil(item.Count * damages_perc);
+
+			missing_materials.Add(item.ItemName, required_item_count);
+		}
+
+		return missing_materials.Count > 0 ? missing_materials : null;
+	}
+
+	private int ComputeDamage(BlockValue block, Dictionary<string, int> missing_materials)
+	{
+		if (missing_materials == null || block.Block.RepairItems == null)
 			return 0;
 
 		float total_required = 0.0f;
 		float total_missing = 0.0f;
 		float damage_perc = (float)block.damage / block.Block.MaxDamage;
 
-		foreach(SItemNameCount item in block.Block.RepairItems)
+		foreach (SItemNameCount item in block.Block.RepairItems)
 		{
 			total_required += Mathf.Ceil(item.Count * damage_perc);
 
@@ -204,7 +232,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer {
 		return computed_damages;
 	}
 
-	private Dictionary<string, int> repair_block(World world, Vector3i pos, bool need_materials)
+	private Dictionary<string, int> RepairBlock(World world, Vector3i pos, bool need_materials)
 	{
 
 		BlockValue block = world.GetBlock(pos);
@@ -245,7 +273,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer {
 			if (need_materials)
 				missing_items = TakeRepairMaterials(damage_perc, repair_items);
 
-			block.damage = compute_damage(block, missing_items);
+			block.damage = ComputeDamage(block, missing_items);
 
 			// Update the block at the given position (very low-level function)
 			// Note: with this function we can basically install a new block at position
@@ -274,19 +302,58 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer {
 		return missing_items;
 	}
 
+	private Dictionary<string, int> GetMissingMaterialsForPos(Vector3i pos)
+	{
+		if (!(world.GetChunkFromWorldPos(pos) is Chunk) || !needMaterials)
+		{
+			return null;
+		}
+
+		// TODO: find a better way to compute the needed repair_items for spike blocks
+		// (for now, if a spike is at stage Dmg1 or Dmg2 with damage=0, the upgrade to Dmg0 is free)
+		BlockValue block = world.GetBlock(pos);
+		List<SItemNameCount> repair_items = block.Block.RepairItems;
+
+		const int trapSpikesWoodDmg0_id = 21469;
+		const int trapSpikesIronDmg0_id = 21476;
+
+		switch (block.Block.GetBlockName())
+		{
+			case "trapSpikesWoodDmg1":
+			case "trapSpikesWoodDmg2":
+				block = new BlockValue(trapSpikesWoodDmg0_id);
+				break;
+
+			case "trapSpikesIronDmg1":
+			case "trapSpikesIronDmg2":
+				block = new BlockValue(trapSpikesIronDmg0_id);
+				break;
+
+			default:
+				// Do nothing -> block = block...
+				break;
+		}
+
+		float damage_perc = (float)block.damage / block.Block.MaxDamage;
+
+		Dictionary<string, int> missing_items = ComputeMissingMaterials(damage_perc, repair_items);
+
+		return missing_items;
+	}
+
 	public Dictionary<string, int> FindAndRepairDamagedBlocks(World world, int max_iterations, bool need_materials)
 	{
 		Vector3i block_position = ToWorldPos();
 
 		// debug_neighbors(world, block_position);
 
-		List<Vector3i> blocks_to_repair = get_blocks_to_repair(world, block_position, max_iterations);
+		blocksToRepair = GetBlocksToRepair(block_position);
 
 		Dictionary<string, int> missing_items = new Dictionary<string, int>();
 
-		foreach (var position in blocks_to_repair)
+		foreach (var position in blocksToRepair)
 		{
-			Dictionary<string, int> block_missing_items = repair_block(world, position, need_materials);
+			Dictionary<string, int> block_missing_items = RepairBlock(world, position, need_materials);
 
 			if (block_missing_items == null)
 				continue;
@@ -301,5 +368,39 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer {
 		}
 
 		return missing_items;
+	}
+
+	public void Init(World _world, int _max_iterations, bool _need_materials)
+	{
+		world = _world;
+		maxBfsIterations = _max_iterations;
+		needMaterials = _need_materials;
+	}
+
+	public void UpdateStats()
+	{
+		Vector3i block_position = ToWorldPos();
+
+		blocksToRepair = GetBlocksToRepair(block_position);
+
+		requiredMaterials = new Dictionary<string, int>();
+
+		foreach (Vector3i position in blocksToRepair)
+		{
+			Dictionary<string, int> blockMissingItems = GetMissingMaterialsForPos(position);
+
+			if (blockMissingItems == null)
+				continue;
+
+			foreach (KeyValuePair<string, int> entry in blockMissingItems)
+			{
+				if (!requiredMaterials.ContainsKey(entry.Key))
+					requiredMaterials.Add(entry.Key, 0);
+
+				requiredMaterials[entry.Key] += entry.Value;
+			}
+		}
+
+		Log.Out($"[TileEntityEfficientBaseRepair::UpdateStats] {blocksToRepair.Count} blocksToRepair, {requiredMaterials.Count} required Materials");
 	}
 }
