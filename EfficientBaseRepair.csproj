@@ -74,6 +74,7 @@
     <Compile Include="Harmony\TileEntityEfficientBaseRepair.cs" />
     <Compile Include="Harmony\XUiC_EfficientBaseRepair.cs" />
     <Compile Include="Harmony\XUiC_EfficientBaseRepairStats.cs" />
+    <Compile Include="Harmony\XUiC_EfficientBaseRepairMaterials.cs" />
     <Compile Include="Harmony\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />

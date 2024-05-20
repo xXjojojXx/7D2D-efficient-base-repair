@@ -1,5 +1,6 @@
 <configs>
     <append xpath="/windows">
+        <!-- modified windowPowerSourceStats -->
         <window name="WindowEfficientBaseRepairStats" width="228" height="312" panel="Left" controller="EfficientBaseRepairStats, EfficientBaseRepair" >
             <panel name="header" height="43" depth="1" backgroundspritename="ui_game_panel_header">
                 <sprite depth="2" name="windowIcon" style="icon32px" pos="5,-5" sprite="powersourceicon"/>
@@ -49,6 +50,21 @@
                         <label depth="2" name="lblRefresh" pos="0,-4" justify="center" text="REFUEL" text_key="xuiRefuel" font_size="24" />
                     </rect>
                 </rect>
+            </rect>
+        </window>
+
+        <!-- modified windowForgeInput -->
+        <window name="windowEfficientBaseRepairMaterials" width="228" height="204" panel="Right" controller="EfficientBaseRepairMaterials, EfficientBaseRepair" materials_accepted="iron,brass,lead,glass,stone,clay" valid_materials_color="[green]" invalid_materials_color="[red]" cursor_area="true" >
+            <panel style="header.panel">
+                <sprite style="header.icon" sprite="ui_game_symbol_forge"/>
+                <label style="header.name" text="INPUT" text_key="xuiSmelting" />
+            </panel>
+            <sprite depth="2" name="backgroundMain" sprite="menu_empty3px" pos="0,-46" height="153" color="[black]" type="sliced" fillcenter="false" on_press="true" />
+            <rect name="content2" depth="0" pos="78, -49" width="147" height="148">
+                <sprite depth="1" color="[mediumGrey]" type="sliced" on_press="true"/>
+                <grid rows="6" cols="1" pos="3,-3" cell_width="147" cell_height="24"  repeat_content="true">
+                    <forge_material name="0"/>
+                </grid>
             </rect>
         </window>
     </append>

@@ -10,6 +10,7 @@
 			<window name="windowLooting"/>
 			<window name="windowNonPagingHeader"/>
 			<window name="WindowEfficientBaseRepairStats"/>
+			<window name="windowEfficientBaseRepairMaterials"/>
         </window_group>
 
     </append>

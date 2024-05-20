@@ -7,6 +7,8 @@ public class XUiC_EfficientBaseRepair : XUiController
 
 	private XUiC_EfficientBaseRepairStats statsWindow;
 
+	private XUiC_EfficientBaseRepairMaterials MaterialsWindow;
+
 	private XUiC_WindowNonPagingHeader nonPagingHeaderWindow;
 
 	private TileEntityEfficientBaseRepair te;
@@ -38,6 +40,7 @@ public class XUiC_EfficientBaseRepair : XUiController
 		nonPagingHeaderWindow = GetChildByType<XUiC_WindowNonPagingHeader>();
 
 		statsWindow = (XUiC_EfficientBaseRepairStats)GetChildById("WindowEfficientBaseRepairStats");
+		MaterialsWindow = (XUiC_EfficientBaseRepairMaterials)GetChildById("windowEfficientBaseRepairMaterials");
 
         // ignore compiler warning for unused variables
         _ = isClosingFromDamage;
@@ -168,6 +171,9 @@ public class XUiC_EfficientBaseRepair : XUiController
 		statsWindow.TileEntity = te;
 		statsWindow.setWidth(lootWindow.ViewComponent.Size.x);
 		statsWindow.OnOpen();
+
+		MaterialsWindow.tileEntity = te;
+		MaterialsWindow.OnOpen();
 
 		Manager.BroadcastPlayByLocalPlayer(position, lootContainer.soundOpen);
 	}
