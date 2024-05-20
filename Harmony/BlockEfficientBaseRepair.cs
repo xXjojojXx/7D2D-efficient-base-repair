@@ -6,60 +6,30 @@ using UnityEngine;
 
 class BlockEfficientBaseRepair : BlockSecureLoot
 {
-    private Vector2i LootSize = new Vector2i(8, 8);
+    private Vector2i LootSize = new Vector2i(4, 10);
 
     private const string TURN_ON_CMD = "turn_repair_on";
     private const string TURN_OFF_CMD = "turn_repair_off";
 
-    // copied from ocbClaimAutoRepair and adapted from BlockLandClaim
-    public override void OnBlockEntityTransformAfterActivated(WorldBase _world, Vector3i _blockPos, int _cIdx, BlockValue _blockValue, BlockEntityData _ebcd)
-    {
-        if (_ebcd == null)
-            return;
-
-        Chunk chunk = (Chunk)((World)_world).GetChunkFromWorldPos(_blockPos);
-        TileEntityEfficientBaseRepair tileEntity = (TileEntityEfficientBaseRepair)_world.GetTileEntity(_cIdx, _blockPos);
-        if (tileEntity == null)
-        {
-            tileEntity = new TileEntityEfficientBaseRepair(chunk);
-            if (tileEntity != null)
-            {
-                tileEntity.localChunkPos = World.toBlock(_blockPos);
-                tileEntity.SetContainerSize(LootSize);
-                chunk.AddTileEntity(tileEntity);
-            }
-        }
-
-        if (tileEntity == null)
-        {
-            Log.Error("Tile Entity EfficientBaseRepair was unable to be created!");
-        }
-
-        base.OnBlockEntityTransformAfterActivated(_world, _blockPos, _cIdx, _blockValue, _ebcd);
-    }
-
-    // copied from ocbClaimAutoRepair
     public override void OnBlockAdded(WorldBase _world, Chunk _chunk, Vector3i _blockPos, BlockValue _blockValue)
     {
-        if (_blockValue.ischild || _world.GetTileEntity(_chunk.ClrIdx, _blockPos) is TileEntityEfficientBaseRepair)
-            return;
-
-        // Overload TileEntity creation (base method should still recognize this)
-        TileEntityEfficientBaseRepair tileEntity = new TileEntityEfficientBaseRepair(_chunk)
-        {
-            localChunkPos = World.toBlock(_blockPos),
-            lootListName = lootList,
-        };
-
-        tileEntity.SetContainerSize(LootSize);
-        _chunk.AddTileEntity(tileEntity);
-
         base.OnBlockAdded(_world, _chunk, _blockPos, _blockValue);
+        if (!_blockValue.ischild && !(_world.GetTileEntity(_chunk.ClrIdx, _blockPos) is TileEntityEfficientBaseRepair))
+        {
+            TileEntityEfficientBaseRepair tileEntity = new TileEntityEfficientBaseRepair(_chunk);
+            tileEntity.localChunkPos = World.toBlock(_blockPos);
+            tileEntity.lootListName = lootList;
+            tileEntity.SetContainerSize(LootSize);
+            _chunk.AddTileEntity(tileEntity);
+        }
     }
 
     public override BlockActivationCommand[] GetBlockActivationCommands(WorldBase _world, BlockValue _blockValue, int _clrIdx, Vector3i _blockPos, EntityAlive _entityFocusing)
     {
-        TileEntityEfficientBaseRepair tileEntity = _world.GetTileEntity(_clrIdx, _blockPos) as TileEntityEfficientBaseRepair;
+		if (!(_world.GetTileEntity(_clrIdx, _blockPos) is TileEntityEfficientBaseRepair tileEntity))
+		{
+			return Array.Empty<BlockActivationCommand>();
+		}
 
         string cmd_activate = tileEntity.is_activated ? TURN_OFF_CMD : TURN_ON_CMD;
         bool is_locked = tileEntity.IsLocked();

@@ -11,9 +11,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer {
     public TileEntityEfficientBaseRepair(Chunk _chunk) : base(_chunk){
         is_activated = false;
     }
-
-    // copied from ocbClaimAutoRepair
-    public override TileEntityType GetTileEntityType() => (TileEntityType)242;
+    public override TileEntityType GetTileEntityType() => (TileEntityType)243;
 
 	private List<Vector3i> get_neighbors(Vector3i pos)
 	{
