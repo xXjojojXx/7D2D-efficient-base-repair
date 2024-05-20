@@ -6,7 +6,7 @@ using UnityEngine;
 
 class BlockEfficientBaseRepair : BlockSecureLoot
 {
-    private Vector2i LootSize = new Vector2i(4, 10);
+    private Vector2i LootSize = new Vector2i(4, 4);
 
     private const string TURN_ON_CMD = "turn_repair_on";
     private const string TURN_OFF_CMD = "turn_repair_off";
@@ -31,7 +31,7 @@ class BlockEfficientBaseRepair : BlockSecureLoot
 			return Array.Empty<BlockActivationCommand>();
 		}
 
-        string cmd_activate = tileEntity.is_activated ? TURN_OFF_CMD : TURN_ON_CMD;
+        string cmd_activate = tileEntity.IsOn ? TURN_OFF_CMD : TURN_ON_CMD;
         bool is_locked = tileEntity.IsLocked();
 
         Log.Out("cmd_activate: " + cmd_activate);

@@ -5,11 +5,11 @@ using static Block;
 
 public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer {
 
-    public bool is_activated;
+    public bool IsOn;
     public bool is_under_cooldown;
 
     public TileEntityEfficientBaseRepair(Chunk _chunk) : base(_chunk){
-        is_activated = false;
+        IsOn = false;
     }
     public override TileEntityType GetTileEntityType() => (TileEntityType)243;
 

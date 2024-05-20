@@ -1,5 +1,3 @@
-using System;
-using System.Runtime.InteropServices.WindowsRuntime;
 using Audio;
 using UnityEngine;
 
@@ -7,11 +5,11 @@ public class XUiC_EfficientBaseRepair : XUiController
 {
 	private XUiC_LootWindow lootWindow;
 
-	private XUiV_Label headerName;
+	private XUiC_EfficientBaseRepairStats statsWindow;
 
 	private XUiC_WindowNonPagingHeader nonPagingHeaderWindow;
 
-	private TileEntityLootContainer te;
+	private TileEntityEfficientBaseRepair te;
 
 	private string lootContainerName;
 
@@ -20,8 +18,6 @@ public class XUiC_EfficientBaseRepair : XUiController
 	private float openTimeLeft;
 
 	private XUiC_Timer timerWindow;
-
-	private UISprite timerHourGlass;
 
 	private bool isClosingFromDamage;
 
@@ -40,12 +36,17 @@ public class XUiC_EfficientBaseRepair : XUiController
 		lootWindow = GetChildByType<XUiC_LootWindow>();
 		timerWindow = base.xui.GetChildByType<XUiC_Timer>();
 		nonPagingHeaderWindow = GetChildByType<XUiC_WindowNonPagingHeader>();
+
+		statsWindow = (XUiC_EfficientBaseRepairStats)GetChildById("WindowEfficientBaseRepairStats");
+
+        // ignore compiler warning for unused variables
+        _ = isClosingFromDamage;
 	}
 
-	public void SetTileEntityChest(string _lootContainerName, TileEntityLootContainer _te)
+	public void SetTileEntityChest(string _lootContainerName, TileEntityEfficientBaseRepair _te)
 	{
-		lootContainerName = _lootContainerName;
 		te = _te;
+		lootContainerName = _lootContainerName;
 		lootWindow.SetTileEntityChest(_lootContainerName, _te);
 		lootingHeader = Localization.Get("xuiLooting");
 	}
@@ -142,7 +143,7 @@ public class XUiC_EfficientBaseRepair : XUiController
 		lootWindow.ViewComponent.UiTransform.gameObject.SetActive(false);
 
 		EntityPlayer entityPlayer = base.xui.playerUI.entityPlayer;
-		totalOpenTime = (openTimeLeft = EffectManager.GetValue(PassiveEffects.ScavengingTime, null, entityPlayer.IsCrouching ? (te.GetOpenTime() * 1.5f) : te.GetOpenTime(), entityPlayer));
+		totalOpenTime = 0f; //(openTimeLeft = EffectManager.GetValue(PassiveEffects.ScavengingTime, null, entityPlayer.IsCrouching ? (te.GetOpenTime() * 1.5f) : te.GetOpenTime(), entityPlayer));
 		if (nonPagingHeaderWindow != null)
 		{
 			nonPagingHeaderWindow.SetHeader("LOOTING");
@@ -166,6 +167,11 @@ public class XUiC_EfficientBaseRepair : XUiController
 				position = entity2.GetPosition();
 			}
 		}
+
+		statsWindow.TileEntity = te;
+		statsWindow.setWidth(lootWindow.ViewComponent.Size.x);
+		statsWindow.OnOpen();
+
 		Manager.BroadcastPlayByLocalPlayer(position, lootContainer.soundOpen);
 	}
 
