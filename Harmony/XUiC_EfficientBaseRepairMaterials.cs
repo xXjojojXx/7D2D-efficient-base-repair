@@ -28,6 +28,8 @@ public class XUiC_EfficientBaseRepairMaterials : XUiController
 		{
 			baseTextColor = ((XUiV_Label)materialWeights[0].ViewComponent).Color;
 		}
+
+        weights = null;
 	}
 
 	public override void OnOpen()

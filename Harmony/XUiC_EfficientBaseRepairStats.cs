@@ -54,8 +54,6 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 
 	private readonly CachedStringFormatterFloat fuelFillFormatter = new CachedStringFormatterFloat();
 
-	private float updateTime;
-
 	public TileEntityEfficientBaseRepair TileEntity
 	{
 		get
@@ -76,6 +74,9 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 	{
 		base.Init();
 		windowIcon = GetChildById("windowIcon");
+
+		isDirty = false;
+		_ = isDirty;
 
 		btnRefresh = GetChildById("btnRefresh");
 		btnRefresh_Background = (XUiV_Button)btnRefresh.GetChildById("clickable").ViewComponent;
