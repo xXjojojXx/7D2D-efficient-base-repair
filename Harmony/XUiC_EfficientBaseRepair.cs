@@ -48,7 +48,7 @@ public class XUiC_EfficientBaseRepair : XUiController
 		te = _te;
 		lootContainerName = _lootContainerName;
 		lootWindow.SetTileEntityChest(_lootContainerName, _te);
-		lootingHeader = Localization.Get("xuiLooting");
+		lootingHeader = Localization.Get("xuiEfficientBaseRepair");
 	}
 
 	protected void OpenContainer()
@@ -64,10 +64,7 @@ public class XUiC_EfficientBaseRepair : XUiController
 		}
 		lootWindow.ViewComponent.IsVisible = true;
 		base.xui.playerUI.windowManager.Close("timer");
-		if (windowGroup.UseStackPanelAlignment)
-		{
-			base.xui.RecenterWindowGroup(windowGroup);
-		}
+		lootWindow.ViewComponent.ParseAttribute("position", "0, -315", this);
 		isOpening = false;
 	}
 

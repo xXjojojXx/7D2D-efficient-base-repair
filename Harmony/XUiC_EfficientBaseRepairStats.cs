@@ -1,3 +1,4 @@
+using System;
 using Audio;
 using UnityEngine;
 using UnityEngine.Scripting;
@@ -55,19 +56,6 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 
 	private float updateTime;
 
-	// public PowerSource PowerSource
-	// {
-	// 	get
-	// 	{
-	// 		return powerSource;
-	// 	}
-	// 	set
-	// 	{
-	// 		powerSource = value;
-	// 		RefreshBindings();
-	// 	}
-	// }
-
 	public TileEntityEfficientBaseRepair TileEntity
 	{
 		get
@@ -83,8 +71,6 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 			// }
 		}
 	}
-
-	// public XUiC_PowerSourceWindowGroup Owner { get; internal set; }
 
 	public override void Init()
 	{
@@ -117,84 +103,87 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 
 	public void setWidth(int width)
 	{
-		this.viewComponent.ParseAttribute("width", width.ToString(), this);
 
-		this.GetChildById("header").ViewComponent.ParseAttribute("width", width.ToString(), this);
+		int max_width = Mathf.Max(width, 230);
+
+		this.viewComponent.ParseAttribute("width", max_width.ToString(), this);
+
+		this.GetChildById("header").ViewComponent.ParseAttribute("width", max_width.ToString(), this);
 
 		XUiController content = GetChildById("content");
 
 		content
 			.GetChildById("backgroundMain")
-			.ViewComponent.ParseAttribute("width", width.ToString(), this);
+			.ViewComponent.ParseAttribute("width", max_width.ToString(), this);
 
 		content
 			.GetChildById("background")
-			.ViewComponent.ParseAttribute("width", width.ToString(), this);
+			.ViewComponent.ParseAttribute("width", max_width.ToString(), this);
 
 		content
 			.GetChildById("statGrid")
 			.GetChildById("stats")
-			.ViewComponent.ParseAttribute("cell_width", (width - 5).ToString(), this);
+			.ViewComponent.ParseAttribute("cell_width", (max_width - 5).ToString(), this);
 
 		// button ON
 		XUiController btnOn = content.GetChildById("btnOn");
 
 		btnOn
 			.GetChildById("backgroundMain")
-			.ViewComponent.ParseAttribute("width", width.ToString(), this);
+			.ViewComponent.ParseAttribute("width", max_width.ToString(), this);
 
 		btnOn
 			.GetChildById("background")
-			.ViewComponent.ParseAttribute("width", (width - 4).ToString(), this);
+			.ViewComponent.ParseAttribute("width", (max_width - 4).ToString(), this);
 
 		btnOn
 			.GetChildById("buttonRect")
-			.ViewComponent.ParseAttribute("width", (width - 4).ToString(), this);
+			.ViewComponent.ParseAttribute("width", (max_width - 4).ToString(), this);
 
 		btnOn
 			.GetChildById("buttonRect")
 			.GetChildById("clickable")
-			.ViewComponent.ParseAttribute("width", (width - 4).ToString(), this);
+			.ViewComponent.ParseAttribute("width", (max_width - 4).ToString(), this);
 
 		btnOn
 			.GetChildById("buttonRect")
 			.GetChildById("lblOnOff")
-			.ViewComponent.ParseAttribute("width", (width - 4).ToString(), this);
+			.ViewComponent.ParseAttribute("width", (max_width - 4).ToString(), this);
 
 		btnOn
 			.GetChildById("buttonRect")
 			.GetChildById("sprOnOff")
-			.ViewComponent.ParseAttribute("pos", $"{width / 2 - 70}, -2", this);
+			.ViewComponent.ParseAttribute("pos", $"{max_width / 2 - 70}, -2", this);
 
 		// button REFRESH
 		XUiController btnRefresh = content.GetChildById("btnRefresh");
 
 		btnRefresh
 			.GetChildById("backgroundMain")
-			.ViewComponent.ParseAttribute("width", width.ToString(), this);
+			.ViewComponent.ParseAttribute("width", max_width.ToString(), this);
 
 		btnRefresh
 			.GetChildById("background")
-			.ViewComponent.ParseAttribute("width", (width - 4).ToString(), this);
+			.ViewComponent.ParseAttribute("width", (max_width - 4).ToString(), this);
 
 		btnRefresh
 			.GetChildById("buttonRect")
-			.ViewComponent.ParseAttribute("width", (width - 4).ToString(), this);
+			.ViewComponent.ParseAttribute("width", (max_width - 4).ToString(), this);
 
 		btnRefresh
 			.GetChildById("buttonRect")
 			.GetChildById("clickable")
-			.ViewComponent.ParseAttribute("width", (width - 4).ToString(), this);
+			.ViewComponent.ParseAttribute("width", (max_width - 4).ToString(), this);
 
 		btnRefresh
 			.GetChildById("buttonRect")
 			.GetChildById("lblRefresh")
-			.ViewComponent.ParseAttribute("width", (width - 4).ToString(), this);
+			.ViewComponent.ParseAttribute("width", (max_width - 4).ToString(), this);
 
 		btnRefresh
 			.GetChildById("buttonRect")
 			.GetChildById("sprRefresh")
-			.ViewComponent.ParseAttribute("pos", $"{width / 2 - 70}, -2", this);
+			.ViewComponent.ParseAttribute("pos", $"{max_width / 2 - 70}, -2", this);
 	}
 
 	private void btnRefresh_OnHover(XUiController _sender, bool _isOver)
@@ -334,7 +323,7 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 
 	public override void Update(float _dt)
 	{
-		if ((!((Object)(object)GameManager.Instance == (Object)null) || GameManager.Instance.World != null) && tileEntity != null)
+		if ((GameManager.Instance != null || GameManager.Instance.World != null) && tileEntity != null)
 		{
 			base.Update(_dt);
 			if (lastOn != tileEntity.IsOn)
