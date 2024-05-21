@@ -3,7 +3,7 @@
         <!-- modified windowPowerSourceStats -->
         <window name="WindowEfficientBaseRepairStats" width="228" height="312" panel="Left" controller="EfficientBaseRepairStats, EfficientBaseRepair" >
             <panel name="header" height="43" depth="1" backgroundspritename="ui_game_panel_header">
-                <sprite depth="2" name="windowIcon" style="icon32px" pos="5,-5" sprite="powersourceicon"/>
+                <sprite depth="2" name="windowIcon" style="icon32px" pos="5,-5" sprite="ui_game_symbol_block_damage"/>
                 <label style="header.name" text="STATS" text_key="xuiStats" />
             </panel>
             <rect name="content" depth="0" pos="0,-46" height="234">
