@@ -29,6 +29,7 @@
 			<property name="MaxBfsIterations" value="1000"/> <!-- The max number of bfs iterations (more iterations will require more CPU ressources) -->
 			<property name="NeedsMaterials" value="true"/>	 <!-- Set this param to false, to fully disable the material requirements -->
 			<property name="RepairPerTick" value="1000"/> 	 <!-- The amount of damage which can be repaired for one game Tick -->
+			<property name="UpdateOnOpen" value="true"/> 	 <!-- Enable / diasble repair stats computing at block opening -->
 			<property class="IgnoredBlocks">			     <!-- The exhaustive list of the blocks you want to exclude from the bfs -->
 				<property name="..."/>
 			</property>

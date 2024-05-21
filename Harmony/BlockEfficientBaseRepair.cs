@@ -11,7 +11,7 @@ class BlockEfficientBaseRepair : BlockSecureLoot
     private const string TURN_ON_CMD = "turn_repair_on";
     private const string TURN_OFF_CMD = "turn_repair_off";
 
-    public bool needMaterials
+    public bool NeedMaterials
     {
         get
         {
@@ -19,11 +19,19 @@ class BlockEfficientBaseRepair : BlockSecureLoot
         }
     }
 
-    public int maxBfsIterations
+    public int MaxBfsIterations
     {
         get
         {
             return Properties.GetInt("MaxBfsIterations");
+        }
+    }
+
+    public bool UpdateOnOpen
+    {
+        get
+        {
+            return Properties.GetBool("UpdateOnOpen");
         }
     }
 
@@ -158,9 +166,9 @@ class BlockEfficientBaseRepair : BlockSecureLoot
         _player.AimingGun = false;
 
         tileEntity.bWasTouched = tileEntity.bTouched;
-        tileEntity.Init((World)_world, maxBfsIterations, needMaterials);
+        tileEntity.Init((World)_world, MaxBfsIterations, NeedMaterials);
 
-        XUiC_EfficientBaseRepair.Open(uIForPlayer, tileEntity);
+        XUiC_EfficientBaseRepair.Open(uIForPlayer, tileEntity, UpdateOnOpen);
 
         return true;
     }
