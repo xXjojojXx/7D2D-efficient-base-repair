@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class XUiC_EfficientBaseRepairMaterials : XUiController
@@ -69,6 +70,8 @@ public class XUiC_EfficientBaseRepairMaterials : XUiController
         if (tileEntity.requiredMaterials == null)
             return;
 
+        Dictionary<string, int> itemsDict = tileEntity.ItemsToDict();
+
         foreach (KeyValuePair<string, int> entry in tileEntity.requiredMaterials)
         {
             string text = Localization.Get(entry.Key);
@@ -80,7 +83,10 @@ public class XUiC_EfficientBaseRepairMaterials : XUiController
             // sprite.SetSpriteImmediately(materialItemValue.GetIconName());
             sprite.ParseAttribute("sprite", materialItemValue.GetIconName(), materialSprites[index]);
 
-            ((XUiV_Label)materialWeights[index].ViewComponent).Text = entry.Value.ToString();
+            int availbableMaterialsCount = itemsDict.ContainsKey(entry.Key) ? itemsDict[entry.Key] : 0;
+            int requiredMaterialsCount = entry.Value;
+
+            ((XUiV_Label)materialWeights[index].ViewComponent).Text = $"{availbableMaterialsCount} / {requiredMaterialsCount}";
 
             index++;
         }

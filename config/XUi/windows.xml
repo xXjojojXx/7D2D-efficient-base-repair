@@ -63,9 +63,9 @@
                 <sprite depth="1" color="[mediumGrey]" type="sliced" on_press="true"/>
                 <grid rows="15" cols="1" pos="3,-3" cell_width="228" cell_height="50"  repeat_content="true">
                     <!-- <forge_material name="0"/> -->
-                    <table depth="1" columns="2">
-                        <sprite name="material" atlas="ItemIconAtlas" depth="2" height="40" width="40" pos="3, 3" fill="[grey]"/>
-                        <label  name="weight"   depth="2" height="24" width="114" color="[beige]"/>
+                    <table depth="1" columns="2" padding="5, 5">
+                        <sprite name="material" atlas="ItemIconAtlas" depth="2" height="40" width="40" pos="3, 3" pivot="center" fill="[iconColor]"/>
+                        <label  name="weight"  font_size="24" padding="10, 10" depth="2" height="40" width="114"  color="[beige]" pivot="center" pos="20, 20"/> <!-- justify="center" -->
                     </table>
                 </grid>
             </rect>

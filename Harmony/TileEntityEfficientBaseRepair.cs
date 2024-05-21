@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System;
 using static Block;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Linq;
 
 public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 {
@@ -25,6 +26,29 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 		IsOn = false;
 	}
 	public override TileEntityType GetTileEntityType() => (TileEntityType)243;
+
+	public Dictionary<string, int> ItemsToDict()
+	{
+		Dictionary<string, int> itemsDict = new Dictionary<string, int>();
+
+		if(items == null)
+			return itemsDict;
+
+		foreach(ItemStack stack in items){
+
+			if(stack.itemValue.ItemClass == null)
+				continue;
+
+			string itemName = stack.itemValue.ItemClass.Name;
+
+			if(!itemsDict.ContainsKey(itemName))
+				itemsDict[itemName] = 0;
+
+			itemsDict[itemName] +=stack.count;
+		}
+
+		return itemsDict;
+	}
 
 	private List<Vector3i> GetNeighbors(Vector3i pos)
 	{
@@ -400,6 +424,9 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 				requiredMaterials[entry.Key] += entry.Value;
 			}
 		}
+
+		Log.Out(string.Join(", ", requiredMaterials.Keys));
+		Log.Out(string.Join(", ", ItemsToDict().Keys));
 
 		Log.Out($"[TileEntityEfficientBaseRepair::UpdateStats] {blocksToRepair.Count} blocksToRepair, {requiredMaterials.Count} required Materials");
 	}
