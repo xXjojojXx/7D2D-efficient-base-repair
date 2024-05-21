@@ -62,33 +62,37 @@ public class XUiC_EfficientBaseRepairMaterials : XUiController
 
     private void UpdateMaterials()
     {
-        int index = 0;
-
-        if(tileEntity == null)
+        if (tileEntity == null)
             return;
 
         if (tileEntity.requiredMaterials == null)
             return;
 
         Dictionary<string, int> itemsDict = tileEntity.ItemsToDict();
+        int index = 0;
 
         foreach (KeyValuePair<string, int> entry in tileEntity.requiredMaterials)
         {
             string text = Localization.Get(entry.Key);
+            string iconName = ItemClass.GetItem(entry.Key).ItemClass.GetIconName();
 
-            ItemClass materialItemValue = ItemClass.GetForId(ItemClass.GetItem(entry.Key).type);
-
-            XUiV_Sprite sprite = (XUiV_Sprite)materialSprites[index].ViewComponent;
-            // sprite.IsVisible = true;
-            // sprite.SetSpriteImmediately(materialItemValue.GetIconName());
-            sprite.ParseAttribute("sprite", materialItemValue.GetIconName(), materialSprites[index]);
-
-            int availbableMaterialsCount = itemsDict.ContainsKey(entry.Key) ? itemsDict[entry.Key] : 0;
+            int availableMaterialsCount = itemsDict.ContainsKey(entry.Key) ? itemsDict[entry.Key] : 0;
             int requiredMaterialsCount = entry.Value;
 
-            ((XUiV_Label)materialWeights[index].ViewComponent).Text = $"{availbableMaterialsCount} / {requiredMaterialsCount}";
+            XUiV_Sprite sprite = (XUiV_Sprite)materialSprites[index].ViewComponent;
+            sprite.ParseAttribute("sprite", iconName, materialSprites[index]);
+
+            XUiV_Label label = (XUiV_Label)materialWeights[index].ViewComponent;
+            label.Text = $"{availableMaterialsCount} / {requiredMaterialsCount}";
+            label.Color = availableMaterialsCount >= requiredMaterialsCount ? validColor : invalidColor;
 
             index++;
+        }
+
+        for (int i = index; i < materialWeights.Length; i++)
+        {
+            ((XUiV_Label)materialWeights[i].ViewComponent).Text = "";
+            ((XUiV_Sprite)materialSprites[i].ViewComponent).ParseAttribute("sprite", "", materialSprites[i]);
         }
     }
 
