@@ -20,6 +20,12 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 
 	private XUiV_Label lblOnOff;
 
+	private XUiV_Label lblBlocksToRepair;
+
+	private XUiV_Label lblVisitedBlocks;
+
+	private XUiV_Label lblIterations;
+
 	private XUiV_Sprite sprOnOff;
 
 	private Color32 onColor = new Color32((byte)250, byte.MaxValue, (byte)163, byte.MaxValue);
@@ -87,16 +93,13 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 		btnOn_Background = (XUiV_Button)btnOn.GetChildById("clickable").ViewComponent;
 		btnOn_Background.Controller.OnPress += btnOn_OnPress;
 
-		XUiController childById = GetChildById("lblOnOff");
-		if (childById != null)
-		{
-			lblOnOff = (XUiV_Label)childById.ViewComponent;
-		}
-		childById = GetChildById("sprOnOff");
-		if (childById != null)
-		{
-			sprOnOff = (XUiV_Sprite)childById.ViewComponent;
-		}
+		lblOnOff = (XUiV_Label)GetChildById("lblOnOff").ViewComponent;
+		sprOnOff = (XUiV_Sprite)GetChildById("sprOnOff").ViewComponent;
+
+		lblBlocksToRepair = (XUiV_Label)GetChildById("lblBlocksToRepair").ViewComponent;
+		lblVisitedBlocks = (XUiV_Label)GetChildById("lblVisitedBlocks").ViewComponent;
+		lblIterations = (XUiV_Label)GetChildById("lblIterations").ViewComponent;
+
 		isDirty = true;
 		turnOff = Localization.Get("xuiTurnOff");
 		turnOn = Localization.Get("xuiTurnOn");
@@ -125,6 +128,10 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 			.GetChildById("statGrid")
 			.GetChildById("stats")
 			.ViewComponent.ParseAttribute("cell_width", (max_width - 5).ToString(), this);
+
+		GetChildById("lblBlocksToRepair").ViewComponent.ParseAttribute("width", (max_width - 5).ToString(), this);
+		GetChildById("lblVisitedBlocks").ViewComponent.ParseAttribute("width", (max_width - 5).ToString(), this);
+		GetChildById("lblIterations").ViewComponent.ParseAttribute("width", (max_width - 5).ToString(), this);
 
 		// button ON
 		XUiController btnOn = content.GetChildById("btnOn");
@@ -322,6 +329,13 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 		return false;
 	}
 
+	private void RefreshStats()
+	{
+		lblBlocksToRepair.Text = $"{tileEntity.blocksToRepairCount} damaged blocks found.";
+		lblVisitedBlocks.Text = $"{tileEntity.visitedBlocksCount} blocks visited";
+		lblIterations.Text = $"{tileEntity.bfsIterationsCount} bfs iterations done";
+	}
+
 	public override void Update(float _dt)
 	{
 		if ((GameManager.Instance != null || GameManager.Instance.World != null) && tileEntity != null)
@@ -330,9 +344,9 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 			if (lastOn != tileEntity.IsOn)
 			{
 				lastOn = tileEntity.IsOn;
-				// Owner.SetOn(tileEntity.IsOn);
 				RefreshIsOn(tileEntity.IsOn);
 			}
+			RefreshStats();
 			RefreshBindings();
 		}
 	}

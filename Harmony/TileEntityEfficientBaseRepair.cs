@@ -9,11 +9,10 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 {
 
 	public bool IsOn;
-	public bool is_under_cooldown;
 
 	private World world;
 
-	private int maxBfsIterations;
+	public int maxBfsIterations;
 
 	private bool needMaterials;
 
@@ -146,7 +145,11 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 			}
 		}
 
-		Log.Out($"{blocks_to_repair.Count} blocks to repair. Iterations = {maxBfsIterations - iterations}/{maxBfsIterations}, visited_blocks = {visited.Count}");
+		blocksToRepairCount = blocks_to_repair.Count;
+		bfsIterationsCount = maxBfsIterations - iterations;
+		visitedBlocksCount = visited.Count;
+
+		Log.Out($"[EfficientBaseRepair] {blocksToRepairCount} blocks to repair. Iterations = {maxBfsIterations - iterations}/{maxBfsIterations}, visited_blocks = {visited.Count}");
 
 		return blocks_to_repair;
 	}
@@ -401,8 +404,17 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 		needMaterials = _need_materials;
 	}
 
+	public int blocksToRepairCount;
+	public int visitedBlocksCount;
+	public int bfsIterationsCount;
+
 	public void UpdateStats()
 	{
+
+		blocksToRepairCount = 0;
+		bfsIterationsCount = 0;
+		visitedBlocksCount = 0;
+
 		Vector3i block_position = ToWorldPos();
 
 		blocksToRepair = GetBlocksToRepair(block_position);
@@ -424,10 +436,5 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 				requiredMaterials[entry.Key] += entry.Value;
 			}
 		}
-
-		Log.Out(string.Join(", ", requiredMaterials.Keys));
-		Log.Out(string.Join(", ", ItemsToDict().Keys));
-
-		Log.Out($"[TileEntityEfficientBaseRepair::UpdateStats] {blocksToRepair.Count} blocksToRepair, {requiredMaterials.Count} required Materials");
 	}
 }

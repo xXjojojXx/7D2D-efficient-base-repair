@@ -10,26 +10,10 @@
                 <sprite depth="4" name="backgroundMain" sprite="menu_empty3px" color="[black]" type="sliced" fillcenter="false" />
                 <sprite depth="1" name="background" color="[darkGrey]" type="sliced" width="228" height="197" pos="0,-3" />
                 <rect name="statGrid" depth="2" pos="6,-5">
-                    <grid name="stats" rows="5" cols="1" pos="3,-5" cell_width="223" cell_height="30" repeat_content="false" >
-                        <!-- <panel height="30" width="340" disableautobackground="true" visible="{showfuel}">
-                            <sprite depth="1" name="windowIcon" style="icon22px" pos="2,-2" sprite="ui_game_symbol_gas"/>
-                            <label depth="1" width="110" pos="30,-2" name="lblSpeed" font_size="22" text="{fueltitle|once}: [DECEA3]{fuel}/{maxfuel}[-]" />
-                            <sprite depth="2" width="70" pos="135, -7" height="10" type="sliced" color="[black]" visible="false"/>
-                            <sprite depth="2" width="68" pos="136, -8" height="8" type="sliced" color="[mediumGrey]" visible="false"/>
-                            <sprite depth="2" name="sprFillPotential" width="68" pos="136, -9" height="6" type="filled" color="[beige]" fill="{potentialfuelfill}" visible="false"/>
-                            <sprite depth="2" name="sprFuelFill" width="68" pos="136, -8" height="8" type="filled" color="181,57,57" fill="{fuelfill}" visible="false" />
-                        </panel>
-                        <panel height="30" width="340" disableautobackground="true">
-                            <sprite depth="1" name="windowIcon" style="icon22px" pos="2,-2" sprite="ui_game_symbol_electric_max_power"/>
-                            <label depth="1" width="180" pos="30,-2" name="lblNoise" font_size="22" text="{maxoutputtitle|once}: [DECEA3]{maxoutput}w[-]" />
-                        </panel>
-                        <panel height="30" width="340" disableautobackground="true">
-                            <sprite depth="1" name="windowIcon" style="icon22px" pos="2,-2" sprite="ui_game_symbol_electric_power"/>
-                            <label depth="1" width="110" pos="30,-2" name="lblProtection" font_size="22" text="{powertitle|once}: [DECEA3]{power}w[-]" />
-                            <sprite depth="2" width="70" pos="135, -7" height="10" type="sliced" color="[black]" />
-                            <sprite depth="2" width="68" pos="136, -8" height="8" type="sliced" color="[mediumGrey]" />
-                            <sprite depth="2" name="sprEnergyFill" width="68" pos="136, -8" height="8" type="filled" color="255,255,0" fill="{powerfill}" />
-                        </panel> -->
+                    <grid name="stats" rows="5" cols="1" pos="3,-5" cell_width="223" cell_height="30" repeat_content="false">
+                        <label name="lblBlocksToRepair" depth="1" width="180" pos="30,-2" font_size="22" text="lblBlocksToRepair"/>
+                        <label name="lblVisitedBlocks"  depth="1" width="180" pos="30,-2" font_size="22" text="lblVisitedBlocks"/>
+                        <label name="lblIterations"     depth="1" width="180" pos="30,-2" font_size="22" text="lblIterations"/>
                     </grid>
                 </rect>
                 <rect name="btnOn" depth="3" pos="0, -198" height="36" >
@@ -52,6 +36,7 @@
                 </rect>
             </rect>
         </window>
+
         <!-- modified windowForgeInput -->
         <window name="windowEfficientBaseRepairMaterials" width="228" height="1000" panel="Right" controller="EfficientBaseRepairMaterials, EfficientBaseRepair" materials_accepted="iron,brass,lead,glass,stone,clay" valid_materials_color="[green]" invalid_materials_color="[red]" cursor_area="true" >
             <panel style="header.panel">
