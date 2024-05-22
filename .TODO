@@ -1,22 +1,28 @@
 UI:
-    ☐ setup UI into the TileEntity
-        ☐ on/off button
-        ☐ dynamic ratio of needed materials / available materials (with refresh button ?)
-        ☐ show active cooldown || time to repair all
-
-To be implemented (or not ?):
-    ✘ Cooldown: a period of time during which no repair can be launched @cancelled(24-05-21 17:36)
-    ✔ Better UI inside the loot container @done(24-05-21 00:35)
-    ☐ RepairSpeed: an amount of damage which can be repaired in one UpdateTick event
-    ☐ electricity needed to launch a repair ?
-    ☐ if electricity needed -> increase repair speed according to max received power ?
-    ☐ make block ignoring in bfs more generic, by specifying explicit blocks to ignore.
-
-To be fixed:
-    ☐ Spike blocks at stage Dmg1 or Dmg2 with block.damage = 0 are upgraded for free at stage Dmg0
+    ✔ setup UI into the TileEntity @done(24-05-22 23:58)
+    ✔ on/off button @done(24-05-22 23:58)
+    ✔ dynamic ratio of needed materials / available materials (with refresh button ?) @done(24-05-22 23:59)
+    ☐ estimated time to repair all
 
 Config:
     ✘ import `COOLDOWN` duration from config.xml @cancelled(24-05-21 17:36)
     ✔ import `MAX_ITERTIONS` for bfs from config.xml @done(24-05-21 00:35)
     ✔ import `NEEDS_MATERIAL` on/off from config.xml @done(24-05-21 00:35)
     ☐ import `IGNORED_BLOCKS` from config.xml
+    ☐ import `LootSizeX` from config.xml
+    ☐ import `LootSizeY` from config.xml
+    ☐ remove `UpdateOnOpen` option (default=true)
+    ☐ import `MaxReceivedPower` from config.xml
+    ☐ import `PowerMultiplier` from config.xml
+
+To be implemented (or not ?):
+    ✘ Cooldown: a period of time during which no repair can be launched @cancelled(24-05-21 17:36)
+    ✔ Better UI inside the loot container @done(24-05-21 00:35)
+    ✔ RepairSpeed: an amount of damage which can be repaired in one UpdateTick event @done(24-05-22 23:59)
+    ☐ electricity needed to launch a repair ?
+    ☐ if electricity needed -> increase repair speed according to max received power ?
+    ☐ make block ignoring in bfs more generic, by specifying explicit blocks to ignore.
+    ☐ add upgrade option
+
+Know issues (WIP):
+    ☐ Spike blocks at stage Dmg1 or Dmg2 with block.damage = 0 are upgraded for free at stage Dmg0

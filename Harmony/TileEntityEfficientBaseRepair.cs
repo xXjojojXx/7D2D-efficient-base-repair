@@ -2,9 +2,6 @@ using UnityEngine;
 using System.Collections.Generic;
 using System;
 using static Block;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Linq;
-using System.Diagnostics;
 
 public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 {
