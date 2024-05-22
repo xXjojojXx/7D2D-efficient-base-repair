@@ -65,11 +65,8 @@ public class XUiC_EfficientBaseRepairMaterials : XUiController
         if (tileEntity == null)
             return;
 
-        if (tileEntity.requiredMaterials == null)
-            return;
-
-        Dictionary<string, int> itemsDict = tileEntity.ItemsToDict();
         int index = 0;
+        Dictionary<string, int> itemsDict = tileEntity.ItemsToDict();
 
         foreach (KeyValuePair<string, int> entry in tileEntity.requiredMaterials)
         {

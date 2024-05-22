@@ -169,7 +169,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 		return blocks_to_repair;
 	}
 
-	private Dictionary<string, int> ComputeMissingMaterials(float damages_perc, List<SItemNameCount> repair_items)
+	private Dictionary<string, int> ComputeRepairMaterials(float damages_perc, List<SItemNameCount> repair_items)
 	{
 		if (repair_items == null)
 			return null;
@@ -220,7 +220,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 
 		float damage_perc = (float)block.damage / block.Block.MaxDamage;
 
-		Dictionary<string, int> missing_items = ComputeMissingMaterials(damage_perc, repair_items);
+		Dictionary<string, int> missing_items = ComputeRepairMaterials(damage_perc, repair_items);
 
 		return missing_items;
 	}
@@ -248,12 +248,13 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 
 			needed_item_count -= taken_items_count;
 			stack.count -= taken_items_count;
+			requiredMaterials[item_name] -= taken_items_count;
 
 			if (needed_item_count < 0)
-				Log.Error($"TileEntityClaimAutoRepair.ReduceItemCount: needed_item_count < 0 (={needed_item_count})");
+				Log.Error($"[EfficientBaseRepair::ReduceItemCount] needed_item_count < 0 (={needed_item_count})");
 
 			if (stack.count < 0)
-				Log.Error($"TileEntityClaimAutoRepair.ReduceItemCount: stack.count  < 0 (={stack.count})");
+				Log.Error($"[EfficientBaseRepair::ReduceItemCount] stack.count  < 0 (={stack.count})");
 
 			UpdateSlot(i, stack);
 
@@ -274,48 +275,56 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 
 	private int ComputeRepairableDamages(BlockValue block, float damagePerc, Dictionary<string, int> missing_materials)
 	{
-		if(block.Block.RepairItems == null)
+		if (block.Block.RepairItems == null)
 			return 0;
 
-		if(missing_materials == null)
+		if (missing_materials == null)
 			return block.damage;
 
 		float total_required = 0.0f;
 		float total_missing = 0.0f;
 
-		foreach(SItemNameCount item in block.Block.RepairItems)
+		foreach (SItemNameCount item in block.Block.RepairItems)
 		{
 			total_required += Mathf.Ceil(item.Count * damagePerc);
 
 			if (!missing_materials.ContainsKey(item.ItemName))
 				continue;
 
+			Log.Out($"[ComputeRepairableDamages] missing[{item.ItemName}]={missing_materials[item.ItemName]}");
+
 			total_missing += missing_materials[item.ItemName];
 		}
 
-		int repairableDamages = (int)Mathf.Ceil(block.damage * total_missing / total_required);
+		int damagesAfterRepair = (int)Mathf.Ceil((float)(block.damage * total_missing) / total_required);
 
-		Log.Out($"[ComputeRepairableDamages] {block.Block.GetBlockName()}.total_required: {total_required}");
-		Log.Out($"[ComputeRepairableDamages] {block.damage} * {total_missing} / {total_required} = {repairableDamages}");
-		Log.Out($"[ComputeRepairableDamages] {block.damage} - {repairableDamages} = {block.damage - repairableDamages}");
+		Log.Out($"[ComputeRepairableDamages] {block.Block.GetBlockName()}");
+		Log.Out($"[ComputeRepairableDamages] {block.damage} * {total_missing} / {total_required} = {damagesAfterRepair}");
+		Log.Out($"[ComputeRepairableDamages] {block.damage} - {damagesAfterRepair} = {block.damage - damagesAfterRepair}");
+		Log.Out($"[ComputeRepairableDamages] missingMaterials=[{string.Join(" ", missing_materials.Keys)}]");
 
-		return repairableDamages;
+		return block.damage - damagesAfterRepair;
 	}
 
-	public void TakeRepairMaterials(float damages_perc, List<SItemNameCount> repair_items)
+	public Dictionary<string, int> TakeRepairMaterials(float damages_perc, List<SItemNameCount> repair_items)
 	{
 		if (repair_items == null)
-			return;
+			return null;
+
+		Dictionary<string, int> missing_materials = new Dictionary<string, int>();
 
 		foreach (SItemNameCount item in repair_items)
 		{
 			int required_item_count = (int) Mathf.Ceil(item.Count * damages_perc);
-			ReduceItemCount(item.ItemName, required_item_count);
+			int missing_item_count = ReduceItemCount(item.ItemName, required_item_count);
 
 			//Log.Out($"{item.ItemName}: required_material={required_item_count} (={item.Count} * {damages_perc:F3})");
+
+			if (missing_item_count > 0)
+				missing_materials.Add(item.ItemName, missing_item_count);
 		}
 
-		return;
+		return missing_materials.Count > 0 ? missing_materials : null;
 	}
 
 	private int TryRepairBlock(World world, Vector3i pos, int maxRepairableDamages)
@@ -355,11 +364,9 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 
 		float damagePerc = (float)block.damage / block.Block.MaxDamage;
 
-		Dictionary<string, int> missing_items = needMaterials ? ComputeMissingMaterials(damagePerc, repair_items) : null;
+		Dictionary<string, int> missing_items = needMaterials ? TakeRepairMaterials(damagePerc, repair_items) : null;
 
 		int repairedDamages = Math.Min(maxRepairableDamages, ComputeRepairableDamages(block, damagePerc, missing_items));
-
-		TakeRepairMaterials((float)repairedDamages / block.Block.MaxDamage, block.Block.RepairItems);
 
 		Log.Out($"[TryRepairBlock] repairedDamages={repairedDamages}");
 
@@ -426,22 +433,27 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 			return;
 
 		if (blocksToRepair.Count == 0)
+		{
+			IsOn = false;
 			return;
+		}
 
 		int repairableDamageCount = repairPerTick;
+
+		Log.Out($"\n[EfficientBaseRepair] TickRepair");
 
 		foreach (Vector3i position in new List<Vector3i>(blocksToRepair))
 		{
 
 			int repairedDamages = TryRepairBlock(world, position, repairableDamageCount);
 
-			Log.Out($"[EfficientBaseRepair] repaired damages={repairedDamages}, repairableDamages={repairableDamageCount}\n");
+			Log.Out($"[EfficientBaseRepair] repaired damages={repairedDamages}, repairableDamages={repairableDamageCount}");
 
 			repairableDamageCount -= repairedDamages;
 
 			BlockValue block = world.GetBlock(position);
 
-			if(block.damage == 0)
+			if (block.damage == 0)
 				blocksToRepair.Remove(position);
 
 			if (repairableDamageCount == 0) return;
