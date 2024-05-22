@@ -128,6 +128,7 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 			.ViewComponent.ParseAttribute("cell_width", (max_width - 5).ToString(), this);
 
 		GetChildById("lblBlocksToRepair").ViewComponent.ParseAttribute("width", (max_width - 5).ToString(), this);
+		GetChildById("lblTotalDamages").ViewComponent.ParseAttribute("width", (max_width - 5).ToString(), this);
 		GetChildById("lblVisitedBlocks").ViewComponent.ParseAttribute("width", (max_width - 5).ToString(), this);
 		GetChildById("lblIterations").ViewComponent.ParseAttribute("width", (max_width - 5).ToString(), this);
 
@@ -327,11 +328,17 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 		return false;
 	}
 
+	private XUiV_Label GetLabel(string labelName)
+	{
+		return (XUiV_Label)GetChildById(labelName).ViewComponent;
+	}
+
 	private void RefreshStats()
 	{
-		lblBlocksToRepair.Text = $"{tileEntity.blocksToRepairCount} damaged blocks found.";
-		lblVisitedBlocks.Text = $"{tileEntity.visitedBlocksCount} blocks visited";
-		lblIterations.Text = $"{tileEntity.bfsIterationsCount} bfs iterations done";
+		GetLabel("lblBlocksToRepair").Text = $"{tileEntity.blocksToRepairCount:N0} damaged blocks found.";
+		GetLabel("lblTotalDamages").Text   = $"{tileEntity.totalDamagesCount:N0} damages points to repair.";
+		GetLabel("lblVisitedBlocks").Text  = $"{tileEntity.visitedBlocksCount:N0} blocks visited.";
+		GetLabel("lblIterations").Text     = $"{tileEntity.bfsIterationsCount} bfs iterations done.";
 	}
 
 	public override void Update(float _dt)

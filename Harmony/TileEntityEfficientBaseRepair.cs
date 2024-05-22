@@ -4,6 +4,7 @@ using System;
 using static Block;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Linq;
+using System.Diagnostics;
 
 public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 {
@@ -13,6 +14,8 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 	private World world;
 
 	public int maxBfsIterations;
+
+	public int repairPerTick;
 
 	private bool needMaterials;
 
@@ -24,6 +27,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 	{
 		IsOn = false;
 	}
+
 	public override TileEntityType GetTileEntityType() => (TileEntityType)243;
 
 	public Dictionary<string, int> ItemsToDict()
@@ -139,6 +143,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 				if (block.damage > 0 || block_name.Contains("Dmg1") || block_name.Contains("Dmg2"))
 				{
 					blocks_to_repair.Add(pos);
+					totalDamagesCount += block.damage;
 				}
 
 				neighbors.AddRange(this.GetNeighbors(pos));
@@ -153,15 +158,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 
 		return blocks_to_repair;
 	}
-
-    public override void UpdateTick(World world)
-    {
-        base.UpdateTick(world);
-
-		if(!IsOn) return;
-
-		Log.Out("[EfficientBaseRepair] Tick");
-    }
 
     public int ReduceItemCount(string item_name, int item_count)
 	{
@@ -406,16 +402,18 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 		return missing_items;
 	}
 
-	public void Init(World _world, int _max_iterations, bool _need_materials)
+	public void Init(World _world, int _max_iterations, bool _need_materials, int _repairPerTick)
 	{
 		world = _world;
 		maxBfsIterations = _max_iterations;
 		needMaterials = _need_materials;
+		repairPerTick = _repairPerTick;
 	}
 
 	public int blocksToRepairCount;
 	public int visitedBlocksCount;
 	public int bfsIterationsCount;
+	public int totalDamagesCount;
 
 	public void UpdateStats()
 	{
@@ -423,6 +421,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 		blocksToRepairCount = 0;
 		bfsIterationsCount = 0;
 		visitedBlocksCount = 0;
+		totalDamagesCount = 0;
 
 		Vector3i block_position = ToWorldPos();
 
@@ -446,4 +445,17 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 			}
 		}
 	}
+	public override void UpdateTick(World world)
+    {
+        base.UpdateTick(world);
+
+		if(!IsOn)
+			return;
+
+		if(blocksToRepair.Count == 0)
+			return;
+
+
+		Log.Out($"[EfficientBaseRepair] Tick");
+    }
 }

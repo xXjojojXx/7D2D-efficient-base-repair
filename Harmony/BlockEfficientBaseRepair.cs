@@ -35,6 +35,14 @@ class BlockEfficientBaseRepair : BlockSecureLoot
         }
     }
 
+    public int RepairPerTick
+    {
+        get
+        {
+            return Properties.GetInt("RepairPerTick");
+        }
+    }
+
     public override void OnBlockAdded(WorldBase _world, Chunk _chunk, Vector3i _blockPos, BlockValue _blockValue)
     {
         base.OnBlockAdded(_world, _chunk, _blockPos, _blockValue);
@@ -164,7 +172,7 @@ class BlockEfficientBaseRepair : BlockSecureLoot
         _player.AimingGun = false;
 
         tileEntity.bWasTouched = tileEntity.bTouched;
-        tileEntity.Init((World)_world, MaxBfsIterations, NeedMaterials);
+        tileEntity.Init((World)_world, MaxBfsIterations, NeedMaterials, RepairPerTick);
 
         XUiC_EfficientBaseRepair.Open(uIForPlayer, tileEntity, UpdateOnOpen);
 
