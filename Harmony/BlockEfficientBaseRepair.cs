@@ -58,8 +58,6 @@ class BlockEfficientBaseRepair : BlockSecureLoot
         string cmd_activate = tileEntity.IsOn ? TURN_OFF_CMD : TURN_ON_CMD;
         bool is_locked = tileEntity.IsLocked();
 
-        Log.Out("cmd_activate: " + cmd_activate);
-
         return new BlockActivationCommand[6]
         {
             new BlockActivationCommand("Search", "search", true),
@@ -67,7 +65,7 @@ class BlockEfficientBaseRepair : BlockSecureLoot
             new BlockActivationCommand("unlock", "unlock", is_locked),
             new BlockActivationCommand("keypad", "keypad", true),
             new BlockActivationCommand("take", "hand", true),
-            new BlockActivationCommand(TURN_ON_CMD, "electric_switch", true),
+            new BlockActivationCommand(cmd_activate, "electric_switch", true),
         };
 
     }
@@ -97,7 +95,7 @@ class BlockEfficientBaseRepair : BlockSecureLoot
         {
             case TURN_ON_CMD:
             case TURN_OFF_CMD:
-                // tileEntity.is_activated = !tileEntity.is_activated;
+                tileEntity.IsOn = !tileEntity.IsOn;
                 return true;
 
             case "take":

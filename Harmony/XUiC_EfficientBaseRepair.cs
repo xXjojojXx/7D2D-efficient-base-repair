@@ -169,7 +169,7 @@ public class XUiC_EfficientBaseRepair : XUiController
 		}
 
 		statsWindow.TileEntity = te;
-		statsWindow.setWidth(lootWindow.ViewComponent.Size.x);
+		statsWindow.SetWidth(lootWindow.ViewComponent.Size.x);
 		statsWindow.OnOpen();
 
 		MaterialsWindow.tileEntity = te;

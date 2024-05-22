@@ -38,8 +38,6 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 
 	public static FastTags tag = FastTags.Parse("gasoline");
 
-	// private PowerSource powerSource;
-
 	private TileEntityEfficientBaseRepair tileEntity;
 
 	private bool lastOn;
@@ -105,7 +103,7 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 		turnOn = Localization.Get("xuiTurnOn");
 	}
 
-	public void setWidth(int width)
+	public void SetWidth(int width)
 	{
 
 		int max_width = Mathf.Max(width, 230);
@@ -207,7 +205,7 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 
 	private void btnOn_OnPress(XUiController _sender, int _mouseButton)
 	{
-		Log.Out("EfficientBaseRepair::btnOn_OnPress");
+		tileEntity.IsOn = !tileEntity.IsOn;
 	}
 
 	private void RefreshIsOn(bool isOn)

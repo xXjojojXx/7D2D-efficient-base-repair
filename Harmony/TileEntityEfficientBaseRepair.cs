@@ -154,7 +154,16 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 		return blocks_to_repair;
 	}
 
-	public int ReduceItemCount(string item_name, int item_count)
+    public override void UpdateTick(World world)
+    {
+        base.UpdateTick(world);
+
+		if(!IsOn) return;
+
+		Log.Out("[EfficientBaseRepair] Tick");
+    }
+
+    public int ReduceItemCount(string item_name, int item_count)
 	{
 		// TODO: optimize this function, by caching 'this.items' in a Hashed structure
 		// -> purpose: prevents from iterating over each 'this.items'
