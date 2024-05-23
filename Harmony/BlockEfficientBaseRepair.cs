@@ -35,14 +35,6 @@ class BlockEfficientBaseRepair : BlockSecureLoot
         }
     }
 
-    public bool UpdateOnOpen
-    {
-        get
-        {
-            return Properties.GetBool("UpdateOnOpen");
-        }
-    }
-
     public int RepairPerTick
     {
         get
@@ -182,7 +174,7 @@ class BlockEfficientBaseRepair : BlockSecureLoot
         tileEntity.bWasTouched = tileEntity.bTouched;
         tileEntity.Init((World)_world, MaxBfsIterations, NeedMaterials, RepairPerTick);
 
-        XUiC_EfficientBaseRepair.Open(uIForPlayer, tileEntity, UpdateOnOpen);
+        XUiC_EfficientBaseRepair.Open(uIForPlayer, tileEntity);
 
         return true;
     }

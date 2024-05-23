@@ -197,7 +197,7 @@ public class XUiC_EfficientBaseRepair : XUiController
 		isOpening = false;
 	}
 
-    public static void Open(LocalPlayerUI _playerUi, TileEntityEfficientBaseRepair tileEntity, bool updateOnOpen)
+    public static void Open(LocalPlayerUI _playerUi, TileEntityEfficientBaseRepair tileEntity)
 	{
         XUiC_EfficientBaseRepair instance = (XUiC_EfficientBaseRepair)_playerUi.xui.FindWindowGroupByName(ID);
 
@@ -208,8 +208,7 @@ public class XUiC_EfficientBaseRepair : XUiController
 
 		instance.SetTileEntityChest("EfficientBaseRepair", tileEntity);
 
-		if(updateOnOpen)
-			tileEntity.UpdateStats();
+		tileEntity.UpdateStats();
 
 		_playerUi.windowManager.Open(ID, _bModal: true);
 	}

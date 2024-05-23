@@ -10,8 +10,8 @@ Config:
     ✔ import `NEEDS_MATERIAL` on/off from config.xml @done(24-05-21 00:35)
     ✔ import `LootSizeX` from config.xml @done(24-05-23 17:36)
     ✔ import `LootSizeY` from config.xml @done(24-05-23 17:36)
+    ✔ remove `UpdateOnOpen` option (default=true) @done(24-05-23 17:37)
     ☐ import `IGNORED_BLOCKS` from config.xml
-    ☐ remove `UpdateOnOpen` option (default=true)
     ☐ import `MaxReceivedPower` from config.xml
     ☐ import `PowerMultiplier` from config.xml
 
