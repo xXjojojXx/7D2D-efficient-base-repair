@@ -12,9 +12,10 @@
                 <rect name="statGrid" depth="2" pos="6,-5">
                     <grid name="stats" rows="5" cols="1" pos="3,-5" cell_width="223" cell_height="30" repeat_content="false">
                         <label name="lblBlocksToRepair" depth="1" width="180" pos="30,-2" font_size="22" text="lblBlocksToRepair"/>
-                        <label name="lblTotalDamages"     depth="1" width="180" pos="30,-2" font_size="22" text="lblTotalDamages"/>
+                        <label name="lblTotalDamages"   depth="1" width="180" pos="30,-2" font_size="22" text="lblTotalDamages"/>
                         <label name="lblVisitedBlocks"  depth="1" width="180" pos="30,-2" font_size="22" text="lblVisitedBlocks"/>
                         <label name="lblIterations"     depth="1" width="180" pos="30,-2" font_size="22" text="lblIterations"/>
+                        <label name="lblTimer"          depth="1" width="180" pos="30,-2" font_size="22" text="lblTimer"/>
                     </grid>
                 </rect>
                 <rect name="btnOn" depth="3" pos="0, -198" height="36" >

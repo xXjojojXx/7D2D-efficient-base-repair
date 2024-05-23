@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Scripting;
 
@@ -129,6 +130,7 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 		GetChildById("lblTotalDamages").ViewComponent.ParseAttribute("width", (max_width - 5).ToString(), this);
 		GetChildById("lblVisitedBlocks").ViewComponent.ParseAttribute("width", (max_width - 5).ToString(), this);
 		GetChildById("lblIterations").ViewComponent.ParseAttribute("width", (max_width - 5).ToString(), this);
+		GetChildById("lblTimer").ViewComponent.ParseAttribute("width", (max_width - 5).ToString(), this);
 
 		// button ON
 		XUiController btnOn = content.GetChildById("btnOn");
@@ -337,6 +339,7 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 		GetLabel("lblTotalDamages").Text   = $"{tileEntity.totalDamagesCount:N0} damages points to repair.";
 		GetLabel("lblVisitedBlocks").Text  = $"{tileEntity.visitedBlocksCount:N0} blocks visited.";
 		GetLabel("lblIterations").Text     = $"{tileEntity.bfsIterationsCount} bfs iterations done.";
+		GetLabel("lblTimer").Text          = $"Repair time {tileEntity.RepairTime()}";
 	}
 
 	public override void Update(float _dt)

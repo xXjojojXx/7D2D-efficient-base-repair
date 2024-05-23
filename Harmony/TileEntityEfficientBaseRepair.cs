@@ -36,6 +36,16 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 
 	public override TileEntityType GetTileEntityType() => (TileEntityType)243;
 
+	public string RepairTime()
+	{
+		const float tickDuration_s = 2f;
+		float repairTime_s = (float)(totalDamagesCount * tickDuration_s) / repairPerTick;
+
+		Log.Out($"[EfficientBaseRepair] repairTime_s={repairTime_s}");
+
+		return TimeSpan.FromSeconds(repairTime_s).ToString(@"hh\:mm\:ss");
+	}
+
 	public Dictionary<string, int> ItemsToDict()
 	{
 		Dictionary<string, int> itemsDict = new Dictionary<string, int>();
