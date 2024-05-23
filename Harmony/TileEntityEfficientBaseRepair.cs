@@ -233,12 +233,13 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 		return missing_items;
 	}
 
-	public int ReduceItemCount(string item_name, int item_count)
+	public int ReduceItemCount(string item_name, int itemCount)
 	{
 		// TODO: optimize this function, by caching 'this.items' in a Hashed structure
 		// -> purpose: prevents from iterating over each 'this.items'
 
-		int needed_item_count = item_count;
+		int neededItemCount = itemCount;
+		int totalTaken = 0;
 
 		for (int i = 0; i < this.items.Length; i++)
 		{
@@ -247,30 +248,34 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 			if (stack.IsEmpty())
 				continue;
 
-			// TODO: how expensive is this call for `GetItem(string)`? (see ItemClass.GetItemClass to get an idea)
-			// TODO: check if this attribute can do the job in a more efficient way: stack.itemValue.ItemClass.Name
+			// TODO: see ItemClass.GetItemClass to get an idea of how expensive is this call for `GetItem(string)`
+			// TODO: check if `stack.itemValue.ItemClass.Name` can do the job in a more efficient way
 			if (stack.itemValue.type != ItemClass.GetItem(item_name).type)
 				continue;
 
-			int taken_items_count = Math.Min(stack.count, needed_item_count);
+			int takenItemsCount = Math.Min(stack.count, neededItemCount);
 
-			needed_item_count -= taken_items_count;
-			stack.count -= taken_items_count;
-			requiredMaterials[item_name] -= taken_items_count;
+			neededItemCount -= takenItemsCount;
+			stack.count -= takenItemsCount;
+			requiredMaterials[item_name] -= takenItemsCount;
 
-			if (needed_item_count < 0)
-				Log.Error($"[EfficientBaseRepair::ReduceItemCount] needed_item_count < 0 (={needed_item_count})");
+			totalTaken += takenItemsCount;
+
+			if (neededItemCount < 0)
+				Log.Error($"[EfficientBaseRepair] needed_item_count < 0 (={neededItemCount})");
 
 			if (stack.count < 0)
-				Log.Error($"[EfficientBaseRepair::ReduceItemCount] stack.count  < 0 (={stack.count})");
+				Log.Error($"[EfficientBaseRepair] stack.count  < 0 (={stack.count})");
 
 			UpdateSlot(i, stack);
 
-			if (needed_item_count == 0)
+			if (neededItemCount == 0)
 				break;
 		}
 
-		return needed_item_count;
+		Log.Out($"[EfficientBaseRepair] taking {totalTaken} {item_name}");
+
+		return totalTaken;
 	}
 
 	public void Init(World _world, int _max_iterations, bool _need_materials, int _repairPerTick, int _refreshRate)
@@ -282,58 +287,56 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 		statsRefreshRate = _refreshRate;
 	}
 
-	private int ComputeRepairableDamages(BlockValue block, float damagePerc, Dictionary<string, int> missing_materials)
+	private int TakeRepairMaterial(SItemNameCount item, int maxTakable)
 	{
-		if (block.Block.RepairItems == null)
-			return 0;
+		int takenItemsCount = Mathf.Min(item.Count, maxTakable);
 
-		if (missing_materials == null)
-			return block.damage;
+		ReduceItemCount(item.ItemName, takenItemsCount);
 
-		float total_required = 0.0f;
-		float total_missing = 0.0f;
-
-		foreach (SItemNameCount item in block.Block.RepairItems)
-		{
-			total_required += Mathf.Ceil(item.Count * damagePerc);
-
-			if (!missing_materials.ContainsKey(item.ItemName))
-				continue;
-
-			Log.Out($"[EfficientBaseRepair] missing[{item.ItemName}]={missing_materials[item.ItemName]}");
-
-			total_missing += missing_materials[item.ItemName];
-		}
-
-		int damagesAfterRepair = (int)Mathf.Ceil((float)(block.damage * total_missing) / total_required);
-
-		Log.Out($"[EfficientBaseRepair] {block.Block.GetBlockName()}");
-		Log.Out($"[EfficientBaseRepair] {block.damage} * {total_missing} / {total_required} = {damagesAfterRepair}");
-		Log.Out($"[EfficientBaseRepair] {block.damage} - {damagesAfterRepair} = {block.damage - damagesAfterRepair}");
-		Log.Out($"[EfficientBaseRepair] missingMaterials=[{string.Join(" ", missing_materials.Keys)}]");
-
-		return block.damage - damagesAfterRepair;
+		return takenItemsCount;
 	}
 
-	public Dictionary<string, int> TakeRepairMaterials(float damages_perc, List<SItemNameCount> repair_items)
+	private int ComputeRepairableDamages(BlockValue block, int maxRepairableDamages, List<SItemNameCount> repairItems)
 	{
-		if (repair_items == null)
-			return null;
+		// full repair for free of blocks which can't be repaired in vanilla game
+		// TODO: add param ForceNonRepairableBlocks
+		if (repairItems == null)
+			return block.damage;
 
-		Dictionary<string, int> missing_materials = new Dictionary<string, int>();
+		float totalRequired = 0.0f;
+		float totalTaken = 0.0f;
 
-		foreach (SItemNameCount item in repair_items)
+		foreach (SItemNameCount item in repairItems)
 		{
-			int required_item_count = (int) Mathf.Ceil(item.Count * damages_perc);
-			int missing_item_count = ReduceItemCount(item.ItemName, required_item_count);
-
-			//Log.Out($"[EfficientBaseRepair] {item.ItemName}: required_material={required_item_count} (={item.Count} * {damages_perc:F3})");
-
-			if (missing_item_count > 0)
-				missing_materials.Add(item.ItemName, missing_item_count);
+			totalRequired += item.Count;
 		}
 
-		return missing_materials.Count > 0 ? missing_materials : null;
+		Log.Out($"[EfficientBaseRepair] totalRequired={totalRequired}");
+
+		float maxRepairablePerc = (float)Mathf.Min(block.damage, maxRepairableDamages) / block.damage;
+		int maxTakableItemCount = (int)Mathf.Floor(totalRequired * maxRepairablePerc);
+
+		Log.Out($"[EfficientBaseRepair] block.damage={block.damage}");
+		Log.Out($"[EfficientBaseRepair] maxRepairableDamages={maxRepairableDamages}");
+		Log.Out($"[EfficientBaseRepair] maxRepairablePerc={maxRepairablePerc:F3}");
+		Log.Out($"[EfficientBaseRepair] maxTakableItemCount={maxTakableItemCount}");
+
+		foreach (SItemNameCount item in repairItems)
+		{
+			int takenItemCount = TakeRepairMaterial(item, maxTakableItemCount);
+
+			totalTaken += takenItemCount;
+			maxTakableItemCount -= takenItemCount;
+
+			if(maxTakableItemCount == 0)
+				break;
+		}
+
+		int repairableDamages = (int)Mathf.Ceil(block.damage * totalTaken / totalRequired);
+
+		Log.Out($"[EfficientBaseRepair] repairableDamages={repairableDamages}");
+
+		return repairableDamages;
 	}
 
 	private void UpdateBlock(Chunk chunkFromWorldPos, BlockValue block, Vector3i pos)
@@ -360,17 +363,14 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 
 	private int TryRepairBlock(World world, Vector3i pos, int maxRepairableDamages)
 	{
-		BlockValue block = world.GetBlock(pos);
-
 		if (!(world.GetChunkFromWorldPos(pos) is Chunk chunkFromWorldPos))
 		{
 			Log.Warning("Can't retreive chunk from world position.");
 			return 0;
 		}
 
-		// TODO: find a better way to compute the needed repair_items for spike blocks
-		// (for now, if a spike is at stage Dmg1 or Dmg2 with damage=0, the upgrade to Dmg0 is free)
-		List<SItemNameCount> repair_items = block.Block.RepairItems;
+		BlockValue block = world.GetBlock(pos);
+		List<SItemNameCount> repairItems = block.Block.RepairItems;
 
 		const uint trapSpikesWoodDmg0_id = 21469;
 		const uint trapSpikesIronDmg0_id = 21476;
@@ -393,19 +393,16 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 				break;
 		}
 
-		float damagePerc = (float)block.damage / block.Block.MaxDamage;
+		int repairableDamages = ComputeRepairableDamages(block, maxRepairableDamages, repairItems);
 
-		Dictionary<string, int> missing_items = needMaterials ? TakeRepairMaterials(damagePerc, repair_items) : null;
+		if (repairableDamages <= 0)
+			return 0;
 
-		int repairedDamages = Math.Min(maxRepairableDamages, ComputeRepairableDamages(block, damagePerc, missing_items));
-
-		Log.Out($"[EfficientBaseRepair] repairedDamages={repairedDamages}");
-
-		block.damage -= repairedDamages;
+		block.damage -= repairableDamages;
 
 		UpdateBlock(chunkFromWorldPos, block, pos);
 
-		return repairedDamages;
+		return repairableDamages;
 	}
 
 	public void UpdateStats()
@@ -448,30 +445,39 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 		if (!IsOn)
 			return;
 
-		if(elapsedTicksSinceLastRefresh >= statsRefreshRate && statsRefreshRate > 0)
+		if (elapsedTicksSinceLastRefresh >= statsRefreshRate && statsRefreshRate > 0)
 			UpdateStats();
 
 		int repairableDamageCount = repairPerTick;
 
-		Log.Out($"\n\n[EfficientBaseRepair] TickRepair");
+		Log.Out($"[EfficientBaseRepair] TickRepair");
 
 		foreach (Vector3i position in new List<Vector3i>(blocksToRepair))
 		{
-
 			int repairedDamages = TryRepairBlock(world, position, repairableDamageCount);
-
-			Log.Out($"[EfficientBaseRepair] repaired damages={repairedDamages}, repairableDamages={repairableDamageCount}\n");
 
 			repairableDamageCount -= repairedDamages;
 
 			BlockValue block = world.GetBlock(position);
 
 			if (block.damage == 0)
+			{
+				Log.Out($"[EfficientBaseRepair] full repaired block at {position.ToString()}");
 				blocksToRepair.Remove(position);
+			}
 
-			if (repairableDamageCount == 0) return;
+			if (repairableDamageCount < 0)
+				Log.Error($"[EfficientBaseRepair] repairableDamageCount={repairableDamageCount}");
+
+			Log.Out($"[EfficientBaseRepair] BlockEnd, repairableDamageCount={repairableDamageCount}\n");
+
+			// stop if less than 100 to avoid iterating over all blocks at each tick.
+			if (repairableDamageCount <= 100)
+				break;
 		}
 
 		elapsedTicksSinceLastRefresh++;
+
+		Log.Out("[EfficientBaseRepair] TickEnd\n\n");
 	}
 }
