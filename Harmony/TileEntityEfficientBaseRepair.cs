@@ -300,17 +300,17 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 			if (!missing_materials.ContainsKey(item.ItemName))
 				continue;
 
-			Log.Out($"[ComputeRepairableDamages] missing[{item.ItemName}]={missing_materials[item.ItemName]}");
+			Log.Out($"[EfficientBaseRepair] missing[{item.ItemName}]={missing_materials[item.ItemName]}");
 
 			total_missing += missing_materials[item.ItemName];
 		}
 
 		int damagesAfterRepair = (int)Mathf.Ceil((float)(block.damage * total_missing) / total_required);
 
-		Log.Out($"[ComputeRepairableDamages] {block.Block.GetBlockName()}");
-		Log.Out($"[ComputeRepairableDamages] {block.damage} * {total_missing} / {total_required} = {damagesAfterRepair}");
-		Log.Out($"[ComputeRepairableDamages] {block.damage} - {damagesAfterRepair} = {block.damage - damagesAfterRepair}");
-		Log.Out($"[ComputeRepairableDamages] missingMaterials=[{string.Join(" ", missing_materials.Keys)}]");
+		Log.Out($"[EfficientBaseRepair] {block.Block.GetBlockName()}");
+		Log.Out($"[EfficientBaseRepair] {block.damage} * {total_missing} / {total_required} = {damagesAfterRepair}");
+		Log.Out($"[EfficientBaseRepair] {block.damage} - {damagesAfterRepair} = {block.damage - damagesAfterRepair}");
+		Log.Out($"[EfficientBaseRepair] missingMaterials=[{string.Join(" ", missing_materials.Keys)}]");
 
 		return block.damage - damagesAfterRepair;
 	}
@@ -327,7 +327,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 			int required_item_count = (int) Mathf.Ceil(item.Count * damages_perc);
 			int missing_item_count = ReduceItemCount(item.ItemName, required_item_count);
 
-			//Log.Out($"{item.ItemName}: required_material={required_item_count} (={item.Count} * {damages_perc:F3})");
+			//Log.Out($"[EfficientBaseRepair] {item.ItemName}: required_material={required_item_count} (={item.Count} * {damages_perc:F3})");
 
 			if (missing_item_count > 0)
 				missing_materials.Add(item.ItemName, missing_item_count);
@@ -377,7 +377,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 
 		int repairedDamages = Math.Min(maxRepairableDamages, ComputeRepairableDamages(block, damagePerc, missing_items));
 
-		Log.Out($"[TryRepairBlock] repairedDamages={repairedDamages}");
+		Log.Out($"[EfficientBaseRepair] repairedDamages={repairedDamages}");
 
 		block.damage -= repairedDamages;
 
@@ -455,7 +455,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 
 			int repairedDamages = TryRepairBlock(world, position, repairableDamageCount);
 
-			Log.Out($"[EfficientBaseRepair] repaired damages={repairedDamages}, repairableDamages={repairableDamageCount}");
+			Log.Out($"[EfficientBaseRepair] repaired damages={repairedDamages}, repairableDamages={repairableDamageCount}\n");
 
 			repairableDamageCount -= repairedDamages;
 
