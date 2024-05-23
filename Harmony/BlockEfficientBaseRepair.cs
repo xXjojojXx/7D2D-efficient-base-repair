@@ -5,7 +5,16 @@ using UnityEngine;
 
 class BlockEfficientBaseRepair : BlockSecureLoot
 {
-    private Vector2i LootSize = new Vector2i(6, 5);
+    private Vector2i LootSize
+    {
+        get
+        {
+            return new Vector2i(
+                Properties.GetInt("LootSizeX"),
+                Properties.GetInt("LootSizeY")
+            );
+        }
+    }
 
     private const string TURN_ON_CMD = "turn_repair_on";
     private const string TURN_OFF_CMD = "turn_repair_off";
