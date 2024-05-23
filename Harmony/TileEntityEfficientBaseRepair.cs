@@ -336,6 +336,28 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 		return missing_materials.Count > 0 ? missing_materials : null;
 	}
 
+	private void UpdateBlock(Chunk chunkFromWorldPos, BlockValue block, Vector3i pos)
+	{
+		// BroadCast the changes done to the block (copied from ocbClaimAutoRepair)
+		world.SetBlock(chunkFromWorldPos.ClrIdx, pos, block, false, false);
+		world.SetBlockRPC(
+			chunkFromWorldPos.ClrIdx,
+			pos,
+			block,
+			block.Block.Density
+		);
+
+		// play material specific sound (copied from ocbClaimAutoRepair)
+		world.GetGameManager().PlaySoundAtPositionServer(
+			pos.ToVector3(),
+			string.Format("ImpactSurface/metalhit{0}", block.Block.blockMaterial.SurfaceCategory),
+			AudioRolloffMode.Logarithmic, 100
+		);
+
+		// Update clients (copied from ocbClaimAutoRepair)
+		SetModified();
+	}
+
 	private int TryRepairBlock(World world, Vector3i pos, int maxRepairableDamages)
 	{
 		BlockValue block = world.GetBlock(pos);
@@ -381,24 +403,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 
 		block.damage -= repairedDamages;
 
-		// BroadCast the changes done to the block (copied from ocbClaimAutoRepair)
-		world.SetBlock(chunkFromWorldPos.ClrIdx, pos, block, false, false);
-		world.SetBlockRPC(
-			chunkFromWorldPos.ClrIdx,
-			pos,
-			block,
-			block.Block.Density
-		);
-
-		// play material specific sound (copied from ocbClaimAutoRepair)
-		world.GetGameManager().PlaySoundAtPositionServer(
-			pos.ToVector3(),
-			string.Format("ImpactSurface/metalhit{0}", block.Block.blockMaterial.SurfaceCategory),
-			AudioRolloffMode.Logarithmic, 100
-		);
-
-		// Update clients (copied from ocbClaimAutoRepair)
-		SetModified();
+		UpdateBlock(chunkFromWorldPos, block, pos);
 
 		return repairedDamages;
 	}
