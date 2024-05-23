@@ -29,6 +29,10 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 
 	public int totalDamagesCount;
 
+	private int elapsedTicksSinceLastRefresh = 0;
+
+	private int statsRefreshRate;
+
 	public TileEntityEfficientBaseRepair(Chunk _chunk) : base(_chunk)
 	{
 		IsOn = false;
@@ -40,8 +44,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 	{
 		const float tickDuration_s = 2f;
 		float repairTime_s = (float)(totalDamagesCount * tickDuration_s) / repairPerTick;
-
-		Log.Out($"[EfficientBaseRepair] repairTime_s={repairTime_s}");
 
 		return TimeSpan.FromSeconds(repairTime_s).ToString(@"hh\:mm\:ss");
 	}
@@ -120,7 +122,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 			block.isair
 			|| block.isWater
 			|| block.Block.shape.IsTerrain()
-			//|| block.Block.IsDecoration
 			|| block.Block.IsPlant()
 			|| block.Block.IsTerrainDecoration
 		);
@@ -272,12 +273,13 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 		return needed_item_count;
 	}
 
-	public void Init(World _world, int _max_iterations, bool _need_materials, int _repairPerTick)
+	public void Init(World _world, int _max_iterations, bool _need_materials, int _repairPerTick, int _refreshRate)
 	{
 		world = _world;
 		maxBfsIterations = _max_iterations;
 		needMaterials = _need_materials;
 		repairPerTick = _repairPerTick;
+		statsRefreshRate = _refreshRate;
 	}
 
 	private int ComputeRepairableDamages(BlockValue block, float damagePerc, Dictionary<string, int> missing_materials)
@@ -417,12 +419,12 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 
 		foreach (Vector3i position in blocksToRepair)
 		{
-			Dictionary<string, int> blockMissingItems = GetMissingMaterialsForPos(position);
+			Dictionary<string, int> missingMaterials = GetMissingMaterialsForPos(position);
 
-			if (blockMissingItems == null)
+			if (missingMaterials == null)
 				continue;
 
-			foreach (KeyValuePair<string, int> entry in blockMissingItems)
+			foreach (KeyValuePair<string, int> entry in missingMaterials)
 			{
 				if (!requiredMaterials.ContainsKey(entry.Key))
 					requiredMaterials.Add(entry.Key, 0);
@@ -430,6 +432,8 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 				requiredMaterials[entry.Key] += entry.Value;
 			}
 		}
+
+		elapsedTicksSinceLastRefresh = 0;
 	}
 
 	public override void UpdateTick(World world)
@@ -439,15 +443,12 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 		if (!IsOn)
 			return;
 
-		if (blocksToRepair.Count == 0)
-		{
-			IsOn = false;
-			return;
-		}
+		if(elapsedTicksSinceLastRefresh >= statsRefreshRate && statsRefreshRate > 0)
+			UpdateStats();
 
 		int repairableDamageCount = repairPerTick;
 
-		Log.Out($"\n[EfficientBaseRepair] TickRepair");
+		Log.Out($"\n\n[EfficientBaseRepair] TickRepair");
 
 		foreach (Vector3i position in new List<Vector3i>(blocksToRepair))
 		{
@@ -465,5 +466,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 
 			if (repairableDamageCount == 0) return;
 		}
+
+		elapsedTicksSinceLastRefresh++;
 	}
 }

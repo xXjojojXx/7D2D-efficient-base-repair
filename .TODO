@@ -2,7 +2,7 @@ UI:
     ✔ setup UI into the TileEntity @done(24-05-22 23:58)
     ✔ on/off button @done(24-05-22 23:58)
     ✔ dynamic ratio of needed materials / available materials (with refresh button ?) @done(24-05-22 23:59)
-    ☐ estimated time to repair all
+    ✔ estimated time to repair all @done(24-05-23 18:17)
 
 Config:
     ✘ import `COOLDOWN` duration from config.xml @cancelled(24-05-21 17:36)
@@ -10,7 +10,7 @@ Config:
     ✔ import `NEEDS_MATERIAL` on/off from config.xml @done(24-05-21 00:35)
     ✔ import `LootSizeX` from config.xml @done(24-05-23 17:36)
     ✔ import `LootSizeY` from config.xml @done(24-05-23 17:36)
-    ✔ remove `UpdateOnOpen` option (default=true) @done(24-05-23 17:37)
+    ✔ import `RefreshRate` from config.xml @done(24-05-23 19:17)
     ☐ import `IGNORED_BLOCKS` from config.xml
     ☐ import `MaxReceivedPower` from config.xml
     ☐ import `PowerMultiplier` from config.xml
@@ -23,6 +23,7 @@ To be implemented (or not ?):
     ☐ if electricity needed -> increase repair speed according to max received power ?
     ☐ make block ignoring in bfs more generic, by specifying explicit blocks to ignore.
     ☐ add upgrade option
+    ☐ add boundHelper on damaged blocks
 
-Know issues (WIP):
+Known issues (WIP):
     ☐ Spike blocks at stage Dmg1 or Dmg2 with block.damage = 0 are upgraded for free at stage Dmg0
