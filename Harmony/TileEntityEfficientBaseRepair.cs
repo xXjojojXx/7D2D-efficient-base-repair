@@ -206,7 +206,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 	{
 		int totalTaken = 0;
 
-		foreach(KeyValuePair<string, int> entry in materials)
+		foreach (KeyValuePair<string, int> entry in materials)
 		{
 			totalTaken += TakeRepairMaterial(entry.Key, entry.Value);
 		}
@@ -251,7 +251,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 			int availableItemCount = itemsDict.TryGetValue(item.ItemName, out availableItemCount) ? availableItemCount : 0;
 
 			// stop trying to repair the block if one material is missing
-			if(availableItemCount < targetItemCount)
+			if (availableItemCount < targetItemCount)
 			{
 				return 0;
 			}
@@ -327,7 +327,10 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 				break;
 		}
 
-		int repairableDamages = ComputeRepairableDamages(block, maxRepairableDamages, repairItems);
+		int repairableDamages = Mathf.Min(block.damage, maxRepairableDamages);
+
+		if (needMaterials)
+			repairableDamages = ComputeRepairableDamages(block, maxRepairableDamages, repairItems);
 
 		if (repairableDamages <= 0)
 			return 0;
