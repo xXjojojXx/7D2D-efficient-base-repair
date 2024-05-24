@@ -15,6 +15,7 @@ Config:
     ☐ import `IGNORED_BLOCKS` from config.xml
     ☐ import `MaxReceivedPower` from config.xml
     ☐ import `PowerMultiplier` from config.xml
+    ☐ import `DisableDuringBloodMoon` from config.xml
 
 To be implemented (or not ?):
     ✘ Cooldown: a period of time during which no repair can be launched @cancelled(24-05-21 17:36)
