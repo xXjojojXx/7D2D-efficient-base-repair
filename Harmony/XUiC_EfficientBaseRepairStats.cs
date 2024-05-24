@@ -335,7 +335,7 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 
 	private void RefreshStats()
 	{
-		GetLabel("lblBlocksToRepair").Text = $"{tileEntity.blocksToRepairCount:N0} damaged blocks found.";
+		GetLabel("lblBlocksToRepair").Text = $"{tileEntity.blocksToRepair.Count:N0} damaged blocks found.";
 		GetLabel("lblTotalDamages").Text   = $"{tileEntity.totalDamagesCount:N0} damages points to repair.";
 		GetLabel("lblVisitedBlocks").Text  = $"{tileEntity.visitedBlocksCount:N0} blocks visited.";
 		GetLabel("lblIterations").Text     = $"{tileEntity.bfsIterationsCount} bfs iterations done.";

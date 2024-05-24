@@ -202,7 +202,7 @@ public class XUiC_EfficientBaseRepair : XUiController
         XUiC_EfficientBaseRepair instance = (XUiC_EfficientBaseRepair)_playerUi.xui.FindWindowGroupByName(ID);
 
         if(instance == null){
-            Log.Out("[EfficientBaseRepair] null instance of XUiC_EfficientBaseRepair. aborting...");
+            Log.Error("[EfficientBaseRepair] null instance of XUiC_EfficientBaseRepair. aborting...");
             return;
         }
 

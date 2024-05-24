@@ -21,8 +21,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 
 	private bool needMaterials;
 
-	public int blocksToRepairCount;
-
 	public int visitedBlocksCount;
 
 	public int bfsIterationsCount;
@@ -199,7 +197,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 				break;
 		}
 
-		Log.Out($"[EfficientBaseRepair] taking {totalTaken} {item_name}");
+		Logging($"[EfficientBaseRepair] taking {totalTaken} {item_name}");
 
 		return totalTaken;
 	}
@@ -218,7 +216,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 
 	private static void Logging(string message)
 	{
-		Log.Out($"[EfficientBaseRepair] {message}");
+		// Log.Out($"[EfficientBaseRepair] {message}");
 	}
 
 	private int ComputeRepairableDamages(BlockValue block, int maxRepairableDamages, List<SItemNameCount> repairItems)
@@ -335,6 +333,9 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 			return 0;
 
 		block.damage -= repairableDamages;
+		totalDamagesCount -= repairableDamages;
+
+		Log.Out($"[EfficientBaseRepair] {repairableDamages} damage points repaired on block {pos}");
 
 		UpdateBlock(chunkFromWorldPos, block, pos);
 
@@ -382,19 +383,16 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 			}
 		}
 
-		blocksToRepairCount = blocks_to_repair.Count;
 		bfsIterationsCount = maxBfsIterations - iterations;
 		visitedBlocksCount = visited.Count;
 
-		Log.Out($"[EfficientBaseRepair] {blocksToRepairCount} blocks to repair. Iterations = {maxBfsIterations - iterations}/{maxBfsIterations}, visited_blocks = {visited.Count}");
+		Log.Out($"[EfficientBaseRepair] {blocks_to_repair.Count} blocks to repair. Iterations = {maxBfsIterations - iterations}/{maxBfsIterations}, visited_blocks = {visited.Count}");
 
 		return blocks_to_repair;
 	}
 
 	public void UpdateStats()
 	{
-
-		blocksToRepairCount = 0;
 		bfsIterationsCount = 0;
 		visitedBlocksCount = 0;
 		totalDamagesCount = 0;
@@ -434,7 +432,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 		if (elapsedTicksSinceLastRefresh >= statsRefreshRate && statsRefreshRate > 0)
 			UpdateStats();
 
-		Log.Out($"[EfficientBaseRepair] TickRepair");
+		Logging($"[EfficientBaseRepair] TickRepair");
 
 		int repairableDamages = repairPerTick;
 
@@ -448,11 +446,11 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 
 			if (block.damage == 0)
 			{
-				Log.Out($"[EfficientBaseRepair] full repaired block at {position}");
+				Logging($"[EfficientBaseRepair] full repaired block at {position}");
 				blocksToRepair.Remove(position);
 			}
 
-			Log.Out($"[EfficientBaseRepair] BlockEnd, repairableDamageCount={repairableDamages}\n");
+			Logging($"[EfficientBaseRepair] BlockEnd, repairableDamageCount={repairableDamages}\n");
 
 			if (repairableDamages <= 0)
 				break;
@@ -460,6 +458,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 
 		elapsedTicksSinceLastRefresh++;
 
-		Log.Out("[EfficientBaseRepair] TickEnd\n\n");
+		Logging("[EfficientBaseRepair] TickEnd\n\n");
 	}
 }
