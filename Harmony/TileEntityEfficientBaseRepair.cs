@@ -136,62 +136,27 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 		);
 	}
 
-	private Dictionary<string, int> ComputeRepairMaterials(float damages_perc, List<SItemNameCount> repair_items)
+	private Dictionary<string, int> GetMissingMaterialsForPos(Vector3i pos)
 	{
-		if (repair_items == null)
+		if (world.GetChunkFromWorldPos(pos) == null)
+			return null;
+
+		BlockValue block = world.GetBlock(pos);
+
+		if (!(block.Block.RepairItems is List<SItemNameCount> repair_items))
 			return null;
 
 		Dictionary<string, int> missing_materials = new Dictionary<string, int>();
+		float damage_perc = (float)block.damage / block.Block.MaxDamage;
 
 		foreach (SItemNameCount item in repair_items)
 		{
-
-			// Log.Out($"[EfficientBaseRepair] {item.ItemName} {item.Count}");
-			int required_item_count = (int)Mathf.Ceil(item.Count * damages_perc);
+			int required_item_count = (int)Mathf.Ceil(item.Count * damage_perc);
 
 			missing_materials.Add(item.ItemName, required_item_count);
 		}
 
 		return missing_materials.Count > 0 ? missing_materials : null;
-	}
-
-	private Dictionary<string, int> GetMissingMaterialsForPos(Vector3i pos)
-	{
-		if (!(world.GetChunkFromWorldPos(pos) is Chunk) || !needMaterials)
-		{
-			return null;
-		}
-
-		// TODO: find a better way to compute the needed repair_items for spike blocks
-		// (for now, if a spike is at stage Dmg1 or Dmg2 with damage=0, the upgrade to Dmg0 is free)
-		BlockValue block = world.GetBlock(pos);
-		List<SItemNameCount> repair_items = block.Block.RepairItems;
-
-		const int trapSpikesWoodDmg0_id = 21469;
-		const int trapSpikesIronDmg0_id = 21476;
-
-		switch (block.Block.GetBlockName())
-		{
-			case "trapSpikesWoodDmg1":
-			case "trapSpikesWoodDmg2":
-				block = new BlockValue(trapSpikesWoodDmg0_id);
-				break;
-
-			case "trapSpikesIronDmg1":
-			case "trapSpikesIronDmg2":
-				block = new BlockValue(trapSpikesIronDmg0_id);
-				break;
-
-			default:
-				// Do nothing -> block = block...
-				break;
-		}
-
-		float damage_perc = (float)block.damage / block.Block.MaxDamage;
-
-		Dictionary<string, int> missing_items = ComputeRepairMaterials(damage_perc, repair_items);
-
-		return missing_items;
 	}
 
 	public int TakeRepairMaterial(string item_name, int itemCount)
@@ -259,26 +224,28 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 		if (repairItems == null)
 			return targetRepairedDamages;
 
-		float maxRepairablePerc = (float)targetRepairedDamages / block.Block.MaxDamage;
+		float targetRepairPerc = (float)targetRepairedDamages / block.Block.MaxDamage;
+		float blockDamagePerc = (float)block.damage / block.Block.MaxDamage;
 
-		Logging($"maxRepairablePerc={maxRepairablePerc:F3}");
+		Logging($"targetRepairPerc={targetRepairPerc:F3}");
+		Logging($"blockDamagePerc={blockDamagePerc:F3}");
 
 		int totalRequired = 0;
 		int totalTaken = 0;
 
 		foreach (SItemNameCount item in repairItems)
 		{
-			int requiredItemCount = (int)Mathf.Ceil(item.Count * maxRepairablePerc);
+			int targetItemCount = (int)Mathf.Ceil(item.Count * targetRepairPerc);
 
-			totalTaken += TakeRepairMaterial(item.ItemName, requiredItemCount);
-			totalRequired += requiredItemCount;
+			totalTaken += TakeRepairMaterial(item.ItemName, targetItemCount);
+			totalRequired += (int)Mathf.Ceil(item.Count * blockDamagePerc);
 
-			Logging($"requiredItemCount={requiredItemCount}");
+			Logging($"targetItemCount={targetItemCount}");
 			Logging($"totalTaken={totalTaken}");
 			Logging($"totalRequired={totalRequired}");
 		}
 
-		float repairedDamages = (float)targetRepairedDamages * totalTaken / totalRequired;
+		float repairedDamages = (float)block.damage * totalTaken / totalRequired;
 
 		Logging($"repairedDamages={repairedDamages:F3}");
 
@@ -471,5 +438,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 		elapsedTicksSinceLastRefresh++;
 
 		Log.Out("[EfficientBaseRepair] TickEnd\n\n");
+		IsOn = false;
 	}
 }
