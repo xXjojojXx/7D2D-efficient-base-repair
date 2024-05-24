@@ -28,9 +28,9 @@
 			<!-- Specific properties -->
 			<property name="MaxBfsIterations" value="1000"/> <!-- The max number of bfs iterations (more iterations will require more CPU ressources) -->
 			<property name="NeedsMaterials" value="true"/>	 <!-- Set this param to false, to fully disable the material requirements -->
-			<property name="RepairPerTick" value="1000"/> 	 <!-- The amount of damage which can be repaired for one game tick -->
 			<property name="LootSizeX" value="6"/>			 <!-- Number of columns of the loot container -->
 			<property name="LootSizeY" value="6"/>			 <!-- Number of rows of the loot container -->
+			<property name="RepairRate" value="1000"/> 	 <!-- The amount of damage which can be repaired for one game tick -->
 			<property name="RefreshRate" value="5"/>	     <!-- The number of game ticks between two auto stats refresh (set to 0 to disable auto refresh) -->
 			<property class="IgnoredBlocks">			     <!-- The exhaustive list of the blocks you want to exclude from the bfs -->
 				<property name="..."/>

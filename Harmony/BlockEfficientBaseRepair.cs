@@ -35,11 +35,11 @@ class BlockEfficientBaseRepair : BlockSecureLoot
         }
     }
 
-    public int RepairPerTick
+    public int RepairRate
     {
         get
         {
-            return Properties.GetInt("RepairPerTick");
+            return Properties.GetInt("RepairRate");
         }
     }
 
@@ -180,7 +180,7 @@ class BlockEfficientBaseRepair : BlockSecureLoot
         _player.AimingGun = false;
 
         tileEntity.bWasTouched = tileEntity.bTouched;
-        tileEntity.Init((World)_world, MaxBfsIterations, NeedMaterials, RepairPerTick, StatsRefreshRate);
+        tileEntity.Init((World)_world, MaxBfsIterations, NeedMaterials, RepairRate, StatsRefreshRate);
 
         XUiC_EfficientBaseRepair.Open(uIForPlayer, tileEntity);
 

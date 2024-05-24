@@ -17,7 +17,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 	/* XML PARAMS */
 	public int maxBfsIterations;
 
-	public int repairPerTick;
+	public int repairRate;
 
 	private bool needMaterials;
 
@@ -38,19 +38,19 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 		IsOn = false;
 	}
 
-	public void Init(World _world, int _max_iterations, bool _need_materials, int _repairPerTick, int _refreshRate)
+	public void Init(World _world, int _max_iterations, bool _need_materials, int _repairRate, int _refreshRate)
 	{
 		world = _world;
 		maxBfsIterations = _max_iterations;
 		needMaterials = _need_materials;
-		repairPerTick = _repairPerTick;
+		repairRate = _repairRate;
 		statsRefreshRate = _refreshRate;
 	}
 
 	public string RepairTime()
 	{
 		const float tickDuration_s = 2f;
-		float repairTime_s = (float)(totalDamagesCount * tickDuration_s) / repairPerTick;
+		float repairTime_s = (float)(totalDamagesCount * tickDuration_s) / repairRate;
 
 		return TimeSpan.FromSeconds(repairTime_s).ToString(@"hh\:mm\:ss");
 	}
@@ -434,7 +434,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 
 		Logging($"[EfficientBaseRepair] TickRepair");
 
-		int repairableDamages = repairPerTick;
+		int repairableDamages = repairRate;
 
 		foreach (Vector3i position in new List<Vector3i>(blocksToRepair))
 		{
