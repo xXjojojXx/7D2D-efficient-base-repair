@@ -204,6 +204,18 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 		return totalTaken;
 	}
 
+	public int TakeRepairMaterials(Dictionary<string, int> materials)
+	{
+		int totalTaken = 0;
+
+		foreach(KeyValuePair<string, int> entry in materials)
+		{
+			totalTaken += TakeRepairMaterial(entry.Key, entry.Value);
+		}
+
+		return totalTaken;
+	}
+
 	private static void Logging(string message)
 	{
 		Log.Out($"[EfficientBaseRepair] {message}");
@@ -231,22 +243,33 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 		Logging($"blockDamagePerc={blockDamagePerc:F3}");
 
 		int totalRequired = 0;
-		int totalTaken = 0;
+
+		Dictionary<string, int> itemsDict = ItemsToDict();
+		Dictionary<string, int> materialsToTake = new Dictionary<string, int>();
 
 		foreach (SItemNameCount item in repairItems)
 		{
 			int targetItemCount = (int)Mathf.Ceil(item.Count * targetRepairPerc);
+			int availableItemCount = itemsDict.TryGetValue(item.ItemName, out availableItemCount) ? availableItemCount : 0;
 
-			totalTaken += TakeRepairMaterial(item.ItemName, targetItemCount);
+			// stop trying to repair the block if one material is missing
+			if(availableItemCount < targetItemCount)
+			{
+				return 0;
+			}
+
+			materialsToTake[item.ItemName] = Mathf.Min(targetItemCount, availableItemCount);
 			totalRequired += (int)Mathf.Ceil(item.Count * blockDamagePerc);
 
 			Logging($"targetItemCount={targetItemCount}");
-			Logging($"totalTaken={totalTaken}");
 			Logging($"totalRequired={totalRequired}");
 		}
 
+		int totalTaken = TakeRepairMaterials(materialsToTake);
+
 		float repairedDamages = (float)block.damage * totalTaken / totalRequired;
 
+		Logging($"totalTaken={totalTaken}");
 		Logging($"repairedDamages={repairedDamages:F3}");
 
 		return (int)Mathf.Ceil(repairedDamages);
@@ -438,6 +461,5 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 		elapsedTicksSinceLastRefresh++;
 
 		Log.Out("[EfficientBaseRepair] TickEnd\n\n");
-		IsOn = false;
 	}
 }
