@@ -435,6 +435,12 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 		if (elapsedTicksSinceLastRefresh >= statsRefreshRate && statsRefreshRate > 0)
 			UpdateStats();
 
+		if (blocksToRepair == null)
+		{
+			Log.Warning("[EfficientBaseRepair] TileEntityEfficientBaseRepair.blocksToRepair not initialized.");
+			return;
+		}
+
 		Logging($"[EfficientBaseRepair] TickRepair");
 
 		int repairableDamages = repairRate;
