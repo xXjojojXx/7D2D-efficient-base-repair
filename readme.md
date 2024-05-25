@@ -55,6 +55,7 @@ Once the installation is done, go to [blocks.xml](./Config/blocks.xml) and look 
 
 ## How to report a bug ?
 
+send me you logfile + your options from `Mods/EfficientBaseRepair/Config/blocks.xml`
 ...
 
 ## How to build from sources ?
@@ -70,3 +71,7 @@ Once the installation is done, go to [blocks.xml](./Config/blocks.xml) and look 
 3. Build the dll `dotnet build` from the project root
 
 4. (optional) Run [Release.cmd](./Scripts/release.cmd) to compile, then to enpack all the files in EfficientBaseRepair.zip and to load it in the Mod folder of the installation pointed by the env variable `PATH_7D2D`
+
+## Knows issues
+
+* Auto repairing might break the initial tensions of the neighbors blocks

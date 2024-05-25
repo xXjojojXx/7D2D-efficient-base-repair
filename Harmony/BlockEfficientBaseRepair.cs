@@ -182,7 +182,7 @@ class BlockEfficientBaseRepair : BlockSecureLoot
         tileEntity.bWasTouched = tileEntity.bTouched;
         tileEntity.Init((World)_world, MaxBfsIterations, NeedMaterials, RepairRate, StatsRefreshRate);
 
-        XUiC_EfficientBaseRepair.Open(uIForPlayer, tileEntity);
+        _world.GetGameManager().TELockServer(_cIdx, _blockPos, tileEntity.entityId, _player.entityId);
 
         return true;
     }
