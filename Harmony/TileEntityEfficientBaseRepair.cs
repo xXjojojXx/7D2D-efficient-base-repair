@@ -203,7 +203,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			if (stack.count < 0)
 				Log.Error($"[EfficientBaseRepair] stack.count  < 0 (={stack.count})");
 
-			UpdateSlot(i, stack);
+			UpdateSlot(i, stack.Clone());
 
 			if (neededItemCount == 0)
 				break;
@@ -302,9 +302,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			string.Format("ImpactSurface/metalhit{0}", block.Block.blockMaterial.SurfaceCategory),
 			AudioRolloffMode.Logarithmic, 100
 		);
-
-		// Update clients (copied from ocbClaimAutoRepair)
-		SetModified();
 	}
 
 	private int TryRepairBlock(World world, Vector3i pos, int maxRepairableDamages)
@@ -462,16 +459,27 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		requiredMaterials = new Dictionary<string, int>();
 
 		int requiredMaterialsCount = _br.ReadInt32();
-
-		if (requiredMaterialsCount == 0)
-			return;
-
-		for (int i = 0; i < requiredMaterialsCount; i++)
+		if (requiredMaterialsCount > 0)
 		{
-			string itemName = _br.ReadString();
-			int itemCount = _br.ReadInt32();
+			for (int i = 0; i < requiredMaterialsCount; i++)
+			{
+				string itemName = _br.ReadString();
+				int itemCount = _br.ReadInt32();
 
-			requiredMaterials[itemName] = itemCount;
+				requiredMaterials[itemName] = itemCount;
+			}
+		}
+
+		// NOTE: reading again items allows to bypass the bUserAccessing condition from base-classes
+		// -> allows the TileEntity to take items from containers, even if the user is accessing the container
+		// -> /!\ may cause unknown issues on concurency access to the container
+		int itemsCount = _br.ReadInt32();
+		if (itemsCount > 0)
+		{
+			for (int i = 0; i < itemsCount; i++)
+			{
+				items[i].Read(_br);
+			}
 		}
 	}
 
@@ -489,11 +497,17 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			requiredMaterials = new Dictionary<string, int>();
 
 		_bw.Write(requiredMaterials.Count);
-
 		foreach (KeyValuePair<string, int> entry in requiredMaterials)
 		{
 			_bw.Write(entry.Key);
 			_bw.Write(entry.Value);
+		}
+
+		// see the note in the read method upper
+		_bw.Write(items.Length);
+		foreach (ItemStack stack in items)
+		{
+			stack.Clone().Write(_bw);
 		}
 	}
 

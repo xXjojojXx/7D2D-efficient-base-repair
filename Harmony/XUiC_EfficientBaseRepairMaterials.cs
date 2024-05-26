@@ -74,7 +74,7 @@ public class XUiC_EfficientBaseRepairMaterials : XUiController
             int availableMaterialsCount = itemsDict.ContainsKey(entry.Key) ? itemsDict[entry.Key] : 0;
             int requiredMaterialsCount = entry.Value;
 
-            if(requiredMaterialsCount == 0)
+            if (requiredMaterialsCount == 0)
                 continue;
 
             XUiV_Sprite sprite = (XUiV_Sprite)materialSprites[index].ViewComponent;
