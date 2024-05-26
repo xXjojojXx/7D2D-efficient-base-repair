@@ -64,6 +64,9 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	public string RepairTime()
 	{
+		if (repairRate <= 0)
+			return "00:00:00";
+
 		const float tickDuration_s = 2f;
 		float repairTime_s = (float)(totalDamagesCount * tickDuration_s) / repairRate;
 
@@ -544,7 +547,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 		Logging($"TickRepair, {blocksToRepair.Count} blocks to repair, needMaterials={needMaterials}");
 
-		int repairableDamages = repairRate;
+		int repairableDamages = repairRate > 0 ? repairRate : int.MaxValue;
 
 		foreach (Vector3i position in new List<Vector3i>(blocksToRepair))
 		{
@@ -563,7 +566,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 			Logging($"BlockEnd, repairableDamageCount={repairableDamages}\n");
 
-			if (repairableDamages <= 0)
+			if (repairableDamages <= 0 && repairRate > 0)
 				break;
 		}
 
