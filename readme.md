@@ -74,4 +74,41 @@ send me you logfile + your options from `Mods/EfficientBaseRepair/Config/blocks.
 
 ## Knows issues
 
+* Spike blocks at stage Dmg1 or Dmg2 with block.damage = 0 are upgraded for free at stage Dmg0
 * Auto repairing might break the initial tensions of the neighbors blocks
+
+## FAQ
+
+### I changed the balancing in blocks.xml but the changes were not applied after game reload.
+
+Removing and replacing the EfficientBaseRepair block once the game was reloaded might be required to apply the configuration modifications.
+
+### I have set the RepairRate to 100 but it repaired 120, what the ?
+
+It's normal, the specified RepairRate is only a target. The real computed damages amount is based on the amount of material taken is the container.
+
+For example, if one item of RessourceConcrete repairs 120 damages points but you specified a repairRate of 100, then the repaired amount will be 120 then no more block will be repaired in this tick, since the limit of 100 repairs per tick was reached.
+
+### May I used EfficientBaseRepair to auto upgrade my base ?
+
+Not for now, but it's planned
+
+### May I use this mod on a muliplayer server ?
+
+Yes, but be aware of the following points:
+
+* EfficientBaseRepair does not check if the block you are trying to repair is inside you land claim or not
+* Concurrency access to the loot container of EfficientBaseRepair might be broken, and cause items duplication
+
+### May I use this mod on UndeadLegacy or DarknessFalls ?
+
+No test was made on such mods but as it implement a custom UI it might not be compatible.
+
+It is planned to make it compatible but requires more works.
+
+### I was going for a trip in wasteland for hours, and when I came back my base was not repaired what happened ?
+
+It's due to the core functionning of the game, you need to be near from the EfficientBlockRepair block to make it active.
+
+It can be disturbing, because he's able to repair blocks much far away than the maximum distance that you can move away from him.
+
