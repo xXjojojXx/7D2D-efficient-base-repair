@@ -24,6 +24,8 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	public int totalDamagesCount = 0;
 
+	public bool playRepairSound = true;
+
 	/* CLASS ATTRIBUTES */
 
 	private bool isOn;
@@ -57,6 +59,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		needMaterials = properties.GetBool("NeedsMaterials");
 		repairRate = properties.GetInt("RepairRate");
 		refreshRate = properties.GetInt("RefreshRate");
+		playRepairSound = properties.GetBool("PlayRepairSound");
 	}
 
 	public string RepairTime()
@@ -295,6 +298,9 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			block,
 			block.Block.Density
 		);
+
+		if (!playRepairSound)
+			return;
 
 		// play material specific sound (copied from ocbClaimAutoRepair)
 		world.GetGameManager().PlaySoundAtPositionServer(

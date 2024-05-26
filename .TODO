@@ -6,16 +6,17 @@ UI:
 
 Config:
     ✘ import `COOLDOWN` duration from config.xml @cancelled(24-05-21 17:36)
+    ✘ import `ForceNonRepairableBlocks` from config.xml @cancelled(24-05-26 18:09) -> yes by default
     ✔ import `MAX_ITERTIONS` for bfs from config.xml @done(24-05-21 00:35)
     ✔ import `NEEDS_MATERIAL` on/off from config.xml @done(24-05-21 00:35)
     ✔ import `LootSizeX` from config.xml @done(24-05-23 17:36)
     ✔ import `LootSizeY` from config.xml @done(24-05-23 17:36)
     ✔ import `RefreshRate` from config.xml @done(24-05-23 19:17)
-    ☐ import `ForceNonRepairableBlocks` from config.xml
+    ✔ import `PlayRepairSound` from config.xml @done(24-05-26 20:15)
+    ☐ import `DisableDuringBloodMoon` from config.xml
     ☐ import `IGNORED_BLOCKS` from config.xml
     ☐ import `MaxReceivedPower` from config.xml
     ☐ import `PowerMultiplier` from config.xml
-    ☐ import `DisableDuringBloodMoon` from config.xml
 
 To be implemented (or not ?):
     ✘ Cooldown: a period of time during which no repair can be launched @cancelled(24-05-21 17:36)
@@ -29,3 +30,15 @@ To be implemented (or not ?):
 
 Known issues (WIP):
     ☐ Spike blocks at stage Dmg1 or Dmg2 with block.damage = 0 are upgraded for free at stage Dmg0
+    ☐ The tension of a repaired block is reseted
+
+Check-List:
+    ☐ auto-refresh can be disabled
+    ☐ materials needs can be disabled
+    ☐ auto repair can be disabled during bloodmoon
+    ☐ repair rate can be modified
+    ☐ bfs max iterations can be disabled
+    ☐ two users can't access the crate at same time
+    ☐ A block which miss at least one material to be repaired is not repaired
+    ☐ An auto reparation does not change the paint applied on the block
+    ☐ ...
