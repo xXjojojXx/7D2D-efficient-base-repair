@@ -54,14 +54,18 @@ class BlockEfficientBaseRepair : BlockSecureLoot
     public override void OnBlockAdded(WorldBase _world, Chunk _chunk, Vector3i _blockPos, BlockValue _blockValue)
     {
         base.OnBlockAdded(_world, _chunk, _blockPos, _blockValue);
-        if (!_blockValue.ischild && !(_world.GetTileEntity(_chunk.ClrIdx, _blockPos) is TileEntityEfficientBaseRepair))
+
+        if (_blockValue.ischild || _world.GetTileEntity(_chunk.ClrIdx, _blockPos) is TileEntityEfficientBaseRepair)
+            return;
+
+        TileEntityEfficientBaseRepair tileEntity = new TileEntityEfficientBaseRepair(_chunk)
         {
-            TileEntityEfficientBaseRepair tileEntity = new TileEntityEfficientBaseRepair(_chunk);
-            tileEntity.localChunkPos = World.toBlock(_blockPos);
-            tileEntity.lootListName = lootList;
-            tileEntity.SetContainerSize(LootSize);
-            _chunk.AddTileEntity(tileEntity);
-        }
+            localChunkPos = World.toBlock(_blockPos),
+            lootListName = lootList
+        };
+
+        tileEntity.SetContainerSize(LootSize);
+        _chunk.AddTileEntity(tileEntity);
     }
 
     public override BlockActivationCommand[] GetBlockActivationCommands(WorldBase _world, BlockValue _blockValue, int _clrIdx, Vector3i _blockPos, EntityAlive _entityFocusing)
@@ -103,15 +107,13 @@ class BlockEfficientBaseRepair : BlockSecureLoot
         }
 
         if (!(_world.GetTileEntity(_cIdx, _blockPos) is TileEntityEfficientBaseRepair tileEntity))
-        {
             return false;
-        }
 
         switch (_commandName)
         {
             case TURN_ON_CMD:
             case TURN_OFF_CMD:
-                tileEntity.IsOn = !tileEntity.IsOn;
+                tileEntity.Switch();
                 return true;
 
             case "take":
@@ -178,10 +180,7 @@ class BlockEfficientBaseRepair : BlockSecureLoot
         }
 
         _player.AimingGun = false;
-
         tileEntity.bWasTouched = tileEntity.bTouched;
-        tileEntity.Init((World)_world, MaxBfsIterations, NeedMaterials, RepairRate, StatsRefreshRate);
-
         _world.GetGameManager().TELockServer(_cIdx, _blockPos, tileEntity.entityId, _player.entityId);
 
         return true;

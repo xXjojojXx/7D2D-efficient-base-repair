@@ -3,48 +3,60 @@ using System.Collections.Generic;
 using System;
 using static Block;
 
-public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
+public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TODO: Implement IPowered interface
 {
-	public bool IsOn;
-
-	private World world;
-
-	/* SHARED ATTRIBUTES */
-	public List<Vector3i> blocksToRepair;
-
-	public Dictionary<string, int> requiredMaterials;
-
 	/* XML PARAMS */
 	public int maxBfsIterations;
 
-	public int repairRate;
-
 	private bool needMaterials;
 
-	public int visitedBlocksCount;
+	public int repairRate;
 
-	public int bfsIterationsCount;
+	private int refreshRate;
 
-	public int totalDamagesCount;
+	/* PUBLIC STATS */
+
+	public int damagedBlockCount = 0;
+
+	public int visitedBlocksCount = 0;
+
+	public int bfsIterationsCount = 0;
+
+	public int totalDamagesCount = 0;
+
+	/* CLASS ATTRIBUTES */
+
+	private bool isOn;
+
+	public bool IsOn
+	{
+		get => isOn;
+	}
 
 	private int elapsedTicksSinceLastRefresh = 0;
 
-	private int statsRefreshRate;
+	private World world;
+
+	public List<Vector3i> blocksToRepair;
+
+	public Dictionary<string, int> requiredMaterials;
 
 	public override TileEntityType GetTileEntityType() => (TileEntityType)243;
 
 	public TileEntityEfficientBaseRepair(Chunk _chunk) : base(_chunk)
 	{
-		IsOn = false;
+		isOn = false;
 	}
 
-	public void Init(World _world, int _max_iterations, bool _need_materials, int _repairRate, int _refreshRate)
+	private void Init(World _world)
 	{
 		world = _world;
-		maxBfsIterations = _max_iterations;
-		needMaterials = _need_materials;
-		repairRate = _repairRate;
-		statsRefreshRate = _refreshRate;
+
+		DynamicProperties properties = _world.GetBlock(ToWorldPos()).Block.Properties;
+		maxBfsIterations = properties.GetInt("MaxBfsIterations");
+		needMaterials = properties.GetBool("NeedsMaterials");
+		repairRate = properties.GetInt("RepairRate");
+		refreshRate = properties.GetInt("RefreshRate");
 	}
 
 	public string RepairTime()
@@ -157,7 +169,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 		return missing_materials.Count > 0 ? missing_materials : null;
 	}
 
-	public int TakeRepairMaterial(string item_name, int itemCount)
+	private int TakeRepairMaterial(string item_name, int itemCount)
 	{
 		// TODO: optimize this function, by caching 'this.items' in a Hashed structure
 		// -> purpose: prevents from iterating over each 'this.items'
@@ -386,6 +398,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 			}
 		}
 
+		damagedBlockCount = blocks_to_repair.Count;
 		bfsIterationsCount = maxBfsIterations - iterations;
 		visitedBlocksCount = visited.Count;
 
@@ -394,8 +407,11 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 		return blocks_to_repair;
 	}
 
-	public void UpdateStats()
+	public void UpdateStats(World world)
 	{
+		Init(world);
+
+		damagedBlockCount = 0;
 		bfsIterationsCount = 0;
 		visitedBlocksCount = 0;
 		totalDamagesCount = 0;
@@ -423,17 +439,76 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 		}
 
 		elapsedTicksSinceLastRefresh = 0;
+		setModified();
+	}
+
+	public void Switch()
+	{
+		isOn = !isOn;
+		Log.Out($"[EfficientBaseRepair] Switch TileEntity to {isOn}");
+		setModified();
+	}
+
+	public override void read(PooledBinaryReader _br, StreamModeRead _eStreamMode)
+	{
+		base.read(_br, _eStreamMode);
+
+		isOn = _br.ReadBoolean();
+		damagedBlockCount = _br.ReadInt32();
+		totalDamagesCount = _br.ReadInt32();
+		visitedBlocksCount = _br.ReadInt32();
+		bfsIterationsCount = _br.ReadInt32();
+
+		requiredMaterials = new Dictionary<string, int>();
+
+		int requiredMaterialsCount = _br.ReadInt32();
+
+		if (requiredMaterialsCount == 0)
+			return;
+
+		for (int i = 0; i < requiredMaterialsCount; i++)
+		{
+			string itemName = _br.ReadString();
+			int itemCount = _br.ReadInt32();
+
+			requiredMaterials[itemName] = itemCount;
+		}
+	}
+
+	public override void write(PooledBinaryWriter _bw, StreamModeWrite _eStreamMode)
+	{
+		base.write(_bw, _eStreamMode);
+
+		_bw.Write(isOn);
+		_bw.Write(damagedBlockCount);
+		_bw.Write(totalDamagesCount);
+		_bw.Write(visitedBlocksCount);
+		_bw.Write(bfsIterationsCount);
+
+		if (requiredMaterials == null)
+			requiredMaterials = new Dictionary<string, int>();
+
+		_bw.Write(requiredMaterials.Count);
+
+		foreach (KeyValuePair<string, int> entry in requiredMaterials)
+		{
+			_bw.Write(entry.Key);
+			_bw.Write(entry.Value);
+		}
 	}
 
 	public override void UpdateTick(World world)
 	{
 		base.UpdateTick(world);
 
-		if (!IsOn)
+		if (!isOn)
+		{
+			Log.Out($"[EfficientBaseRepair] TickRepair IsOn={isOn}");
 			return;
+		}
 
-		if (elapsedTicksSinceLastRefresh >= statsRefreshRate && statsRefreshRate > 0)
-			UpdateStats();
+		if (blocksToRepair == null || (elapsedTicksSinceLastRefresh >= refreshRate && refreshRate > 0))
+			UpdateStats(world);
 
 		if (blocksToRepair == null)
 		{
@@ -441,7 +516,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 			return;
 		}
 
-		Logging($"[EfficientBaseRepair] TickRepair");
+		Log.Out($"[EfficientBaseRepair] TickRepair");
 
 		int repairableDamages = repairRate;
 
@@ -457,6 +532,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 			{
 				Logging($"[EfficientBaseRepair] full repaired block at {position}");
 				blocksToRepair.Remove(position);
+				damagedBlockCount--;
 			}
 
 			Logging($"[EfficientBaseRepair] BlockEnd, repairableDamageCount={repairableDamages}\n");
@@ -466,7 +542,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer
 		}
 
 		elapsedTicksSinceLastRefresh++;
-
+		setModified();
 		Logging("[EfficientBaseRepair] TickEnd\n\n");
 	}
 }

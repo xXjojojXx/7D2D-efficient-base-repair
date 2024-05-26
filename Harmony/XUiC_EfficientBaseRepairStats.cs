@@ -201,12 +201,12 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 
 	private void btnRefresh_OnPress(XUiController _sender, int _mouseButton)
 	{
-		tileEntity.UpdateStats();
+		// tileEntity.UpdateStats();
 	}
 
 	private void btnOn_OnPress(XUiController _sender, int _mouseButton)
 	{
-		tileEntity.IsOn = !tileEntity.IsOn;
+		tileEntity.Switch();
 	}
 
 	private void RefreshIsOn(bool isOn)
@@ -335,11 +335,11 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 
 	private void RefreshStats()
 	{
-		GetLabel("lblBlocksToRepair").Text = $"{tileEntity.blocksToRepair.Count:N0} damaged blocks found.";
+		GetLabel("lblBlocksToRepair").Text = $"{tileEntity.damagedBlockCount:N0} damaged blocks found.";
 		GetLabel("lblTotalDamages").Text   = $"{tileEntity.totalDamagesCount:N0} damages points to repair.";
 		GetLabel("lblVisitedBlocks").Text  = $"{tileEntity.visitedBlocksCount:N0} blocks visited.";
-		GetLabel("lblIterations").Text     = $"{tileEntity.bfsIterationsCount} bfs iterations done.";
-		GetLabel("lblTimer").Text          = $"Repair time {tileEntity.RepairTime()}";
+		GetLabel("lblIterations").Text     = $"tileEntity.isOn={tileEntity.IsOn}";
+		GetLabel("lblTimer").Text          = ""; // $"Repair time {tileEntity.RepairTime()}";
 	}
 
 	public override void Update(float _dt)
