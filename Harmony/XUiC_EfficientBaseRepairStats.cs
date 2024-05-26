@@ -201,7 +201,7 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 
 	private void btnRefresh_OnPress(XUiController _sender, int _mouseButton)
 	{
-		// tileEntity.UpdateStats();
+		tileEntity.UpdateStats(GameManager.Instance.World);
 	}
 
 	private void btnOn_OnPress(XUiController _sender, int _mouseButton)
@@ -339,7 +339,7 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 		GetLabel("lblTotalDamages").Text   = $"{tileEntity.totalDamagesCount:N0} damages points to repair.";
 		GetLabel("lblVisitedBlocks").Text  = $"{tileEntity.visitedBlocksCount:N0} blocks visited.";
 		GetLabel("lblIterations").Text     = $"tileEntity.isOn={tileEntity.IsOn}";
-		GetLabel("lblTimer").Text          = ""; // $"Repair time {tileEntity.RepairTime()}";
+		GetLabel("lblTimer").Text          = $"Repair time {tileEntity.RepairTime()}";
 	}
 
 	public override void Update(float _dt)

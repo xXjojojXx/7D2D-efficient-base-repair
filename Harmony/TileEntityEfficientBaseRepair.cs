@@ -223,7 +223,15 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 		foreach (KeyValuePair<string, int> entry in materials)
 		{
-			totalTaken += TakeRepairMaterial(entry.Key, entry.Value);
+			if (needMaterials)
+			{
+				totalTaken += TakeRepairMaterial(entry.Key, entry.Value);
+			}
+			else
+			{
+				totalTaken += entry.Value;
+				requiredMaterials[entry.Key] -= entry.Value;
+			}
 		}
 
 		return totalTaken;
@@ -266,12 +274,12 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			int availableItemCount = itemsDict.TryGetValue(item.ItemName, out availableItemCount) ? availableItemCount : 0;
 
 			// stop trying to repair the block if one material is missing
-			if (availableItemCount < targetItemCount)
+			if (availableItemCount < targetItemCount && needMaterials)
 			{
 				return 0;
 			}
 
-			materialsToTake[item.ItemName] = Mathf.Min(targetItemCount, availableItemCount);
+			materialsToTake[item.ItemName] = targetItemCount;
 			totalRequired += (int)Mathf.Ceil(item.Count * blockDamagePerc);
 
 			Logging($"targetItemCount={targetItemCount}");
@@ -304,9 +312,10 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 		// play material specific sound (copied from ocbClaimAutoRepair)
 		world.GetGameManager().PlaySoundAtPositionServer(
-			pos.ToVector3(),
-			string.Format("ImpactSurface/metalhit{0}", block.Block.blockMaterial.SurfaceCategory),
-			AudioRolloffMode.Logarithmic, 100
+			_pos: pos.ToVector3(),
+			_audioClipName: string.Format("ImpactSurface/metalhit{0}", block.Block.blockMaterial.SurfaceCategory),
+			_mode: AudioRolloffMode.Logarithmic,
+			_distance: 100
 		);
 	}
 
@@ -342,10 +351,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 				break;
 		}
 
-		int repairableDamages = Mathf.Min(block.damage, maxRepairableDamages);
-
-		if (needMaterials)
-			repairableDamages = ComputeRepairableDamages(block, maxRepairableDamages, repairItems);
+		int repairableDamages = ComputeRepairableDamages(block, maxRepairableDamages, repairItems);
 
 		if (repairableDamages <= 0)
 			return 0;
@@ -523,7 +529,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 		if (!isOn)
 		{
-			Log.Out($"[EfficientBaseRepair] TickRepair IsOn={isOn}");
+			Logging($"TickRepair IsOn={isOn}");
 			return;
 		}
 
@@ -536,7 +542,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			return;
 		}
 
-		Log.Out($"[EfficientBaseRepair] TickRepair");
+		Logging($"TickRepair, {blocksToRepair.Count} blocks to repair, needMaterials={needMaterials}");
 
 		int repairableDamages = repairRate;
 
@@ -550,12 +556,12 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 			if (block.damage == 0)
 			{
-				Logging($"[EfficientBaseRepair] full repaired block at {position}");
+				Logging($"full repaired block at {position}");
 				blocksToRepair.Remove(position);
 				damagedBlockCount--;
 			}
 
-			Logging($"[EfficientBaseRepair] BlockEnd, repairableDamageCount={repairableDamages}\n");
+			Logging($"BlockEnd, repairableDamageCount={repairableDamages}\n");
 
 			if (repairableDamages <= 0)
 				break;
@@ -563,6 +569,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 		elapsedTicksSinceLastRefresh++;
 		setModified();
+
 		Logging("[EfficientBaseRepair] TickEnd\n\n");
 	}
 }

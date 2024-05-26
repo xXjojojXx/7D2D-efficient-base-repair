@@ -89,18 +89,18 @@ It's normal, the specified RepairRate is only a target. The real computed damage
 
 For example, if one item of RessourceConcrete repairs 120 damages points but you specified a repairRate of 100, then the repaired amount will be 120 then no more block will be repaired in this tick, since the limit of 100 repairs per tick was reached.
 
-### May I used EfficientBaseRepair to auto upgrade my base ?
+### Can I use EfficientBaseRepair to auto upgrade my base ?
 
 Not for now, but it's planned
 
-### May I use this mod on a muliplayer server ?
+### Can I use this mod on a muliplayer server ?
 
 Yes, but be aware of the following points:
 
 * EfficientBaseRepair does not check if the block you are trying to repair is inside you land claim or not
 * Concurrency access to the loot container of EfficientBaseRepair might be broken, and cause items duplication
 
-### May I use this mod on UndeadLegacy or DarknessFalls ?
+### Can I use this mod on UndeadLegacy or DarknessFalls ?
 
 No test was made on such mods but as it implement a custom UI it might not be compatible.
 
