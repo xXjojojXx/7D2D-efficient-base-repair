@@ -470,7 +470,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 	public void Switch()
 	{
 		isOn = !isOn;
-		Log.Out($"[EfficientBaseRepair] Switch TileEntity to {isOn}");
+		Logging($"Switch TileEntity to {isOn}");
 		setModified();
 	}
 
@@ -514,7 +514,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		// force refresh on server side if he receives the param forceRefresh=true from client.
 		if (_eStreamMode == StreamModeRead.FromClient && forceRefresh)
 		{
-			Log.Out("Refresh forced from server.");
+			Log.Out("[EfficientBaseRepair] Refresh forced from server.");
 			UpdateStats(GameManager.Instance.World);
 		}
 	}
@@ -545,6 +545,13 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		foreach (ItemStack stack in items)
 		{
 			stack.Clone().Write(_bw);
+		}
+
+		// trigger forceRefresh=true in single player mode
+		if (_eStreamMode == StreamModeWrite.ToClient && forceRefresh)
+		{
+			Log.Out("[EfficientBaseRepair] Refresh forced from Client.");
+			UpdateStats(GameManager.Instance.World);
 		}
 	}
 
