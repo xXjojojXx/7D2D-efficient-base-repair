@@ -16,40 +16,8 @@ class BlockEfficientBaseRepair : BlockSecureLoot
         }
     }
 
-    private const string TURN_ON_CMD = "turn_repair_on";
-    private const string TURN_OFF_CMD = "turn_repair_off";
-
-    public bool NeedMaterials
-    {
-        get
-        {
-            return Properties.GetBool("NeedsMaterials");
-        }
-    }
-
-    public int MaxBfsIterations
-    {
-        get
-        {
-            return Properties.GetInt("MaxBfsIterations");
-        }
-    }
-
-    public int RepairRate
-    {
-        get
-        {
-            return Properties.GetInt("RepairRate");
-        }
-    }
-
-    public int StatsRefreshRate
-    {
-        get
-        {
-            return Properties.GetInt("RefreshRate");
-        }
-    }
+    private const string TURN_ON_CMD = "EfficientBaseRepairTurnOn";
+    private const string TURN_OFF_CMD = "EfficientBaseRepairTurnOff";
 
     public override void OnBlockAdded(WorldBase _world, Chunk _chunk, Vector3i _blockPos, BlockValue _blockValue)
     {
@@ -85,7 +53,7 @@ class BlockEfficientBaseRepair : BlockSecureLoot
             new BlockActivationCommand("unlock", "unlock", is_locked),
             new BlockActivationCommand("keypad", "keypad", true),
             new BlockActivationCommand("take", "hand", true),
-            new BlockActivationCommand(cmd_activate, "electric_switch", true),
+            new BlockActivationCommand(cmd_activate, "electric_switch", true, tileEntity.IsOn),
         };
 
     }

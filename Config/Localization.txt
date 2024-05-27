@@ -1,0 +1,3 @@
+Key,File,Type,UsedInMainMenu,NoTranslate,english,Context / Alternate Text,german,spanish,french,italian,japanese,koreana,polish,brazilian,russian,turkish,schinese,tchinese
+blockcommand_EfficientBaseRepairTurnOff,UI,XUI,,,Turn Off,,Ausschalten,Desactivar,Désactiver,Spegni,オフにする,끄기,Wył.,Desligar,Выключить,Kapat,关闭,關掉
+blockcommand_EfficientBaseRepairTurnOn,UI,XUI,,,Turn On,,Einschalten,Activar,Activer,Accendi,オンにする,켜기,Wł.,Ligar,Включить,Aç,打开,打開
