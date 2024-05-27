@@ -27,6 +27,7 @@ To be implemented (or not ?):
     ☐ make block ignoring in bfs more generic, by specifying explicit blocks to ignore.
     ☐ add upgrade option
     ☐ add boundHelper on damaged blocks
+    ☐ find a way to change params without accessing xml files
 
 Known issues (WIP):
     ☐ Spike blocks at stage Dmg1 or Dmg2 with block.damage = 0 are upgraded for free at stage Dmg0

@@ -30,6 +30,8 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	private bool isOn;
 
+	private bool forceRefresh;
+
 	public bool IsOn
 	{
 		get => isOn;
@@ -55,6 +57,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		world = _world;
 
 		DynamicProperties properties = _world.GetBlock(ToWorldPos()).Block.Properties;
+
 		maxBfsIterations = properties.GetInt("MaxBfsIterations");
 		needMaterials = properties.GetBool("NeedsMaterials");
 		repairRate = properties.GetInt("RepairRate");
@@ -242,7 +245,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	private static void Logging(string message)
 	{
-		// Log.Out($"[EfficientBaseRepair] {message}");
+		Log.Out($"[EfficientBaseRepair] {message}");
 	}
 
 	private int ComputeRepairableDamages(BlockValue block, int maxRepairableDamages, List<SItemNameCount> repairItems)
@@ -419,7 +422,13 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		return blocks_to_repair;
 	}
 
-	public void UpdateStats(World world)
+	public void Refresh()
+	{
+		forceRefresh = true;
+		setModified();
+	}
+
+	private void UpdateStats(World world)
 	{
 		Init(world);
 
@@ -427,6 +436,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		bfsIterationsCount = 0;
 		visitedBlocksCount = 0;
 		totalDamagesCount = 0;
+		forceRefresh = false;
 
 		Vector3i block_position = ToWorldPos();
 
@@ -466,6 +476,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		base.read(_br, _eStreamMode);
 
 		isOn = _br.ReadBoolean();
+		forceRefresh = _br.ReadBoolean();
 		damagedBlockCount = _br.ReadInt32();
 		totalDamagesCount = _br.ReadInt32();
 		visitedBlocksCount = _br.ReadInt32();
@@ -496,6 +507,13 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 				items[i].Read(_br);
 			}
 		}
+
+		// force refresh on server side if he receives the param forceRefresh=true from client.
+		if (_eStreamMode == StreamModeRead.FromClient && forceRefresh)
+		{
+			Log.Out("Refresh forced from server.");
+			UpdateStats(GameManager.Instance.World);
+		}
 	}
 
 	public override void write(PooledBinaryWriter _bw, StreamModeWrite _eStreamMode)
@@ -503,6 +521,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		base.write(_bw, _eStreamMode);
 
 		_bw.Write(isOn);
+		_bw.Write(forceRefresh);
 		_bw.Write(damagedBlockCount);
 		_bw.Write(totalDamagesCount);
 		_bw.Write(visitedBlocksCount);
@@ -541,7 +560,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 		if (blocksToRepair == null)
 		{
-			Log.Warning("[EfficientBaseRepair] TileEntityEfficientBaseRepair.blocksToRepair not initialized.");
+			Log.Warning("[EfficientBaseRepair] TileEntityEfficientBaseRepair.blocksToRepair initializing failed.");
 			return;
 		}
 
