@@ -119,7 +119,7 @@ It can be disturbing, because he's able to repair blocks much far away than the 
 
 No, all the parameters accessible from xml files can be changed whenever you want it. Just ensure to reload the game, and maybe to remove / re-place the block in game.
 
-## Knows issues (aka to be fixed)
+## Knows issues (to be fixed)
 
 * Spike blocks at stage Dmg1 or Dmg2 with block.damage = 0 are upgraded for free at stage Dmg0
 * Auto repairing might break the initial tensions of the neighbors blocks
