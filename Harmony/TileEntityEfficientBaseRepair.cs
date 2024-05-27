@@ -10,9 +10,13 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	private bool needMaterials;
 
+	private bool activeDuringBloodMoon;
+
 	public int repairRate;
 
 	private int refreshRate;
+
+	public bool playRepairSound = true;
 
 	/* PUBLIC STATS */
 
@@ -23,8 +27,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 	public int bfsIterationsCount = 0;
 
 	public int totalDamagesCount = 0;
-
-	public bool playRepairSound = true;
 
 	/* CLASS ATTRIBUTES */
 
@@ -63,6 +65,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		repairRate = properties.GetInt("RepairRate");
 		refreshRate = properties.GetInt("RefreshRate");
 		playRepairSound = properties.GetBool("PlayRepairSound");
+		activeDuringBloodMoon = properties.GetBool("ActiveDuringBloodMoon");
 	}
 
 	public string RepairTime()
@@ -545,13 +548,26 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		}
 	}
 
+	private bool BloodMoonActive(World _world)
+	{
+		if (activeDuringBloodMoon)
+			return false;
+
+		bool bloodMoonActive = _world.aiDirector.BloodMoonComponent.BloodMoonActive;
+
+		if (bloodMoonActive && isOn)
+			Switch();
+
+		return bloodMoonActive;
+	}
+
 	public override void UpdateTick(World world)
 	{
 		base.UpdateTick(world);
 
-		if (!isOn)
+		if (!isOn || BloodMoonActive(world))
 		{
-			Logging($"TickRepair IsOn={isOn}");
+			Logging($"TileEntity OFF");
 			return;
 		}
 

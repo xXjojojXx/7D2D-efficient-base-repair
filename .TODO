@@ -13,7 +13,7 @@ Config:
     ✔ import `LootSizeY` from config.xml @done(24-05-23 17:36)
     ✔ import `RefreshRate` from config.xml @done(24-05-23 19:17)
     ✔ import `PlayRepairSound` from config.xml @done(24-05-26 20:15)
-    ☐ import `DisableDuringBloodMoon` from config.xml
+    ☐ import `ActiveDuringBloodMoon` from config.xml
     ☐ import `IGNORED_BLOCKS` from config.xml
     ☐ import `MaxReceivedPower` from config.xml
     ☐ import `PowerMultiplier` from config.xml
