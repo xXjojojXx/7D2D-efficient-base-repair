@@ -248,7 +248,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	private static void Logging(string message)
 	{
-		Log.Out($"[EfficientBaseRepair] {message}");
+		// Log.Out($"[EfficientBaseRepair] {message}");
 	}
 
 	private int ComputeRepairableDamages(BlockValue block, int maxRepairableDamages, List<SItemNameCount> repairItems)
@@ -555,7 +555,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		}
 	}
 
-	private bool BloodMoonActive(World _world)
+	public bool BloodMoonActive(World _world)
 	{
 		if (activeDuringBloodMoon)
 			return false;

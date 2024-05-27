@@ -63,6 +63,11 @@ class BlockEfficientBaseRepair : BlockSecureLoot
         return Localization.Get("useWorkstation");
     }
 
+    private void BloodMoonDenied(EntityPlayerLocal _player)
+    {
+        GameManager.ShowTooltip(_player, Localization.Get("EfficientBaseRepairBloodMoonDenied"), string.Empty, "ui_denied");
+    }
+
     // copied from BlockSecureLoot
     public override bool OnBlockActivated(string _commandName, WorldBase _world, int _cIdx, Vector3i _blockPos, BlockValue _blockValue, EntityAlive _player)
     {
@@ -81,6 +86,12 @@ class BlockEfficientBaseRepair : BlockSecureLoot
         {
             case TURN_ON_CMD:
             case TURN_OFF_CMD:
+                if (tileEntity.BloodMoonActive(_world as World))
+                {
+                    BloodMoonDenied(_player as EntityPlayerLocal);
+                    return false;
+                }
+
                 tileEntity.Switch();
                 return true;
 
@@ -144,6 +155,12 @@ class BlockEfficientBaseRepair : BlockSecureLoot
         LocalPlayerUI uIForPlayer = LocalPlayerUI.GetUIForPlayer(_player as EntityPlayerLocal);
         if (uIForPlayer == null)
         {
+            return false;
+        }
+
+        if (tileEntity.BloodMoonActive(_world as World))
+        {
+            BloodMoonDenied(_player as EntityPlayerLocal);
             return false;
         }
 
