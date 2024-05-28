@@ -92,7 +92,7 @@ class BlockEfficientBaseRepair : BlockSecureLoot
                     return false;
                 }
 
-                tileEntity.Switch();
+                tileEntity.Switch(forceRefresh_: _commandName == TURN_ON_CMD);
                 return true;
 
             case "take":

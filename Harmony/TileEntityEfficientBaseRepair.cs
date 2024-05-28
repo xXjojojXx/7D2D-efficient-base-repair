@@ -467,8 +467,11 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		setModified();
 	}
 
-	public void Switch()
+	public void Switch(bool forceRefresh_ = false)
 	{
+		if (forceRefresh_)
+			forceRefresh = true;
+
 		isOn = !isOn;
 		Logging($"Switch TileEntity to {isOn}");
 		setModified();

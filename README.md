@@ -51,9 +51,11 @@ As this approcah may require a lot of ressources, the searching of blocks to rep
 
 You can limit the covered search, by reducing the `MaxBfsIteration` parameter if you need a better performances compromise.
 
-The full structure analysis will be done at three different times:
+The full structure analysis will be done at different moments:
 
-* A the block opening: When you open the UI of the block, it will automatically search for blocks to repair, in order to display fresh datas (Don't be worried if you have a small freeze delay at opening on big structures).
+* At the block opening: When you open the UI of the block, it will automatically search for blocks to repair, in order to display fresh datas (Don't be worried if you have a small freeze delay at opening on big structures).
+
+* At the block activation from the block commands (radial menu)
 
 * Every `n` game ticks: You can parameter the number of game tick (one game tick ~ 2s) to perform an auto refresh when the block is activated. By default auto refresh are disabled.
 

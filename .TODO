@@ -7,14 +7,14 @@ UI:
 Config:
     ✘ import `COOLDOWN` duration from config.xml @cancelled(24-05-21 17:36)
     ✘ import `ForceNonRepairableBlocks` from config.xml @cancelled(24-05-26 18:09) -> yes by default
+    ✘ import `IGNORED_BLOCKS` from config.xml @cancelled(24-05-28 17:38) -> later
     ✔ import `MAX_ITERTIONS` for bfs from config.xml @done(24-05-21 00:35)
     ✔ import `NEEDS_MATERIAL` on/off from config.xml @done(24-05-21 00:35)
     ✔ import `LootSizeX` from config.xml @done(24-05-23 17:36)
     ✔ import `LootSizeY` from config.xml @done(24-05-23 17:36)
     ✔ import `RefreshRate` from config.xml @done(24-05-23 19:17)
     ✔ import `PlayRepairSound` from config.xml @done(24-05-26 20:15)
-    ☐ import `ActiveDuringBloodMoon` from config.xml
-    ☐ import `IGNORED_BLOCKS` from config.xml
+    ✔ import `ActiveDuringBloodMoon` from config.xml @done(24-05-28 17:03)
     ☐ import `MaxReceivedPower` from config.xml
     ☐ import `PowerMultiplier` from config.xml
 
