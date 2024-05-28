@@ -548,6 +548,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		}
 
 		// trigger forceRefresh=true in single player mode
+		// TODO: try with SingletonMonoBehaviour<ConnectionManager>.Instance.IsSinglePlayer
 		if (_eStreamMode == StreamModeWrite.ToClient && forceRefresh)
 		{
 			Log.Out("[EfficientBaseRepair] Refresh forced from Client.");
@@ -558,6 +559,9 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 	public bool BloodMoonActive(World _world)
 	{
 		if (activeDuringBloodMoon)
+			return false;
+
+		if (_world.aiDirector == null)
 			return false;
 
 		bool bloodMoonActive = _world.aiDirector.BloodMoonComponent.BloodMoonActive;
@@ -591,9 +595,13 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 		int repairableDamages = repairRate > 0 ? repairRate : int.MaxValue;
 
+		bool wasModified = false;
+
 		foreach (Vector3i position in new List<Vector3i>(blocksToRepair))
 		{
 			int repairedDamages = TryRepairBlock(world, position, repairableDamages);
+
+			wasModified |= repairedDamages > 0;
 
 			repairableDamages -= repairedDamages;
 
@@ -613,7 +621,9 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		}
 
 		elapsedTicksSinceLastRefresh++;
-		setModified();
+
+		if (wasModified)
+			setModified();
 
 		Logging("[EfficientBaseRepair] TickEnd\n\n");
 	}
