@@ -1,28 +1,29 @@
-﻿<configs>
+<configs>
     <append xpath="/blocks">
         <block name="EfficientBaseRepair">
 
             <!-- Modding required properties -->
             <property name="Class" value="BlockEfficientBaseRepair, EfficientBaseRepair"/>
-            <property name="CustomIcon" value="EfficientBaseRepair"/>
+            <property name="CustomIcon" value="cntHardenedChestSecure"/>
 
             <!-- Vanilla properties -->
             <property name="DisplayInfo" value="Custom"/>
             <property name="CreativeMode" value="Player"/>
             <property name="DisplayType" value="blockHardened"/>
             <property name="Stacknumber" value="10"/>
-            <property name="Material" value="Msteel"/>
+            <property name="Material" value="Mmetal_hard"/>
             <property name="Shape" value="ModelEntity"/>
             <property name="LootList" value="storageCrate"/>
-            <property name="Model" value="Entities/Industrial/landClaimBlockPrefab"/>
+            <property name="Model" value="@:Entities/LootContainers/tier4LootChestPrefab.prefab"/>
             <property name="PlacementDistance" value="25"/>
             <property name="AllowedRotations" value="No45"/>
             <property name="MaxDamage" value="5000"/>
             <property name="StartDamage" value="0"/>
             <property name="PassThroughDamage" value="true"/>
             <property name="TakeDelay" value="1"/>
+            <drop event="Fall" name="scrapMetalPile" count="1" prob="1" stick_chance="1"/>
             <property class="RepairItems">
-                <property name="resourceRockSmall" value="10"/>
+                <property name="resourceForgedIron" value="60"/>
             </property>
 
             <!-- Specific properties -->
