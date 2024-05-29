@@ -165,9 +165,9 @@ class BlockEfficientBaseRepair : BlockSecureLoot
         }
 
         _player.AimingGun = false;
+        Vector3i blockPos = tileEntity.ToWorldPos();
         tileEntity.bWasTouched = tileEntity.bTouched;
-        _world.GetGameManager().TELockServer(_cIdx, _blockPos, tileEntity.entityId, _player.entityId);
-
+        _world.GetGameManager().TELockServer(_cIdx, blockPos, tileEntity.entityId, _player.entityId);
         return true;
     }
 
