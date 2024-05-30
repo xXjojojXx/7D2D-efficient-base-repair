@@ -1,4 +1,4 @@
-# 7days To Die - Efficient Base Repair
+# 7days To Die - A21 - Efficient Base Repair
 
 This mod inspired by [ocbClaimAutoRepair](https://github.com/OCB7D2D/OcbClaimAutoRepair), add a new block allowing to efficiently repair your base in addition to dynamically showing some good to known repair statistics.
 
@@ -6,9 +6,16 @@ Almost fully customizable, this mod allows you to choose you own balancing setti
 
 ## How to install ?
 
-...
+1. Download the [zip file](url/to/zip/file) of the mod.
 
-**The mod needs to be installed on both client and server side**
+2. Copy the downloaded zip file to `path/to/.../7 days to die/Mods`
+
+3. `Right-click on the zip file` + `Extract to 'EfficientBaseRepair/'`
+
+#### NOTES
+* **The mod needs to be installed on both client and server side**
+* **Consider doing a backup of your current save before installing the mod**
+* **Before uninstalling the mod, ensure to remove all EfficientBaseRepair blocks from the world**
 
 ## How to use ?
 
@@ -19,6 +26,8 @@ Almost fully customizable, this mod allows you to choose you own balancing setti
 3. Press the `switch on` button from the user interface, or from the block command bar.
 
 4. Here it is, now just wait for you base to be repaired !
+
+![screenshot](./screens/UI.PNG)
 
 ## How damaged blocks are found ?
 
@@ -77,12 +86,28 @@ Once the installation is done, go to [blocks.xml](./Config/blocks.xml) and look 
 <property name="ActiveDuringBloodMoon" value="false"/> <!-- Allow to disable the auto repair during the blood moon -->
 ```
 
-## How to report a bug ?
+## How to report a bug or ask for a new feature ?
 
-send me you logfile + your options from `Mods/EfficientBaseRepair/Config/blocks.xml`
+The most efficient way to report a bug or an anormal behvior is to create a [github issue](https://github.com/VisualDev-FR/7D2D-efficient-base-repair/issues) and to describe it the better as you can following this basic rules:
+
+1. Give a short description of what goes wrong
+
+2. Give an example of how to reproduce the bug step by step
+
+3. Attach your player logs (`C:\Users\...\AppData\LocalLow\The Fun Pimps\7 Days To Die\Player.log"`) + you server logs to the github issue
 ...
 
 ## FAQ
+
+### How 'Efficient' is it ?
+
+It will be as much efficient as you want it !
+
+With the defaults settings you can attempt to repair about 100 hit-points per minutes, but you can configure it as well to instantly repair over 100,000 blocks !
+
+Obviously it will have (cheap) cost in terms of game performance, for small structures you may not perceive the calculation time, but for structures over 100,000 blocks, be mentally prepaired for waiting between 0.5 and 2 seconds...
+
+So yes it is efficient ! (Much more than manually look for damaged blocks)
 
 ### I changed the balancing in blocks.xml but the changes were not applied after game reload.
 
@@ -102,14 +127,17 @@ Not for now, but it's planned
 
 Yes, but be aware of the following points:
 
-* EfficientBaseRepair does not check if the block you are trying to repair is inside you land claim or not
-* Concurrency access to the loot container of EfficientBaseRepair might be broken, and cause items duplication
+* This mod is not EAC compatible
+
+* EfficientBaseRepair does not check if the block you are trying to repair is inside you land claim or not. It can repair blocks much far away than the maximum distance covered by you land claim block.
+
+* Block finding is done on server side and might be expensive for big structures (so tell your friends to avoid spamming the refresh button at the same time)
 
 ### Can I use this mod on UndeadLegacy or DarknessFalls ?
 
 No test was made on such mods but as it implement a custom UI it might not be compatible.
 
-Upvote [this github issue](link/to/issue) to manifest your interest about his feature.
+Upvote this github issues to manifest your interest about [Undead Legacy](https://github.com/VisualDev-FR/7D2D-efficient-base-repair/issues/1) or [DarknessFalls](https://github.com/VisualDev-FR/7D2D-efficient-base-repair/issues/2) compatibility.
 
 ### I was going for a trip in wasteland for hours, and when I came back my base was not repaired what happened ?
 
