@@ -175,7 +175,7 @@ public class XUiC_EfficientBaseRepair : XUiController
 		MaterialsWindow.tileEntity = te;
 		MaterialsWindow.OnOpen();
 
-		Manager.BroadcastPlayByLocalPlayer(position, lootContainer.soundOpen);
+		Manager.BroadcastPlayByLocalPlayer(position, "UseActions/chest_tier4_open");
 	}
 
 	public override void OnClose()
