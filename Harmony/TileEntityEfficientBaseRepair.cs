@@ -482,8 +482,11 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 	public override void read(PooledBinaryReader _br, StreamModeRead _eStreamMode)
 	{
 		base.read(_br, _eStreamMode);
-
 		isOn = _br.ReadBoolean();
+
+		if (_eStreamMode == StreamModeRead.Persistency)
+			return;
+
 		forceRefresh = _br.ReadBoolean();
 		damagedBlockCount = _br.ReadInt32();
 		totalDamagesCount = _br.ReadInt32();
@@ -527,8 +530,11 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 	public override void write(PooledBinaryWriter _bw, StreamModeWrite _eStreamMode)
 	{
 		base.write(_bw, _eStreamMode);
-
 		_bw.Write(isOn);
+
+		if (_eStreamMode == StreamModeWrite.Persistency)
+			return;
+
 		_bw.Write(forceRefresh);
 		_bw.Write(damagedBlockCount);
 		_bw.Write(totalDamagesCount);
