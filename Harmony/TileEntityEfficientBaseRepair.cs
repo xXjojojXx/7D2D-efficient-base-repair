@@ -19,6 +19,8 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	public bool playRepairSound = true;
 
+	private bool autoTurnOff = false;
+
 	/* PUBLIC STATS */
 
 	public int damagedBlockCount = 0;
@@ -67,6 +69,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		refreshRate = properties.GetInt("RefreshRate");
 		playRepairSound = properties.GetBool("PlayRepairSound");
 		activeDuringBloodMoon = properties.GetBool("ActiveDuringBloodMoon");
+		autoTurnOff = properties.GetBool("AutoTurnOff");
 	}
 
 	public string RepairTime()
@@ -634,7 +637,14 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		elapsedTicksSinceLastRefresh++;
 
 		if (wasModified)
+		{
 			setModified();
+		}
+		else if (autoTurnOff)
+		{
+			isOn = false;
+			setModified();
+		}
 
 		Logging("[EfficientBaseRepair] TickEnd\n\n");
 	}

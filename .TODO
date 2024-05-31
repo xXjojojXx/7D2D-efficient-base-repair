@@ -1,4 +1,5 @@
 UI:
+    ✘ Remove air blocks from visited blocks count @cancelled(24-05-31 12:35)
     ✔ setup UI into the TileEntity @done(24-05-22 23:58)
     ✔ on/off button @done(24-05-22 23:58)
     ✔ dynamic ratio of needed materials / available materials (with refresh button ?) @done(24-05-22 23:59)
@@ -7,7 +8,6 @@ UI:
     ✔ change the icon + the text of the refresh button @done(24-05-31 10:49)
     ✔ Adjust the left / right pannels heights @done(24-05-31 11:06)
     ☐ Debug the timer for multiplayer games
-    ☐ Remove air blocks from visited blocks count
 
 Config:
     ✘ import `COOLDOWN` duration from config.xml @cancelled(24-05-21 17:36)
@@ -22,12 +22,12 @@ Config:
     ✔ import `RefreshRate` from config.xml @done(24-05-23 19:17)
     ✔ import `PlayRepairSound` from config.xml @done(24-05-26 20:15)
     ✔ import `ActiveDuringBloodMoon` from config.xml @done(24-05-28 17:03)
+    ✔ configure `progression.xml` @done(24-05-31 12:29)
+    ✔ configure `recipes.xml` @done(24-05-31 12:29)
+    ✔ import `AutoTurnOff` from config.xml @done(24-05-31 12:44)
     ☐ import `MaxReceivedPower` from config.xml
     ☐ import `PowerMultiplier` from config.xml
-    ☐ import `StopIfEmpty` from config.xml
     ☐ import `MaxRefreshPerMinute` from config.xml
-    ☐ configure `progression.xml`
-    ☐ configure `recipes.xml`
 
 To be implemented (or not ?):
     ✘ Cooldown: a period of time during which no repair can be launched @cancelled(24-05-21 17:36)
@@ -56,4 +56,5 @@ Check-List:
     ☐ two users can't access the crate at same time
     ☐ A block which miss at least one material to be repaired is not repaired
     ☐ An auto reparation does not change the paint applied on the block
+    ☐ The blocks auto turns off when he can't repair more blocks
     ☐ ...
