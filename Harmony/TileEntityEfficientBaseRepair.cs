@@ -1,3 +1,4 @@
+using Audio;
 using UnityEngine;
 using System.Collections.Generic;
 using System;
@@ -474,6 +475,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 		isOn = !isOn;
 		Logging($"Switch TileEntity to {isOn}");
+		Manager.PlayInsidePlayerHead(isOn ? "switch_up" : "switch_down");
 		setModified();
 	}
 

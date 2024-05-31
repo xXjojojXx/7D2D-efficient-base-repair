@@ -1,4 +1,4 @@
-using System;
+using Audio;
 using UnityEngine;
 using UnityEngine.Scripting;
 
@@ -93,9 +93,7 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 		lblOnOff = (XUiV_Label)GetChildById("lblOnOff").ViewComponent;
 		sprOnOff = (XUiV_Sprite)GetChildById("sprOnOff").ViewComponent;
 
-		lblBlocksToRepair = (XUiV_Label)GetChildById("lblBlocksToRepair").ViewComponent;
-		lblVisitedBlocks = (XUiV_Label)GetChildById("lblVisitedBlocks").ViewComponent;
-		lblIterations = (XUiV_Label)GetChildById("lblIterations").ViewComponent;
+		((XUiV_Label)GetChildById("lblRefresh").ViewComponent).Text = Localization.Get("RefreshxuiServerBrowserList");
 
 		isDirty = true;
 		turnOff = Localization.Get("xuiTurnOff");
@@ -202,6 +200,7 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 	private void btnRefresh_OnPress(XUiController _sender, int _mouseButton)
 	{
 		tileEntity.Refresh();
+		Manager.PlayInsidePlayerHead("UseActions/chest_tier4_open");
 	}
 
 	private void btnOn_OnPress(XUiController _sender, int _mouseButton)
@@ -338,7 +337,7 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 		GetLabel("lblBlocksToRepair").Text = $"{tileEntity.damagedBlockCount:N0} damaged blocks found.";
 		GetLabel("lblTotalDamages").Text   = $"{tileEntity.totalDamagesCount:N0} damages points to repair.";
 		GetLabel("lblVisitedBlocks").Text  = $"{tileEntity.visitedBlocksCount:N0} blocks visited.";
-		GetLabel("lblIterations").Text     = $"tileEntity.isOn={tileEntity.IsOn}";
+		GetLabel("lblIterations").Text     = $"{tileEntity.bfsIterationsCount} iterations done.";
 		GetLabel("lblTimer").Text          = $"Repair time {tileEntity.RepairTime()}";
 	}
 
