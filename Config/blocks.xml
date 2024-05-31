@@ -2,14 +2,12 @@
     <append xpath="/blocks">
         <block name="EfficientBaseRepair">
 
-            <!-- Modding required properties -->
             <property name="Class" value="BlockEfficientBaseRepair, EfficientBaseRepair"/>
             <property name="CustomIcon" value="cntHardenedChestSecure"/>
-
-            <!-- Vanilla properties -->
             <property name="DisplayInfo" value="Custom"/>
             <property name="CreativeMode" value="Player"/>
             <property name="DisplayType" value="blockHardened"/>
+            <property name="DescriptionKey" value="efficientBaseRepairDesc"/>
             <property name="Stacknumber" value="10"/>
             <property name="Material" value="Mmetal_hard"/>
             <property name="Shape" value="ModelEntity"/>
@@ -23,7 +21,7 @@
             <property name="TakeDelay" value="1"/>
             <drop event="Fall" name="scrapMetalPile" count="1" prob="1" stick_chance="1"/>
             <property class="RepairItems">
-                <property name="resourceForgedIron" value="60"/>
+                <property name="resourceRepairKit" value="5"/>
             </property>
 
             <!-- Specific properties -->
