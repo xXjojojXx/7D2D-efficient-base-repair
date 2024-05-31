@@ -1,0 +1,14 @@
+<!-- inspired by ocbClaimAutoRepair -->
+<configs>
+
+    <set xpath="/progression/crafting_skills/crafting_skill[@name='craftingRepairTools']/@max_level">60</set>
+
+    <insertafter xpath="/progression/crafting_skills/crafting_skill[@name='craftingRepairTools']/display_entry[@item='meleeToolRepairT3Nailgun']">
+        <display_entry item="EfficientBaseRepair" has_quality="false" unlock_level="60"/>
+    </insertafter>
+
+    <append xpath="/progression/crafting_skills/crafting_skill[@name='craftingRepairTools']/effect_group">
+        <passive_effect name="RecipeTagUnlocked" operation="base_set" level="50, 60" value="1" tags="EfficientBaseRepair"/>
+    </append>
+
+</configs>

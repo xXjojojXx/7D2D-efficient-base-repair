@@ -1,0 +1,10 @@
+<!-- inspired by ocbClaimAutoRepair -->
+<configs>
+    <append xpath="/recipes">
+        <recipe name="EfficientBaseRepair" count="1" tags="learnable,workbenchCrafting" craft_area="workbench" material_based="false" craft_time="120">
+            <ingredient name="resourceForgedSteel" count="40"/>
+            <ingredient name="resourceElectricParts" count="20"/>
+            <ingredient name="carBattery" count="1"/>
+        </recipe>
+    </append>
+</configs>
