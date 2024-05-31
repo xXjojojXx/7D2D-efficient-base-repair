@@ -86,7 +86,7 @@ Once you have set up your own balancing options, restart the game or the dedicat
 
 ### How 'Efficient' is it?
 
-It will be as efficient as you want it to be! 
+It will be as efficient as you want it to be!
 
 With the default settings, you can expect to repair about 100 hit points per minute, but you can configure it to instantly repair over 100,000 blocks! Obviously, there will be a (minimal) cost in terms of game performance. For small structures, you may not notice the calculation time, but for structures over 100,000 blocks, be mentally prepared for a wait of between 0.5 and 2 seconds.
 
