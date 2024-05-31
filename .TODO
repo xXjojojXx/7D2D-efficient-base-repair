@@ -48,10 +48,10 @@ To be fixed:
     ☐ The tension of a repaired block is reseted
 
 Check-List:
-    ☐ auto-refresh can be disabled
+    ✔ repair rate can be modified @done(24-05-31 14:30)
+    ✔ auto-refresh can be disabled @done(24-05-31 14:31)
     ☐ materials needs can be disabled
     ☐ auto repair can be disabled during bloodmoon
-    ☐ repair rate can be modified
     ☐ bfs max iterations can be disabled
     ☐ two users can't access the crate at same time
     ☐ A block which miss at least one material to be repaired is not repaired
