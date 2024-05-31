@@ -32,8 +32,8 @@
                     <sprite depth="2" name="background" pos="3,-3" sprite="menu_empty" width="224" height="32" color="[darkGrey]" type="sliced" />
                     <rect name="buttonRect" depth="3" pos="1,-3" width="224" height="31">
                         <button name="clickable" sprite="menu_empty" defaultcolor="[mediumGrey]" hoversprite="ui_game_select_row" hovercolor="[white]" type="sliced" hoverscale="1.0" />
-                        <sprite depth="1" name="sprRefresh" width="24" height="24" pos="60,-2" color="[iconColor]" sprite="ui_game_symbol_gas"/>
-                        <label depth="2" name="lblRefresh" pos="0,-4" justify="center" text="REFUEL" text_key="xuiRefuel" font_size="24" />
+                        <sprite depth="1" name="sprRefresh" width="24" height="24" pos="60,-2" color="[iconColor]" sprite="ui_game_symbol_scrap"/>
+                        <label depth="2" name="lblRefresh" pos="0,-4" justify="center" font_size="24" />
                     </rect>
                 </rect>
             </rect>
