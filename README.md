@@ -6,7 +6,7 @@ Almost fully customizable, this mod allows you to choose your own balancing sett
 
 This block is unlocked at level 60 of repair tool skills and can be crafted in a workbench with forged steel, electric parts, and a car battery.
 
-Find more details about changes of this project in the dedicated [changelog file](./CHANGELOG)
+Find more details about changes of this project in the dedicated [changelog file](./CHANGELOG.md)
 
 ## How to Install Manually
 
