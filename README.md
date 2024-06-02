@@ -11,7 +11,7 @@ Find more details about changes of this project in the dedicated [changelog file
 ## How to Install Manually
 
 1. Download the [zip file](https://www.nexusmods.com/7daystodie/mods/4861?tab=files) of the mod.
-2. Extract the entire content of the zip file to `...\steamapps\common\7 Days To Die\Mods\`.
+2. Extract the entire content of the zip file to `C:\...\Steam\steamapps\common\7 Days To Die\Mods\`.
 
 #### NOTES
 * **This mod is not EAC compatible.**

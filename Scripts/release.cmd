@@ -2,16 +2,17 @@
 
 call ".\Scripts\compile.cmd"
 
+if %ERRORLEVEL% neq 0 exit /b 1
+
 if exist "EfficientBaseRepair.zip" DEL "EfficientBaseRepair.zip"
 
 if exist ".\EfficientBaseRepair" rmdir ".\EfficientBaseRepair" /s /q
 
-mkdir EfficientBaseRepair /y
+MKDIR .\EfficientBaseRepair
 
 xcopy Config EfficientBaseRepair\Config\ /s > nul
 xcopy *.dll EfficientBaseRepair\ > nul
 xcopy *.md EfficientBaseRepair\ > nul
-xcopy CHANGELOG EfficientBaseRepair\ > nul
 xcopy ModInfo.xml EfficientBaseRepair\ > nul
 
 7z.exe a "EfficientBaseRepair.zip" EfficientBaseRepair > nul

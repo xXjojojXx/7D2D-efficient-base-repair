@@ -33,7 +33,7 @@
             <property name="RefreshRate" value="0"/>               <!-- The number of game ticks between two auto refresh (set to 0 to disable auto refresh) -->
             <property name="PlayRepairSound" value="true"/>        <!-- Set to false to disable the hammer sound on the current block which is being repaired -->
             <property name="ActiveDuringBloodMoon" value="false"/> <!-- Set to false to disable the auto repair during the blood moon -->
-            <property name="AutoTurnOff" value="false"/>           <!-- Auto turn off the block if no more blocks can be repaired -->
+            <property name="AutoTurnOff" value="false"/>           <!-- Auto turn off if no more blocks can be repaired -->
 
         </block>
     </append>
