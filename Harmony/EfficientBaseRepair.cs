@@ -18,7 +18,7 @@ namespace Harmony
         {
             public static bool Prefix(TileEntityType type, Chunk _chunk, ref TileEntity __result)
             {
-                if (type == (TileEntityType)243)
+                if (type == (TileEntityType)191)
                 {
                     __result = new TileEntityEfficientBaseRepair(_chunk);
                     return false;
