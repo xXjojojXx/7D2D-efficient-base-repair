@@ -13,8 +13,6 @@ public class XUiC_EfficientBaseRepair : XUiController
 
 	private TileEntityEfficientBaseRepair te;
 
-	private string lootContainerName;
-
 	private bool isOpening;
 
 	private float openTimeLeft;
@@ -49,9 +47,7 @@ public class XUiC_EfficientBaseRepair : XUiController
 	public void SetTileEntityChest(string _lootContainerName, TileEntityEfficientBaseRepair _te)
 	{
 		te = _te;
-		lootContainerName = _lootContainerName;
 		lootWindow.SetTileEntityChest(_lootContainerName, _te);
-		lootingHeader = Localization.Get("xuiEfficientBaseRepair");
 	}
 
 	protected void OpenContainer()
@@ -63,7 +59,7 @@ public class XUiC_EfficientBaseRepair : XUiController
 
 		if (nonPagingHeaderWindow != null)
 		{
-			nonPagingHeaderWindow.SetHeader(lootingHeader);
+			nonPagingHeaderWindow.SetHeader("Base Repair");
 		}
 		lootWindow.ViewComponent.IsVisible = true;
 		base.xui.playerUI.windowManager.Close("timer");

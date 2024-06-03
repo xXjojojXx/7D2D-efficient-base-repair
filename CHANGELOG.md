@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fix translation of the refresh button
+- Fix the UI header text
 
 ## [0.0.2] - 2024-06-03
 
