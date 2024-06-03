@@ -50,7 +50,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	public Dictionary<string, int> requiredMaterials;
 
-	public override TileEntityType GetTileEntityType() => (TileEntityType)243;
+	public override TileEntityType GetTileEntityType() => (TileEntityType)191;
 
 	public TileEntityEfficientBaseRepair(Chunk _chunk) : base(_chunk)
 	{
