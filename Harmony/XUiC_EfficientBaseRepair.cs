@@ -47,6 +47,7 @@ public class XUiC_EfficientBaseRepair : XUiController
 	public void SetTileEntityChest(string _lootContainerName, TileEntityEfficientBaseRepair _te)
 	{
 		te = _te;
+		te.Init(GameManager.Instance.World);
 		lootWindow.SetTileEntityChest(_lootContainerName, _te);
 	}
 
