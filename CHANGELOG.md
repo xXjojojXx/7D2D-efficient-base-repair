@@ -6,7 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [Unreleased]
+
+## [0.0.3] - 2024-06-04
 
 ### Fixed
 
@@ -27,3 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implement the repairation blocks algorithm
 - Create a dedicated UI for the block
 - Set the repairation algorithm parametrizable from xml files
+
+
+[unreleased]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/0.0.3...HEAD
+[0.0.3]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/0.0.2...0.0.3
+[0.0.2]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/0.0.1...0.0.2
+[0.0.1]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/tree/0.0.1
