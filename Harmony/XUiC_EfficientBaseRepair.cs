@@ -19,10 +19,6 @@ public class XUiC_EfficientBaseRepair : XUiController
 
 	private XUiC_Timer timerWindow;
 
-	private bool isClosingFromDamage;
-
-	private string lootingHeader;
-
 	public static string ID = "EfficientBaseRepair";
 
 	private float totalOpenTime;
@@ -39,9 +35,6 @@ public class XUiC_EfficientBaseRepair : XUiController
 
 		statsWindow = (XUiC_EfficientBaseRepairStats)GetChildById("WindowEfficientBaseRepairStats");
 		MaterialsWindow = (XUiC_EfficientBaseRepairMaterials)GetChildById("windowEfficientBaseRepairMaterials");
-
-        // ignore compiler warning for unused variables
-        _ = isClosingFromDamage;
 	}
 
 	public void SetTileEntityChest(string _lootContainerName, TileEntityEfficientBaseRepair _te)
@@ -76,7 +69,6 @@ public class XUiC_EfficientBaseRepair : XUiController
 			GUIWindowManager windowManager = base.xui.playerUI.windowManager;
 			windowManager.Close("timer");
 			isOpening = false;
-			isClosingFromDamage = true;
 			windowManager.Close("looting");
 		}
 		else
@@ -108,7 +100,6 @@ public class XUiC_EfficientBaseRepair : XUiController
 
 	public override void OnOpen()
 	{
-		isClosingFromDamage = false;
 		if (te.entityId != -1)
 		{
 			Entity entity = GameManager.Instance.World.GetEntity(te.entityId);
@@ -119,7 +110,6 @@ public class XUiC_EfficientBaseRepair : XUiController
 				ignoreCloseSound = true;
 				windowManager.Close("timer");
 				isOpening = false;
-				isClosingFromDamage = true;
 				windowManager.Close("looting");
 				return;
 			}
@@ -131,7 +121,6 @@ public class XUiC_EfficientBaseRepair : XUiController
 			ignoreCloseSound = true;
 			windowManager2.Close("timer");
 			isOpening = false;
-			isClosingFromDamage = true;
 			windowManager2.Close("looting");
 			return;
 		}
@@ -194,14 +183,15 @@ public class XUiC_EfficientBaseRepair : XUiController
 		isOpening = false;
 	}
 
-    public static void Open(LocalPlayerUI _playerUi, TileEntityEfficientBaseRepair tileEntity, World _world)
+	public static void Open(LocalPlayerUI _playerUi, TileEntityEfficientBaseRepair tileEntity, World _world)
 	{
-        XUiC_EfficientBaseRepair instance = (XUiC_EfficientBaseRepair)_playerUi.xui.FindWindowGroupByName(ID);
+		XUiC_EfficientBaseRepair instance = (XUiC_EfficientBaseRepair)_playerUi.xui.FindWindowGroupByName(ID);
 
-        if(instance == null){
-            Log.Error("[EfficientBaseRepair] null instance of XUiC_EfficientBaseRepair. aborting...");
-            return;
-        }
+		if (instance == null)
+		{
+			Log.Error("[EfficientBaseRepair] null instance of XUiC_EfficientBaseRepair. aborting...");
+			return;
+		}
 
 		tileEntity.Refresh();
 
