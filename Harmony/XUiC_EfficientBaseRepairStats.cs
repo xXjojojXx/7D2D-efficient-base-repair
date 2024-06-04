@@ -56,7 +56,7 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 		lblOnOff = (XUiV_Label)GetChildById("lblOnOff").ViewComponent;
 		sprOnOff = (XUiV_Sprite)GetChildById("sprOnOff").ViewComponent;
 
-		((XUiV_Label)GetChildById("lblRefresh").ViewComponent).Text = Localization.Get("RefreshxuiServerBrowserList");
+		((XUiV_Label)GetChildById("lblRefresh").ViewComponent).Text = Localization.Get("xuiServerBrowserRefreshList");
 	}
 
 	public void SetWidth(int width)

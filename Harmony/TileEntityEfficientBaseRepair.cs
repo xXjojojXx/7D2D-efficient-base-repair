@@ -57,7 +57,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		isOn = false;
 	}
 
-	private void Init(World _world)
+	public void Init(World _world)
 	{
 		world = _world;
 

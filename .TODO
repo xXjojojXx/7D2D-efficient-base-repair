@@ -7,7 +7,7 @@ UI:
     ✔ change the opening sound of the block @done(24-05-30 16:46)
     ✔ change the icon + the text of the refresh button @done(24-05-31 10:49)
     ✔ Adjust the left / right pannels heights @done(24-05-31 11:06)
-    ☐ Debug the timer for multiplayer games
+    ✔ Debug the timer for multiplayer games @done(24-06-04 18:42)
 
 Config:
     ✘ import `COOLDOWN` duration from config.xml @cancelled(24-05-21 17:36)
