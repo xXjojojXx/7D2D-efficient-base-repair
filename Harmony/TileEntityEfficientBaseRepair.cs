@@ -25,6 +25,8 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	public int damagedBlockCount = 0;
 
+	public int upgradableBlockCount = 0;
+
 	public int visitedBlocksCount = 0;
 
 	public int bfsIterationsCount = 0;
@@ -47,6 +49,8 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 	private World world;
 
 	public List<Vector3i> blocksToRepair;
+
+	List<Vector3i> blocksToUpgrade = new List<Vector3i>();
 
 	public Dictionary<string, int> requiredMaterials;
 
@@ -162,7 +166,27 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		);
 	}
 
-	private Dictionary<string, int> GetMissingMaterialsForPos(Vector3i pos)
+	private Dictionary<string, int> GetUpgradeMaterialsForPos(Vector3i pos)
+	{
+		if (world.GetChunkFromWorldPos(pos) == null)
+			return null;
+
+		BlockValue block = world.GetBlock(pos);
+		DynamicProperties upgradeProperties = block.Block.UpgradeBlock.Block.Properties;
+
+		if (!upgradeProperties.Values.ContainsKey("UpgradeBlock.Item"))
+			return null;
+
+		return new Dictionary<string, int>(){
+			{
+				upgradeProperties.GetString("UpgradeBlock.Item"),
+				upgradeProperties.GetInt("UpgradeBlock.ItemCount")
+			}
+		};
+	}
+
+
+	private Dictionary<string, int> GetRepairMaterialsForPos(Vector3i pos)
 	{
 		if (world.GetChunkFromWorldPos(pos) == null)
 			return null;
@@ -379,9 +403,11 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		return repairableDamages;
 	}
 
-	public List<Vector3i> GetBlocksToRepair(Vector3i initial_pos)
+	public void AnalyseStructure(Vector3i initial_pos)
 	{
-		List<Vector3i> blocks_to_repair = new List<Vector3i>();
+		blocksToRepair = new List<Vector3i>();
+		blocksToUpgrade = new List<Vector3i>();
+
 		List<Vector3i> neighbors = this.GetNeighbors(initial_pos);
 		Dictionary<string, int> visited = new Dictionary<string, int>();
 
@@ -412,21 +438,24 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 				if (block.damage > 0 || block_name.Contains("Dmg1") || block_name.Contains("Dmg2"))
 				{
-					blocks_to_repair.Add(pos);
+					blocksToRepair.Add(pos);
 					totalDamagesCount += block.damage;
+				}
+				else if (block.Block.UpgradeBlock.Block.Properties.Values.ContainsKey("UpgradeBlock.Item"))
+				{
+					blocksToUpgrade.Add(pos);
 				}
 
 				neighbors.AddRange(this.GetNeighbors(pos));
 			}
 		}
 
-		damagedBlockCount = blocks_to_repair.Count;
+		damagedBlockCount = blocksToRepair.Count;
 		bfsIterationsCount = maxBfsIterations - iterations;
 		visitedBlocksCount = visited.Count;
+		upgradableBlockCount = blocksToUpgrade.Count;
 
-		Log.Out($"[EfficientBaseRepair] {blocks_to_repair.Count} blocks to repair. Iterations = {maxBfsIterations - iterations}/{maxBfsIterations}, visited_blocks = {visited.Count}");
-
-		return blocks_to_repair;
+		Log.Out($"[EfficientBaseRepair] {blocksToRepair.Count} blocks to repair. Iterations = {maxBfsIterations - iterations}/{maxBfsIterations}, visited_blocks = {visited.Count}");
 	}
 
 	public void Refresh()
@@ -445,15 +474,29 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		totalDamagesCount = 0;
 		forceRefresh = false;
 
-		Vector3i block_position = ToWorldPos();
-
-		blocksToRepair = GetBlocksToRepair(block_position);
+		AnalyseStructure(ToWorldPos());
 
 		requiredMaterials = new Dictionary<string, int>();
 
 		foreach (Vector3i position in blocksToRepair)
 		{
-			Dictionary<string, int> missingMaterials = GetMissingMaterialsForPos(position);
+			Dictionary<string, int> missingMaterials = GetRepairMaterialsForPos(position);
+
+			if (missingMaterials == null)
+				continue;
+
+			foreach (KeyValuePair<string, int> entry in missingMaterials)
+			{
+				if (!requiredMaterials.ContainsKey(entry.Key))
+					requiredMaterials.Add(entry.Key, 0);
+
+				requiredMaterials[entry.Key] += entry.Value;
+			}
+		}
+
+		foreach (Vector3i position in blocksToUpgrade)
+		{
+			Dictionary<string, int> missingMaterials = GetUpgradeMaterialsForPos(position);
 
 			if (missingMaterials == null)
 				continue;
@@ -495,6 +538,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		totalDamagesCount = _br.ReadInt32();
 		visitedBlocksCount = _br.ReadInt32();
 		bfsIterationsCount = _br.ReadInt32();
+		upgradableBlockCount = _br.ReadInt32();
 
 		requiredMaterials = new Dictionary<string, int>();
 
@@ -543,6 +587,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		_bw.Write(totalDamagesCount);
 		_bw.Write(visitedBlocksCount);
 		_bw.Write(bfsIterationsCount);
+		_bw.Write(upgradableBlockCount);
 
 		if (requiredMaterials == null)
 			requiredMaterials = new Dictionary<string, int>();

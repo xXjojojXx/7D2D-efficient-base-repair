@@ -28,7 +28,7 @@
             <property name="MaxBfsIterations" value="1000"/>       <!-- The max number of bfs iterations (more iterations will require more CPU ressources) -->
             <property name="NeedsMaterials" value="true"/>         <!-- Set this param to false, to fully disable the material requirements -->
             <property name="LootSizeX" value="6"/>                 <!-- Number of columns of the loot container -->
-            <property name="LootSizeY" value="6"/>                 <!-- Number of rows of the loot container -->
+            <property name="LootSizeY" value="5"/>                 <!-- Number of rows of the loot container -->
             <property name="RepairRate" value="100"/>              <!-- The amount of damage which can be repaired for one game tick (set to 0 for instant repairs) -->
             <property name="RefreshRate" value="0"/>               <!-- The number of game ticks between two auto refresh (set to 0 to disable auto refresh) -->
             <property name="PlayRepairSound" value="true"/>        <!-- Set to false to disable the hammer sound on the current block which is being repaired -->

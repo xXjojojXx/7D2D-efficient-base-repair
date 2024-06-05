@@ -56,8 +56,8 @@ public class XUiC_EfficientBaseRepair : XUiController
 			nonPagingHeaderWindow.SetHeader("Base Repair");
 		}
 		lootWindow.ViewComponent.IsVisible = true;
-		base.xui.playerUI.windowManager.Close("timer");
-		lootWindow.ViewComponent.ParseAttribute("position", "0, -315", this);
+		xui.playerUI.windowManager.Close("timer");
+		lootWindow.ViewComponent.ParseAttribute("position", "0, -348", this);
 		isOpening = false;
 	}
 
@@ -183,7 +183,7 @@ public class XUiC_EfficientBaseRepair : XUiController
 		isOpening = false;
 	}
 
-	public static void Open(LocalPlayerUI _playerUi, TileEntityEfficientBaseRepair tileEntity, World _world)
+	public static void Open(LocalPlayerUI _playerUi, TileEntityEfficientBaseRepair tileEntity)
 	{
 		XUiC_EfficientBaseRepair instance = (XUiC_EfficientBaseRepair)_playerUi.xui.FindWindowGroupByName(ID);
 

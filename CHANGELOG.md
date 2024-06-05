@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Possibility to upgrade structures
+- Upgrade stats in the block UI
+
 ## [0.0.3] - 2024-06-04
 
 ### Fixed
