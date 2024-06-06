@@ -183,8 +183,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		if (upgradeProperties.GetString("UpgradeBlock.Item") == "r")
 			return null;
 
-		Log.Out($"{block.Block.GetBlockName()} {upgradeProperties.GetString("UpgradeBlock.Item")} {upgradeProperties.GetString("UpgradeBlock.ItemCount")}");
-
 		return new Dictionary<string, int>(){
 			{
 				upgradeProperties.GetString("UpgradeBlock.Item"),
@@ -437,7 +435,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 				if (!is_visited)
 					visited.Add(pos.ToString(), 0);
 
-				if (is_ignored || is_visited)
+				if (is_ignored || is_visited || block.ischild)
 					continue;
 
 				// allow to include damaged spike blocks
@@ -450,7 +448,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 				}
 				else if (block.Block.Properties.Values.ContainsKey("UpgradeBlock.Item"))
 				{
-					Log.Out("add pos " + pos.ToString());
 					blocksToUpgrade.Add(pos);
 				}
 
