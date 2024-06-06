@@ -172,10 +172,18 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			return null;
 
 		BlockValue block = world.GetBlock(pos);
-		DynamicProperties upgradeProperties = block.Block.UpgradeBlock.Block.Properties;
+		DynamicProperties upgradeProperties = block.Block.Properties;
+
+		if (block.isair || block.isWater || block.ischild)
+			return null;
 
 		if (!upgradeProperties.Values.ContainsKey("UpgradeBlock.Item"))
 			return null;
+
+		if (upgradeProperties.GetString("UpgradeBlock.Item") == "r")
+			return null;
+
+		Log.Out($"{block.Block.GetBlockName()} {upgradeProperties.GetString("UpgradeBlock.Item")} {upgradeProperties.GetString("UpgradeBlock.ItemCount")}");
 
 		return new Dictionary<string, int>(){
 			{
@@ -184,7 +192,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			}
 		};
 	}
-
 
 	private Dictionary<string, int> GetRepairMaterialsForPos(Vector3i pos)
 	{
@@ -424,7 +431,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			{
 				BlockValue block = world.GetBlock(pos);
 
-				bool is_ignored = this.IsBlockIgnored(block);
+				bool is_ignored = IsBlockIgnored(block);
 				bool is_visited = visited.ContainsKey(pos.ToString());
 
 				if (!is_visited)
@@ -441,8 +448,9 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 					blocksToRepair.Add(pos);
 					totalDamagesCount += block.damage;
 				}
-				else if (block.Block.UpgradeBlock.Block.Properties.Values.ContainsKey("UpgradeBlock.Item"))
+				else if (block.Block.Properties.Values.ContainsKey("UpgradeBlock.Item"))
 				{
+					Log.Out("add pos " + pos.ToString());
 					blocksToUpgrade.Add(pos);
 				}
 
