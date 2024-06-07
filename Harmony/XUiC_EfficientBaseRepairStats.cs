@@ -13,6 +13,10 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 
 	private XUiV_Button btnOn_Background;
 
+	private XUiController btnUpgrade;
+
+	private XUiV_Button btnUpgrade_Background;
+
 	private XUiV_Label lblOnOff;
 
 	private XUiV_Sprite sprOnOff;
@@ -60,6 +64,10 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 		btnOn = GetChildById("btnOn");
 		btnOn_Background = (XUiV_Button)btnOn.GetChildById("clickable").ViewComponent;
 		btnOn_Background.Controller.OnPress += BtnOn_OnPress;
+
+		btnUpgrade = GetChildById("btnUpgrade");
+		btnUpgrade_Background = (XUiV_Button)btnUpgrade.GetChildById("clickable").ViewComponent;
+		btnUpgrade_Background.Controller.OnPress += BtnUpgrade_OnPress;
 
 		lblOnOff = (XUiV_Label)GetChildById("lblOnOff").ViewComponent;
 		sprOnOff = (XUiV_Sprite)GetChildById("sprOnOff").ViewComponent;
@@ -196,13 +204,18 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 
 	private void BtnRefresh_OnPress(XUiController _sender, int _mouseButton)
 	{
-		tileEntity.Refresh();
+		tileEntity.ForceRefresh();
 		Manager.PlayInsidePlayerHead("UseActions/chest_tier4_open");
 	}
 
 	private void BtnOn_OnPress(XUiController _sender, int _mouseButton)
 	{
 		tileEntity.Switch();
+	}
+
+	private void BtnUpgrade_OnPress(XUiController _sender, int _mouseButton)
+	{
+		tileEntity.SwitchUpgrade();
 	}
 
 	private void RefreshUpgradeOn(bool upgradeOn)
@@ -269,8 +282,8 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 			{
 				lastOn = tileEntity.IsOn;
 				RefreshIsOn(tileEntity.IsOn);
-				RefreshUpgradeOn(tileEntity.IsOn);
 			}
+			RefreshUpgradeOn(tileEntity.upgradeOn);
 			RefreshStats();
 			RefreshBindings();
 		}
@@ -281,7 +294,7 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 		base.OnOpen();
 		tileEntity.SetUserAccessing(_bUserAccessing: true);
 		RefreshIsOn(tileEntity.IsOn);
-		RefreshUpgradeOn(tileEntity.IsOn);
+		RefreshUpgradeOn(tileEntity.upgradeOn);
 		RefreshBindings();
 		tileEntity.SetModified();
 	}

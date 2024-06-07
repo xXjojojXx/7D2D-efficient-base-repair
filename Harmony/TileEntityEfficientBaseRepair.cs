@@ -37,12 +37,11 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	private bool isOn;
 
+	public bool upgradeOn;
+
 	private bool forceRefresh;
 
-	public bool IsOn
-	{
-		get => isOn;
-	}
+	public bool IsOn => isOn;
 
 	private int elapsedTicksSinceLastRefresh = 0;
 
@@ -463,16 +462,17 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		Log.Out($"[EfficientBaseRepair] {blocksToRepair.Count} blocks to repair. Iterations = {maxBfsIterations - iterations}/{maxBfsIterations}, visited_blocks = {visited.Count}");
 	}
 
-	public void Refresh()
+	public void ForceRefresh()
 	{
 		forceRefresh = true;
 		setModified();
 	}
 
-	private void UpdateStats(World world)
+	private void RefreshStats(World world)
 	{
 		Init(world);
 
+		elapsedTicksSinceLastRefresh = 0;
 		damagedBlockCount = 0;
 		bfsIterationsCount = 0;
 		visitedBlocksCount = 0;
@@ -480,7 +480,11 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		forceRefresh = false;
 
 		AnalyseStructure(ToWorldPos());
+		RefreshMaterialsStats();
+	}
 
+	private void RefreshMaterialsStats()
+	{
 		requiredMaterials = new Dictionary<string, int>();
 
 		foreach (Vector3i position in blocksToRepair)
@@ -499,6 +503,12 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			}
 		}
 
+		if (!upgradeOn)
+		{
+			setModified();
+			return;
+		}
+
 		foreach (Vector3i position in blocksToUpgrade)
 		{
 			Dictionary<string, int> missingMaterials = GetUpgradeMaterialsForPos(position);
@@ -515,7 +525,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			}
 		}
 
-		elapsedTicksSinceLastRefresh = 0;
 		setModified();
 	}
 
@@ -530,6 +539,12 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		setModified();
 	}
 
+	public void SwitchUpgrade()
+	{
+		upgradeOn = !upgradeOn;
+		RefreshMaterialsStats();
+	}
+
 	public override void read(PooledBinaryReader _br, StreamModeRead _eStreamMode)
 	{
 		base.read(_br, _eStreamMode);
@@ -538,6 +553,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		if (_eStreamMode == StreamModeRead.Persistency)
 			return;
 
+		upgradeOn = _br.ReadBoolean();
 		forceRefresh = _br.ReadBoolean();
 		damagedBlockCount = _br.ReadInt32();
 		totalDamagesCount = _br.ReadInt32();
@@ -575,7 +591,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		if (_eStreamMode == StreamModeRead.FromClient && forceRefresh)
 		{
 			Log.Out("[EfficientBaseRepair] Refresh forced from server.");
-			UpdateStats(GameManager.Instance.World);
+			RefreshStats(GameManager.Instance.World);
 		}
 	}
 
@@ -587,6 +603,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		if (_eStreamMode == StreamModeWrite.Persistency)
 			return;
 
+		_bw.Write(upgradeOn);
 		_bw.Write(forceRefresh);
 		_bw.Write(damagedBlockCount);
 		_bw.Write(totalDamagesCount);
@@ -616,7 +633,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		if (_eStreamMode == StreamModeWrite.ToClient && forceRefresh)
 		{
 			Log.Out("[EfficientBaseRepair] Refresh forced from Client.");
-			UpdateStats(GameManager.Instance.World);
+			RefreshStats(GameManager.Instance.World);
 		}
 	}
 
@@ -647,7 +664,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		}
 
 		if (blocksToRepair == null || (elapsedTicksSinceLastRefresh >= refreshRate && refreshRate > 0))
-			UpdateStats(world);
+			RefreshStats(world);
 
 		if (blocksToRepair == null)
 		{
