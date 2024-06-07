@@ -80,13 +80,18 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	public string RepairTime()
 	{
-		if (repairRate <= 0)
-			return "00:00:00";
-
 		const float tickDuration_s = 2f;
-		float repairTime_s = (float)(totalDamagesCount * tickDuration_s) / repairRate;
 
-		return TimeSpan.FromSeconds(repairTime_s).ToString(@"hh\:mm\:ss");
+		float repairTime_s = 0f;
+		float upgradeTime_s = 0f;
+
+		if (repairRate > 0)
+			repairTime_s = (float)(totalDamagesCount * tickDuration_s) / repairRate;
+
+		if (upgradeRate > 0 && upgradeOn)
+			upgradeTime_s = (float)(upgradableBlockCount * tickDuration_s) / upgradeRate;
+
+		return TimeSpan.FromSeconds(repairTime_s + upgradeTime_s).ToString(@"hh\:mm\:ss");
 	}
 
 	public Dictionary<string, int> ItemsToDict()
@@ -415,7 +420,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		blocksToRepair = new List<Vector3i>();
 		blocksToUpgrade = new List<Vector3i>();
 
-		List<Vector3i> neighbors = this.GetNeighbors(initial_pos);
+		List<Vector3i> neighbors = GetNeighbors(initial_pos);
 		Dictionary<string, int> visited = new Dictionary<string, int>();
 
 		int iterations = maxBfsIterations;
@@ -431,13 +436,13 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			{
 				BlockValue block = world.GetBlock(pos);
 
-				bool is_ignored = IsBlockIgnored(block);
-				bool is_visited = visited.ContainsKey(pos.ToString());
+				bool isIgnored = IsBlockIgnored(block);
+				bool isVisited = visited.ContainsKey(pos.ToString());
 
-				if (!is_visited)
+				if (!isVisited)
 					visited.Add(pos.ToString(), 0);
 
-				if (is_ignored || is_visited || block.ischild)
+				if (isIgnored || isVisited || block.ischild)
 					continue;
 
 				// allow to include damaged spike blocks
@@ -453,7 +458,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 					blocksToUpgrade.Add(pos);
 				}
 
-				neighbors.AddRange(this.GetNeighbors(pos));
+				neighbors.AddRange(GetNeighbors(pos));
 			}
 		}
 
