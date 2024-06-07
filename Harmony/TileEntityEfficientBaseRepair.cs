@@ -21,6 +21,8 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	private bool autoTurnOff = false;
 
+	private int upgradeRate;
+
 	/* PUBLIC STATS */
 
 	public int damagedBlockCount = 0;
@@ -60,7 +62,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		isOn = false;
 	}
 
-	public void Init(World _world)
+	private void Init(World _world)
 	{
 		world = _world;
 
@@ -73,6 +75,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		playRepairSound = properties.GetBool("PlayRepairSound");
 		activeDuringBloodMoon = properties.GetBool("ActiveDuringBloodMoon");
 		autoTurnOff = properties.GetBool("AutoTurnOff");
+		upgradeRate = properties.GetInt("UpgradeRate");
 	}
 
 	public string RepairTime()
@@ -560,6 +563,8 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		visitedBlocksCount = _br.ReadInt32();
 		bfsIterationsCount = _br.ReadInt32();
 		upgradableBlockCount = _br.ReadInt32();
+		upgradeRate = _br.ReadInt32();
+		repairRate = _br.ReadInt32();
 
 		requiredMaterials = new Dictionary<string, int>();
 
@@ -610,6 +615,8 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		_bw.Write(visitedBlocksCount);
 		_bw.Write(bfsIterationsCount);
 		_bw.Write(upgradableBlockCount);
+		_bw.Write(upgradeRate);
+		_bw.Write(repairRate);
 
 		if (requiredMaterials == null)
 			requiredMaterials = new Dictionary<string, int>();
