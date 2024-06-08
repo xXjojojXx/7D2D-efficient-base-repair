@@ -47,6 +47,10 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	private int elapsedTicksSinceLastRefresh = 0;
 
+	private string UpgradeSound => "nailgun_fire";
+
+	private string RepairSound(BlockValue block) => string.Format("ImpactSurface/metalhit{0}", block.Block.blockMaterial.SurfaceCategory);
+
 	private World world;
 
 	public List<Vector3i> blocksToRepair;
@@ -345,7 +349,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		return (int)Mathf.Ceil(repairedDamages);
 	}
 
-	private void UpdateBlock(Chunk chunkFromWorldPos, BlockValue block, Vector3i pos)
+	private void UpdateBlock(Chunk chunkFromWorldPos, BlockValue block, Vector3i pos, string audioClipName)
 	{
 		// BroadCast the changes done to the block (copied from ocbClaimAutoRepair)
 		world.SetBlock(chunkFromWorldPos.ClrIdx, pos, block, false, false);
@@ -356,13 +360,13 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			block.Block.Density
 		);
 
-		if (!playRepairSound)
+		if (!playRepairSound || audioClipName == string.Empty)
 			return;
 
 		// play material specific sound (copied from ocbClaimAutoRepair)
 		world.GetGameManager().PlaySoundAtPositionServer(
 			_pos: pos.ToVector3(),
-			_audioClipName: string.Format("ImpactSurface/metalhit{0}", block.Block.blockMaterial.SurfaceCategory),
+			_audioClipName: audioClipName,
 			_mode: AudioRolloffMode.Logarithmic,
 			_distance: 100
 		);
@@ -410,7 +414,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 		Log.Out($"[EfficientBaseRepair] {repairableDamages} damage points repaired on block {pos}");
 
-		UpdateBlock(chunkFromWorldPos, block, pos);
+		UpdateBlock(chunkFromWorldPos, block, pos, RepairSound(block));
 
 		return repairableDamages;
 	}
@@ -422,6 +426,9 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 		Dictionary<string, int> availableMaterials = ItemsToDict();
 		Dictionary<string, int> requiredMaterials = GetUpgradeMaterialsForPos(pos);
+
+		if (requiredMaterials == null)
+			return false;
 
 		foreach (var entry in requiredMaterials)
 		{
@@ -440,9 +447,10 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		BlockValue currentBlock = world.GetBlock(pos);
 		BlockValue upgradedBlock = currentBlock.Block.UpgradeBlock;
 
-		upgradedBlock.meta = currentBlock.meta;
+		upgradedBlock.rotation = currentBlock.rotation;
+		// upgradedBlock.meta = currentBlock.meta;
 
-		UpdateBlock(chunk, upgradedBlock, pos);
+		UpdateBlock(chunk, upgradedBlock, pos, UpgradeSound);
 		SetBlockUpgradable(pos);
 
 		return true;
@@ -754,6 +762,8 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	private bool UpgradeBlocks(World world)
 	{
+		if (!upgradeOn)
+			return false;
 
 		int upgradableBlocksCount = upgradeRate > 0 ? upgradeRate : int.MaxValue;
 		int upgradedBlocksCount = 0;
