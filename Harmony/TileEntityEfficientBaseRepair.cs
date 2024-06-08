@@ -23,6 +23,8 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	private int upgradeRate;
 
+	private bool keepPaintAfterUpgrade;
+
 	/* PUBLIC STATS */
 
 	public int damagedBlockCount = 0;
@@ -80,6 +82,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		activeDuringBloodMoon = properties.GetBool("ActiveDuringBloodMoon");
 		autoTurnOff = properties.GetBool("AutoTurnOff");
 		upgradeRate = properties.GetInt("UpgradeRate");
+		keepPaintAfterUpgrade = properties.GetBool("KeepPaintAfterUpgrade");
 	}
 
 	public string RepairTime()
@@ -448,7 +451,11 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		BlockValue upgradedBlock = currentBlock.Block.UpgradeBlock;
 
 		upgradedBlock.rotation = currentBlock.rotation;
-		// upgradedBlock.meta = currentBlock.meta;
+
+		Log.Out($"keepPaintAfterUpgrade={keepPaintAfterUpgrade}");
+
+		if (!keepPaintAfterUpgrade)
+			GameManager.Instance.SetBlockTextureServer(pos, BlockFace.None, 0, -1);
 
 		UpdateBlock(chunk, upgradedBlock, pos, UpgradeSound);
 		SetBlockUpgradable(pos);
