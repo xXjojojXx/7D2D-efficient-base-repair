@@ -415,6 +415,39 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		return repairableDamages;
 	}
 
+	private bool TryUpgradeBlock(World world, Vector3i pos)
+	{
+		if (!(world.GetChunkFromWorldPos(pos) is Chunk chunk))
+			return false;
+
+		Dictionary<string, int> availableMaterials = ItemsToDict();
+		Dictionary<string, int> requiredMaterials = GetUpgradeMaterialsForPos(pos);
+
+		foreach (var entry in requiredMaterials)
+		{
+			if (!availableMaterials.ContainsKey(entry.Key))
+				return false;
+
+			int availableItemCount = availableMaterials[entry.Key];
+			int requiredItemCount = requiredMaterials[entry.Key];
+
+			if (availableItemCount < requiredItemCount)
+				return false;
+		}
+
+		TakeRepairMaterials(requiredMaterials);
+
+		BlockValue currentBlock = world.GetBlock(pos);
+		BlockValue upgradedBlock = currentBlock.Block.UpgradeBlock;
+
+		upgradedBlock.meta = currentBlock.meta;
+
+		UpdateBlock(chunk, upgradedBlock, pos);
+		SetBlockUpgradable(pos);
+
+		return true;
+	}
+
 	public void AnalyseStructure(Vector3i initial_pos)
 	{
 		blocksToRepair = new List<Vector3i>();
@@ -665,36 +698,38 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		return bloodMoonActive;
 	}
 
-	public override void UpdateTick(World world)
+	private void SetBlockUpgradable(Vector3i position)
 	{
-		base.UpdateTick(world);
+		Dictionary<string, int> upgradeMaterials = GetUpgradeMaterialsForPos(position);
 
-		if (!isOn || BloodMoonActive(world))
-		{
-			Logging($"TileEntity OFF");
+		if (upgradeMaterials == null)
 			return;
-		}
 
-		if (blocksToRepair == null || (elapsedTicksSinceLastRefresh >= refreshRate && refreshRate > 0))
-			RefreshStats(world);
+		blocksToUpgrade.Add(position);
+		upgradableBlockCount++;
 
-		if (blocksToRepair == null)
+		foreach (KeyValuePair<string, int> entry in upgradeMaterials)
 		{
-			Log.Warning("[EfficientBaseRepair] TileEntityEfficientBaseRepair.blocksToRepair initializing failed.");
-			return;
-		}
+			if (!requiredMaterials.ContainsKey(entry.Key))
+				requiredMaterials[entry.Key] = 0;
 
+			requiredMaterials[entry.Key] += entry.Value;
+		}
+	}
+
+	private bool RepairBlocks(World world)
+	{
 		Logging($"TickRepair, {blocksToRepair.Count} blocks to repair, needMaterials={needMaterials}");
 
 		int repairableDamages = repairRate > 0 ? repairRate : int.MaxValue;
 
-		bool wasModified = false;
+		bool wasRepaired = false;
 
 		foreach (Vector3i position in new List<Vector3i>(blocksToRepair))
 		{
 			int repairedDamages = TryRepairBlock(world, position, repairableDamages);
 
-			wasModified |= repairedDamages > 0;
+			wasRepaired |= repairedDamages > 0;
 
 			repairableDamages -= repairedDamages;
 
@@ -705,6 +740,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 				Logging($"full repaired block at {position}");
 				blocksToRepair.Remove(position);
 				damagedBlockCount--;
+				SetBlockUpgradable(position);
 			}
 
 			Logging($"BlockEnd, repairableDamageCount={repairableDamages}\n");
@@ -713,7 +749,52 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 				break;
 		}
 
-		elapsedTicksSinceLastRefresh++;
+		return wasRepaired;
+	}
+
+	private bool UpgradeBlocks(World world)
+	{
+
+		int upgradableBlocksCount = upgradeRate > 0 ? upgradeRate : int.MaxValue;
+		int upgradedBlocksCount = 0;
+
+		foreach (Vector3i position in new List<Vector3i>(blocksToUpgrade))
+		{
+			if (!TryUpgradeBlock(world, position))
+				continue;
+
+			upgradableBlocksCount--;
+			upgradedBlocksCount++;
+
+			blocksToUpgrade.Remove(position);
+
+			if (upgradableBlocksCount == 0)
+				break;
+		}
+
+		return upgradedBlocksCount > 0;
+	}
+
+	public override void UpdateTick(World world)
+	{
+		base.UpdateTick(world);
+
+		if (!isOn || BloodMoonActive(world))
+			return;
+
+		if (blocksToRepair == null || (elapsedTicksSinceLastRefresh >= refreshRate && refreshRate > 0))
+			RefreshStats(world);
+
+		if (blocksToRepair == null)
+		{
+			Log.Warning("[EfficientBaseRepair] TileEntityEfficientBaseRepair.blocksToRepair initializing failed.");
+			return;
+		}
+
+		bool wasModified = false;
+
+		wasModified |= RepairBlocks(world);
+		wasModified |= UpgradeBlocks(world);
 
 		if (wasModified)
 		{
@@ -726,5 +807,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		}
 
 		Logging("[EfficientBaseRepair] TickEnd\n\n");
+		elapsedTicksSinceLastRefresh++;
 	}
 }

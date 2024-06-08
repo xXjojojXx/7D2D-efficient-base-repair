@@ -6,10 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- On dedicated servers, the structure was analysed three times at each refresh.
+
 ### Added
 
 - Possibility to upgrade structures
-- Upgrade stats in the block UI
+- Add the number of upgradable blocks in the stats pannel of the UI
+- Add the total time (repairing + upgrading) in the stats pannel of the UI
+- New upgrade button
+- New xml parameter `UpgradeRate`
+
 
 ## [0.0.3] - 2024-06-04
 
@@ -34,7 +42,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Set the repairation algorithm parametrizable from xml files
 
 
-[unreleased]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/0.0.3...HEAD
+[unreleased]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/0.0.3...unreleased
 [0.0.3]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/0.0.2...0.0.3
 [0.0.2]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/0.0.1...0.0.2
 [0.0.1]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/tree/0.0.1
