@@ -390,27 +390,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		BlockValue block = world.GetBlock(pos);
 		List<SItemNameCount> repairItems = block.Block.RepairItems;
 
-		const uint trapSpikesWoodDmg0_id = 21469;
-		const uint trapSpikesIronDmg0_id = 21476;
-
-		// handle repairing of spike blocks
-		switch (block.Block.GetBlockName())
-		{
-			case "trapSpikesWoodDmg1":
-			case "trapSpikesWoodDmg2":
-				block = new BlockValue(trapSpikesWoodDmg0_id);
-				break;
-
-			case "trapSpikesIronDmg1":
-			case "trapSpikesIronDmg2":
-				block = new BlockValue(trapSpikesIronDmg0_id);
-				break;
-
-			default:
-				// Do nothing -> block = block...
-				break;
-		}
-
 		int repairableDamages = ComputeRepairableDamages(block, maxRepairableDamages, repairItems);
 
 		if (repairableDamages <= 0)
@@ -496,10 +475,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 				if (isIgnored || isVisited || block.ischild)
 					continue;
 
-				// allow to include damaged spike blocks
-				string block_name = block.Block.GetBlockName();
-
-				if (block.damage > 0 || block_name.Contains("Dmg1") || block_name.Contains("Dmg2"))
+				if (block.damage > 0)
 				{
 					blocksToRepair.Add(pos);
 					totalDamagesCount += block.damage;

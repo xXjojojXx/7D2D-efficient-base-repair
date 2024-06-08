@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 
 - On dedicated servers, the structure was analysed three times at each refresh.
+- Spike blocks at stage dmg=0 or gmg=1 were upgraded for free
 
 ### Added
 
