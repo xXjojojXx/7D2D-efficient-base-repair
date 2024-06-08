@@ -701,12 +701,19 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			stack.Clone().Write(_bw);
 		}
 
+		if (_eStreamMode == StreamModeWrite.ToServer)
+			return;
+
 		// trigger forceRefresh=true in single player mode
 		// TODO: try with SingletonMonoBehaviour<ConnectionManager>.Instance.IsSinglePlayer
-		if (_eStreamMode == StreamModeWrite.ToClient && forceRefresh)
+		if (forceRefresh)
 		{
 			Log.Out("[EfficientBaseRepair] Refresh forced from Client.");
 			RefreshStats(GameManager.Instance.World);
+		}
+		else
+		{
+			RefreshMaterialsStats();
 		}
 	}
 
