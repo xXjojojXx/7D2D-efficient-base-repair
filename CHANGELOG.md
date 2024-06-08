@@ -16,14 +16,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Changed
 
 - The xml parameter `NeedsMaterials` was renamed to `NeedsMaterialsForRepair`
+- The default xml parameter `AutoTurnOff` was set to false
 
 ### Added
 
 - new batch script to start a local dedicated server
-- Possibility to upgrade structures
+- Add possibility to upgrade structures with a dedicated button
 - Add the number of upgradable blocks in the stats pannel of the UI
 - Add the total time (repairing + upgrading) in the stats pannel of the UI
-- New upgrade button
 - New xml parameter `UpgradeRate`
 - New xml parameter `NeedsMaterialsForUpgrade`
 - New xml parameter `KeepPaintAfterUpgrade`
