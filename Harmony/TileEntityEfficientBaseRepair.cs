@@ -465,6 +465,8 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		UpdateBlock(chunk, upgradedBlock, pos, UpgradeSound);
 		SetBlockUpgradable(pos);
 
+		Log.Out($"[EfficientBaseRepair] Upgrade to {upgradedBlock.Block.GetBlockName()} at pos {pos}");
+
 		return true;
 	}
 
@@ -546,6 +548,9 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	private void RefreshMaterialsStats()
 	{
+		if (blocksToRepair == null)
+			return;
+
 		requiredMaterials = new Dictionary<string, int>();
 
 		foreach (Vector3i position in blocksToRepair)
@@ -564,11 +569,8 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			}
 		}
 
-		if (!upgradeOn)
-		{
-			setModified();
+		if (!upgradeOn || blocksToUpgrade == null)
 			return;
-		}
 
 		foreach (Vector3i position in blocksToUpgrade)
 		{
@@ -585,8 +587,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 				requiredMaterials[entry.Key] += entry.Value;
 			}
 		}
-
-		setModified();
 	}
 
 	public void Switch(bool forceRefresh_ = false)
@@ -603,18 +603,18 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 	public void SwitchUpgrade()
 	{
 		upgradeOn = !upgradeOn;
-		RefreshMaterialsStats();
+		setModified();
 	}
 
 	public override void read(PooledBinaryReader _br, StreamModeRead _eStreamMode)
 	{
 		base.read(_br, _eStreamMode);
 		isOn = _br.ReadBoolean();
+		upgradeOn = _br.ReadBoolean();
 
 		if (_eStreamMode == StreamModeRead.Persistency)
 			return;
 
-		upgradeOn = _br.ReadBoolean();
 		forceRefresh = _br.ReadBoolean();
 		damagedBlockCount = _br.ReadInt32();
 		totalDamagesCount = _br.ReadInt32();
@@ -624,8 +624,8 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		upgradeRate = _br.ReadInt32();
 		repairRate = _br.ReadInt32();
 
+		// send requiredMaterials from server to client, to update Materials panel.
 		requiredMaterials = new Dictionary<string, int>();
-
 		int requiredMaterialsCount = _br.ReadInt32();
 		if (requiredMaterialsCount > 0)
 		{
@@ -650,11 +650,20 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			}
 		}
 
+		if (_eStreamMode == StreamModeRead.FromServer)
+			return;
+
 		// force refresh on server side if he receives the param forceRefresh=true from client.
-		if (_eStreamMode == StreamModeRead.FromClient && forceRefresh)
+		if (forceRefresh)
 		{
 			Log.Out("[EfficientBaseRepair] Refresh forced from server.");
 			RefreshStats(GameManager.Instance.World);
+			setModified();
+		}
+		else
+		{
+			RefreshMaterialsStats();
+			setModified();
 		}
 	}
 
@@ -662,11 +671,11 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 	{
 		base.write(_bw, _eStreamMode);
 		_bw.Write(isOn);
+		_bw.Write(upgradeOn);
 
 		if (_eStreamMode == StreamModeWrite.Persistency)
 			return;
 
-		_bw.Write(upgradeOn);
 		_bw.Write(forceRefresh);
 		_bw.Write(damagedBlockCount);
 		_bw.Write(totalDamagesCount);

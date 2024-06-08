@@ -296,7 +296,6 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 		RefreshIsOn(tileEntity.IsOn);
 		RefreshUpgradeOn(tileEntity.upgradeOn);
 		RefreshBindings();
-		tileEntity.SetModified();
 	}
 
 	public override void OnClose()
