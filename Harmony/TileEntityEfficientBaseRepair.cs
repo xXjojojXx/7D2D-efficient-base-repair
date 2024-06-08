@@ -719,6 +719,9 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		blocksToUpgrade.Add(position);
 		upgradableBlockCount++;
 
+		if (!upgradeOn)
+			return;
+
 		foreach (KeyValuePair<string, int> entry in upgradeMaterials)
 		{
 			if (!requiredMaterials.ContainsKey(entry.Key))
