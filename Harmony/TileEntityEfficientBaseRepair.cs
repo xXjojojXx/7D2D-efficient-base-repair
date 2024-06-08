@@ -793,7 +793,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		if (!upgradeOn)
 			return false;
 
-		int upgradableBlocksCount = upgradeRate > 0 ? upgradeRate : int.MaxValue;
+		int upgradeCountTarget = upgradeRate > 0 ? upgradeRate : int.MaxValue;
 		int upgradedBlocksCount = 0;
 
 		foreach (Vector3i position in new List<Vector3i>(blocksToUpgrade))
@@ -801,12 +801,13 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			if (!TryUpgradeBlock(world, position))
 				continue;
 
-			upgradableBlocksCount--;
+			upgradableBlockCount--;
+			upgradeCountTarget--;
 			upgradedBlocksCount++;
 
 			blocksToUpgrade.Remove(position);
 
-			if (upgradableBlocksCount == 0)
+			if (upgradeCountTarget == 0)
 				break;
 		}
 
