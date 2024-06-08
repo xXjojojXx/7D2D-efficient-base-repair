@@ -6,18 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.1.0] - 2024-06-09
+
 ### Fixed
 
 - On dedicated servers, the structure was analysed three times at each refresh.
-- Spike blocks at stage dmg=0 or gmg=1 were upgraded for free
+- Spike blocks at stage dmg=0 or dmg=1 were upgraded for free
+
+### Changed
+
+- The xml parameter `NeedsMaterials` was renamed to `NeedsMaterialsForRepair`
 
 ### Added
 
+- new batch script to start a local dedicated server
 - Possibility to upgrade structures
 - Add the number of upgradable blocks in the stats pannel of the UI
 - Add the total time (repairing + upgrading) in the stats pannel of the UI
 - New upgrade button
 - New xml parameter `UpgradeRate`
+- New xml parameter `NeedsMaterialsForUpgrade`
+- New xml parameter `KeepPaintAfterUpgrade`
 
 
 ## [0.0.3] - 2024-06-04
@@ -44,6 +53,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 
 [unreleased]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/0.0.3...unreleased
+[0.1.0]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/0.0.3...0.1.0
 [0.0.3]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/0.0.2...0.0.3
 [0.0.2]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/0.0.1...0.0.2
 [0.0.1]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/tree/0.0.1
