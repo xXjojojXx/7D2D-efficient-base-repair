@@ -12,6 +12,8 @@ cd %MOD_PATH%\..
 
 7z.exe x "%~dp0..\EfficientBaseRepair.zip" > nul
 
-taskkill /IM 7DaysToDie.exe /F
+taskkill /IM 7DaysToDie.exe /F >nul 2>&1
 
 start steam://rungameid/251570
+
+exit /b 0

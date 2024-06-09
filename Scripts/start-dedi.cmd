@@ -19,6 +19,8 @@ cd %MOD_PATH%\..
 
 cd ..
 
-taskkill /IM 7DaysToDieServer.exe /F
+taskkill /IM 7DaysToDieServer.exe /F >nul 2>&1
 
 call "startdedicated.bat"
+
+exit /b 0
