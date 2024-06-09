@@ -9,7 +9,9 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 	/* XML PARAMS */
 	public int maxBfsIterations;
 
-	private bool needMaterials;
+	private bool needMaterialsForRepair;
+
+	private bool needMaterialsForUpgrade;
 
 	private bool activeDuringBloodMoon;
 
@@ -21,9 +23,15 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	private bool autoTurnOff = false;
 
+	private int upgradeRate;
+
+	private bool keepPaintAfterUpgrade;
+
 	/* PUBLIC STATS */
 
 	public int damagedBlockCount = 0;
+
+	public int upgradableBlockCount = 0;
 
 	public int visitedBlocksCount = 0;
 
@@ -35,18 +43,23 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	private bool isOn;
 
+	public bool upgradeOn;
+
 	private bool forceRefresh;
 
-	public bool IsOn
-	{
-		get => isOn;
-	}
+	public bool IsOn => isOn;
 
 	private int elapsedTicksSinceLastRefresh = 0;
+
+	private string UpgradeSound => "nailgun_fire";
+
+	private string RepairSound(BlockValue block) => string.Format("ImpactSurface/metalhit{0}", block.Block.blockMaterial.SurfaceCategory);
 
 	private World world;
 
 	public List<Vector3i> blocksToRepair;
+
+	List<Vector3i> blocksToUpgrade = new List<Vector3i>();
 
 	public Dictionary<string, int> requiredMaterials;
 
@@ -57,30 +70,38 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		isOn = false;
 	}
 
-	public void Init(World _world)
+	private void Init(World _world)
 	{
 		world = _world;
 
 		DynamicProperties properties = _world.GetBlock(ToWorldPos()).Block.Properties;
 
 		maxBfsIterations = properties.GetInt("MaxBfsIterations");
-		needMaterials = properties.GetBool("NeedsMaterials");
+		needMaterialsForRepair = properties.GetBool("NeedsMaterialsForRepair");
+		needMaterialsForUpgrade = properties.GetBool("NeedsMaterialsForUpgrade");
 		repairRate = properties.GetInt("RepairRate");
 		refreshRate = properties.GetInt("RefreshRate");
 		playRepairSound = properties.GetBool("PlayRepairSound");
 		activeDuringBloodMoon = properties.GetBool("ActiveDuringBloodMoon");
 		autoTurnOff = properties.GetBool("AutoTurnOff");
+		upgradeRate = properties.GetInt("UpgradeRate");
+		keepPaintAfterUpgrade = properties.GetBool("KeepPaintAfterUpgrade");
 	}
 
 	public string RepairTime()
 	{
-		if (repairRate <= 0)
-			return "00:00:00";
-
 		const float tickDuration_s = 2f;
-		float repairTime_s = (float)(totalDamagesCount * tickDuration_s) / repairRate;
 
-		return TimeSpan.FromSeconds(repairTime_s).ToString(@"hh\:mm\:ss");
+		float repairTime_s = 0f;
+		float upgradeTime_s = 0f;
+
+		if (repairRate > 0)
+			repairTime_s = (float)(totalDamagesCount * tickDuration_s) / repairRate;
+
+		if (upgradeRate > 0 && upgradeOn)
+			upgradeTime_s = (float)(upgradableBlockCount * tickDuration_s) / upgradeRate;
+
+		return TimeSpan.FromSeconds(repairTime_s + upgradeTime_s).ToString(@"hh\:mm\:ss");
 	}
 
 	public Dictionary<string, int> ItemsToDict()
@@ -162,7 +183,32 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		);
 	}
 
-	private Dictionary<string, int> GetMissingMaterialsForPos(Vector3i pos)
+	private Dictionary<string, int> GetUpgradeMaterialsForPos(Vector3i pos)
+	{
+		if (world.GetChunkFromWorldPos(pos) == null)
+			return null;
+
+		BlockValue block = world.GetBlock(pos);
+		DynamicProperties upgradeProperties = block.Block.Properties;
+
+		if (block.isair || block.isWater || block.ischild)
+			return null;
+
+		if (!upgradeProperties.Values.ContainsKey("UpgradeBlock.Item"))
+			return null;
+
+		if (upgradeProperties.GetString("UpgradeBlock.Item") == "r")
+			return null;
+
+		return new Dictionary<string, int>(){
+			{
+				upgradeProperties.GetString("UpgradeBlock.Item"),
+				upgradeProperties.GetInt("UpgradeBlock.ItemCount")
+			}
+		};
+	}
+
+	private Dictionary<string, int> GetRepairMaterialsForPos(Vector3i pos)
 	{
 		if (world.GetChunkFromWorldPos(pos) == null)
 			return null;
@@ -230,7 +276,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		return totalTaken;
 	}
 
-	public int TakeRepairMaterials(Dictionary<string, int> materials)
+	public int TakeRepairMaterials(Dictionary<string, int> materials, bool needMaterials)
 	{
 		int totalTaken = 0;
 
@@ -259,6 +305,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 	{
 		int targetRepairedDamages = Mathf.Min(block.damage, maxRepairableDamages);
 
+		Logging($"needMaterials={needMaterialsForRepair}");
 		Logging($"block.damage={block.damage}");
 		Logging($"block.Block.MaxDamage={block.Block.MaxDamage}");
 		Logging($"maxRepairableDamages={maxRepairableDamages}");
@@ -287,7 +334,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			int availableItemCount = itemsDict.TryGetValue(item.ItemName, out availableItemCount) ? availableItemCount : 0;
 
 			// stop trying to repair the block if one material is missing
-			if (availableItemCount < targetItemCount && needMaterials)
+			if (needMaterialsForRepair && availableItemCount < targetItemCount)
 			{
 				return 0;
 			}
@@ -299,7 +346,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			Logging($"totalRequired={totalRequired}");
 		}
 
-		int totalTaken = TakeRepairMaterials(materialsToTake);
+		int totalTaken = TakeRepairMaterials(materialsToTake, needMaterialsForRepair);
 
 		float repairedDamages = (float)block.damage * totalTaken / totalRequired;
 
@@ -309,7 +356,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		return (int)Mathf.Ceil(repairedDamages);
 	}
 
-	private void UpdateBlock(Chunk chunkFromWorldPos, BlockValue block, Vector3i pos)
+	private void UpdateBlock(Chunk chunkFromWorldPos, BlockValue block, Vector3i pos, string audioClipName)
 	{
 		// BroadCast the changes done to the block (copied from ocbClaimAutoRepair)
 		world.SetBlock(chunkFromWorldPos.ClrIdx, pos, block, false, false);
@@ -320,13 +367,13 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			block.Block.Density
 		);
 
-		if (!playRepairSound)
+		if (!playRepairSound || audioClipName == string.Empty)
 			return;
 
 		// play material specific sound (copied from ocbClaimAutoRepair)
 		world.GetGameManager().PlaySoundAtPositionServer(
 			_pos: pos.ToVector3(),
-			_audioClipName: string.Format("ImpactSurface/metalhit{0}", block.Block.blockMaterial.SurfaceCategory),
+			_audioClipName: audioClipName,
 			_mode: AudioRolloffMode.Logarithmic,
 			_distance: 100
 		);
@@ -343,27 +390,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		BlockValue block = world.GetBlock(pos);
 		List<SItemNameCount> repairItems = block.Block.RepairItems;
 
-		const uint trapSpikesWoodDmg0_id = 21469;
-		const uint trapSpikesIronDmg0_id = 21476;
-
-		// handle repairing of spike blocks
-		switch (block.Block.GetBlockName())
-		{
-			case "trapSpikesWoodDmg1":
-			case "trapSpikesWoodDmg2":
-				block = new BlockValue(trapSpikesWoodDmg0_id);
-				break;
-
-			case "trapSpikesIronDmg1":
-			case "trapSpikesIronDmg2":
-				block = new BlockValue(trapSpikesIronDmg0_id);
-				break;
-
-			default:
-				// Do nothing -> block = block...
-				break;
-		}
-
 		int repairableDamages = ComputeRepairableDamages(block, maxRepairableDamages, repairItems);
 
 		if (repairableDamages <= 0)
@@ -372,17 +398,59 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		block.damage -= repairableDamages;
 		totalDamagesCount -= repairableDamages;
 
-		Log.Out($"[EfficientBaseRepair] {repairableDamages} damage points repaired on block {pos}");
-
-		UpdateBlock(chunkFromWorldPos, block, pos);
+		UpdateBlock(chunkFromWorldPos, block, pos, RepairSound(block));
 
 		return repairableDamages;
 	}
 
-	public List<Vector3i> GetBlocksToRepair(Vector3i initial_pos)
+	private bool TryUpgradeBlock(World world, Vector3i pos)
 	{
-		List<Vector3i> blocks_to_repair = new List<Vector3i>();
-		List<Vector3i> neighbors = this.GetNeighbors(initial_pos);
+		if (!(world.GetChunkFromWorldPos(pos) is Chunk chunk))
+			return false;
+
+		Dictionary<string, int> availableMaterials = ItemsToDict();
+		Dictionary<string, int> requiredMaterials = GetUpgradeMaterialsForPos(pos);
+
+		if (requiredMaterials == null)
+			return false;
+
+		foreach (var entry in requiredMaterials)
+		{
+			if (!needMaterialsForUpgrade)
+				continue;
+
+			if (!availableMaterials.ContainsKey(entry.Key))
+				return false;
+
+			int availableItemCount = availableMaterials[entry.Key];
+			int requiredItemCount = requiredMaterials[entry.Key];
+
+			if (availableItemCount < requiredItemCount)
+				return false;
+		}
+
+		TakeRepairMaterials(requiredMaterials, needMaterialsForUpgrade);
+
+		BlockValue currentBlock = world.GetBlock(pos);
+		BlockValue upgradedBlock = currentBlock.Block.UpgradeBlock;
+
+		upgradedBlock.rotation = currentBlock.rotation;
+
+		if (!keepPaintAfterUpgrade)
+			GameManager.Instance.SetBlockTextureServer(pos, BlockFace.None, 0, -1);
+
+		UpdateBlock(chunk, upgradedBlock, pos, UpgradeSound);
+		SetBlockUpgradable(pos);
+
+		return true;
+	}
+
+	public void AnalyseStructure(Vector3i initial_pos)
+	{
+		blocksToRepair = new List<Vector3i>();
+		blocksToUpgrade = new List<Vector3i>();
+
+		List<Vector3i> neighbors = GetNeighbors(initial_pos);
 		Dictionary<string, int> visited = new Dictionary<string, int>();
 
 		int iterations = maxBfsIterations;
@@ -398,62 +466,71 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			{
 				BlockValue block = world.GetBlock(pos);
 
-				bool is_ignored = this.IsBlockIgnored(block);
-				bool is_visited = visited.ContainsKey(pos.ToString());
+				bool isIgnored = IsBlockIgnored(block);
+				bool isVisited = visited.ContainsKey(pos.ToString());
 
-				if (!is_visited)
+				if (!isVisited)
 					visited.Add(pos.ToString(), 0);
 
-				if (is_ignored || is_visited)
+				if (isIgnored || isVisited || block.ischild)
 					continue;
 
-				// allow to include damaged spike blocks
-				string block_name = block.Block.GetBlockName();
-
-				if (block.damage > 0 || block_name.Contains("Dmg1") || block_name.Contains("Dmg2"))
+				if (block.damage > 0)
 				{
-					blocks_to_repair.Add(pos);
+					blocksToRepair.Add(pos);
 					totalDamagesCount += block.damage;
 				}
+				else if (block.Block.Properties.Values.ContainsKey("UpgradeBlock.Item"))
+				{
+					blocksToUpgrade.Add(pos);
+				}
 
-				neighbors.AddRange(this.GetNeighbors(pos));
+				neighbors.AddRange(GetNeighbors(pos));
 			}
 		}
 
-		damagedBlockCount = blocks_to_repair.Count;
+		damagedBlockCount = blocksToRepair.Count;
 		bfsIterationsCount = maxBfsIterations - iterations;
 		visitedBlocksCount = visited.Count;
+		upgradableBlockCount = blocksToUpgrade.Count;
 
-		Log.Out($"[EfficientBaseRepair] {blocks_to_repair.Count} blocks to repair. Iterations = {maxBfsIterations - iterations}/{maxBfsIterations}, visited_blocks = {visited.Count}");
-
-		return blocks_to_repair;
+		Log.Out($"[EfficientBaseRepair] damagedBlockCount    = {blocksToRepair.Count}");
+		Log.Out($"[EfficientBaseRepair] upgradableBlockCount = {blocksToRepair.Count}");
+		Log.Out($"[EfficientBaseRepair] Iterations           = {maxBfsIterations - iterations}/{maxBfsIterations}");
+		Log.Out($"[EfficientBaseRepair] visited_blocks       = {visited.Count}");
 	}
 
-	public void Refresh()
+	public void ForceRefresh()
 	{
 		forceRefresh = true;
 		setModified();
 	}
 
-	private void UpdateStats(World world)
+	private void RefreshStats(World world)
 	{
 		Init(world);
 
+		elapsedTicksSinceLastRefresh = 0;
 		damagedBlockCount = 0;
 		bfsIterationsCount = 0;
 		visitedBlocksCount = 0;
 		totalDamagesCount = 0;
 		forceRefresh = false;
 
-		Vector3i block_position = ToWorldPos();
+		AnalyseStructure(ToWorldPos());
+		RefreshMaterialsStats();
+	}
 
-		blocksToRepair = GetBlocksToRepair(block_position);
+	private void RefreshMaterialsStats()
+	{
+		if (blocksToRepair == null)
+			return;
 
 		requiredMaterials = new Dictionary<string, int>();
 
 		foreach (Vector3i position in blocksToRepair)
 		{
-			Dictionary<string, int> missingMaterials = GetMissingMaterialsForPos(position);
+			Dictionary<string, int> missingMaterials = GetRepairMaterialsForPos(position);
 
 			if (missingMaterials == null)
 				continue;
@@ -467,8 +544,24 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			}
 		}
 
-		elapsedTicksSinceLastRefresh = 0;
-		setModified();
+		if (!upgradeOn || blocksToUpgrade == null)
+			return;
+
+		foreach (Vector3i position in blocksToUpgrade)
+		{
+			Dictionary<string, int> missingMaterials = GetUpgradeMaterialsForPos(position);
+
+			if (missingMaterials == null)
+				continue;
+
+			foreach (KeyValuePair<string, int> entry in missingMaterials)
+			{
+				if (!requiredMaterials.ContainsKey(entry.Key))
+					requiredMaterials.Add(entry.Key, 0);
+
+				requiredMaterials[entry.Key] += entry.Value;
+			}
+		}
 	}
 
 	public void Switch(bool forceRefresh_ = false)
@@ -482,6 +575,12 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		setModified();
 	}
 
+	public void SwitchUpgrade()
+	{
+		upgradeOn = !upgradeOn;
+		setModified();
+	}
+
 	public override void read(PooledBinaryReader _br, StreamModeRead _eStreamMode)
 	{
 		base.read(_br, _eStreamMode);
@@ -490,14 +589,18 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		if (_eStreamMode == StreamModeRead.Persistency)
 			return;
 
+		upgradeOn = _br.ReadBoolean();
 		forceRefresh = _br.ReadBoolean();
 		damagedBlockCount = _br.ReadInt32();
 		totalDamagesCount = _br.ReadInt32();
 		visitedBlocksCount = _br.ReadInt32();
 		bfsIterationsCount = _br.ReadInt32();
+		upgradableBlockCount = _br.ReadInt32();
+		upgradeRate = _br.ReadInt32();
+		repairRate = _br.ReadInt32();
 
+		// send requiredMaterials from server to client, to update Materials panel.
 		requiredMaterials = new Dictionary<string, int>();
-
 		int requiredMaterialsCount = _br.ReadInt32();
 		if (requiredMaterialsCount > 0)
 		{
@@ -522,11 +625,20 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			}
 		}
 
+		if (_eStreamMode == StreamModeRead.FromServer)
+			return;
+
 		// force refresh on server side if he receives the param forceRefresh=true from client.
-		if (_eStreamMode == StreamModeRead.FromClient && forceRefresh)
+		if (forceRefresh)
 		{
 			Log.Out("[EfficientBaseRepair] Refresh forced from server.");
-			UpdateStats(GameManager.Instance.World);
+			RefreshStats(GameManager.Instance.World);
+			setModified();
+		}
+		else
+		{
+			RefreshMaterialsStats();
+			setModified();
 		}
 	}
 
@@ -538,11 +650,15 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		if (_eStreamMode == StreamModeWrite.Persistency)
 			return;
 
+		_bw.Write(upgradeOn);
 		_bw.Write(forceRefresh);
 		_bw.Write(damagedBlockCount);
 		_bw.Write(totalDamagesCount);
 		_bw.Write(visitedBlocksCount);
 		_bw.Write(bfsIterationsCount);
+		_bw.Write(upgradableBlockCount);
+		_bw.Write(upgradeRate);
+		_bw.Write(repairRate);
 
 		if (requiredMaterials == null)
 			requiredMaterials = new Dictionary<string, int>();
@@ -561,12 +677,19 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			stack.Clone().Write(_bw);
 		}
 
+		if (_eStreamMode == StreamModeWrite.ToServer)
+			return;
+
 		// trigger forceRefresh=true in single player mode
 		// TODO: try with SingletonMonoBehaviour<ConnectionManager>.Instance.IsSinglePlayer
-		if (_eStreamMode == StreamModeWrite.ToClient && forceRefresh)
+		if (forceRefresh)
 		{
 			Log.Out("[EfficientBaseRepair] Refresh forced from Client.");
-			UpdateStats(GameManager.Instance.World);
+			RefreshStats(GameManager.Instance.World);
+		}
+		else
+		{
+			RefreshMaterialsStats();
 		}
 	}
 
@@ -586,37 +709,40 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		return bloodMoonActive;
 	}
 
-	public override void UpdateTick(World world)
+	private void SetBlockUpgradable(Vector3i position)
 	{
-		base.UpdateTick(world);
+		Dictionary<string, int> upgradeMaterials = GetUpgradeMaterialsForPos(position);
 
-		if (!isOn || BloodMoonActive(world))
-		{
-			Logging($"TileEntity OFF");
+		if (upgradeMaterials == null)
 			return;
-		}
 
-		if (blocksToRepair == null || (elapsedTicksSinceLastRefresh >= refreshRate && refreshRate > 0))
-			UpdateStats(world);
+		blocksToUpgrade.Add(position);
+		upgradableBlockCount++;
 
-		if (blocksToRepair == null)
-		{
-			Log.Warning("[EfficientBaseRepair] TileEntityEfficientBaseRepair.blocksToRepair initializing failed.");
+		if (!upgradeOn)
 			return;
-		}
 
-		Logging($"TickRepair, {blocksToRepair.Count} blocks to repair, needMaterials={needMaterials}");
+		foreach (KeyValuePair<string, int> entry in upgradeMaterials)
+		{
+			if (!requiredMaterials.ContainsKey(entry.Key))
+				requiredMaterials[entry.Key] = 0;
+
+			requiredMaterials[entry.Key] += entry.Value;
+		}
+	}
+
+	private bool RepairBlocks(World world)
+	{
+		Logging($"TickRepair, {blocksToRepair.Count} blocks to repair, needMaterials={needMaterialsForRepair}");
 
 		int repairableDamages = repairRate > 0 ? repairRate : int.MaxValue;
-
-		bool wasModified = false;
+		int totalRepairedDamages = 0;
 
 		foreach (Vector3i position in new List<Vector3i>(blocksToRepair))
 		{
 			int repairedDamages = TryRepairBlock(world, position, repairableDamages);
 
-			wasModified |= repairedDamages > 0;
-
+			totalRepairedDamages += repairedDamages;
 			repairableDamages -= repairedDamages;
 
 			BlockValue block = world.GetBlock(position);
@@ -626,6 +752,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 				Logging($"full repaired block at {position}");
 				blocksToRepair.Remove(position);
 				damagedBlockCount--;
+				SetBlockUpgradable(position);
 			}
 
 			Logging($"BlockEnd, repairableDamageCount={repairableDamages}\n");
@@ -634,7 +761,61 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 				break;
 		}
 
-		elapsedTicksSinceLastRefresh++;
+		if (totalRepairedDamages > 0)
+			Log.Out($"[EfficientBaseRepair] {totalRepairedDamages} hit points repaired.");
+
+		return totalRepairedDamages > 0;
+	}
+
+	private bool UpgradeBlocks(World world)
+	{
+		if (!upgradeOn)
+			return false;
+
+		int upgradeCountTarget = upgradeRate > 0 ? upgradeRate : int.MaxValue;
+		int upgradedBlocksCount = 0;
+
+		foreach (Vector3i position in new List<Vector3i>(blocksToUpgrade))
+		{
+			if (!TryUpgradeBlock(world, position))
+				continue;
+
+			upgradableBlockCount--;
+			upgradeCountTarget--;
+			upgradedBlocksCount++;
+
+			blocksToUpgrade.Remove(position);
+
+			if (upgradeCountTarget == 0)
+				break;
+		}
+
+		if (upgradedBlocksCount > 0)
+			Log.Out($"[EfficientBaseRepair] {upgradedBlocksCount} blocks upgraded.");
+
+		return upgradedBlocksCount > 0;
+	}
+
+	public override void UpdateTick(World world)
+	{
+		base.UpdateTick(world);
+
+		if (!isOn || BloodMoonActive(world))
+			return;
+
+		if (blocksToRepair == null || (elapsedTicksSinceLastRefresh >= refreshRate && refreshRate > 0))
+			RefreshStats(world);
+
+		if (blocksToRepair == null)
+		{
+			Log.Warning("[EfficientBaseRepair] TileEntityEfficientBaseRepair.blocksToRepair initializing failed.");
+			return;
+		}
+
+		bool wasModified = false;
+
+		wasModified |= RepairBlocks(world);
+		wasModified |= UpgradeBlocks(world);
 
 		if (wasModified)
 		{
@@ -647,5 +828,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		}
 
 		Logging("[EfficientBaseRepair] TickEnd\n\n");
+		elapsedTicksSinceLastRefresh++;
 	}
 }

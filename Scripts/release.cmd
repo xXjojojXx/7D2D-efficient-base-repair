@@ -26,8 +26,6 @@ set MOD_PATH="%PATH_7D2D%\Mods\EfficientBaseRepair"
 
 if exist %MOD_PATH% RMDIR /s /q %MOD_PATH%
 
-mkdir %MOD_PATH%
-
-cd "%PATH_7D2D%\Mods"
+cd %MOD_PATH%\..
 
 7z.exe x "%~dp0..\EfficientBaseRepair.zip" > nul

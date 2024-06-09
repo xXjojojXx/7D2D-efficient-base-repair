@@ -40,7 +40,6 @@ public class XUiC_EfficientBaseRepair : XUiController
 	public void SetTileEntityChest(string _lootContainerName, TileEntityEfficientBaseRepair _te)
 	{
 		te = _te;
-		te.Init(GameManager.Instance.World);
 		lootWindow.SetTileEntityChest(_lootContainerName, _te);
 	}
 
@@ -56,8 +55,8 @@ public class XUiC_EfficientBaseRepair : XUiController
 			nonPagingHeaderWindow.SetHeader("Base Repair");
 		}
 		lootWindow.ViewComponent.IsVisible = true;
-		base.xui.playerUI.windowManager.Close("timer");
-		lootWindow.ViewComponent.ParseAttribute("position", "0, -315", this);
+		xui.playerUI.windowManager.Close("timer");
+		lootWindow.ViewComponent.ParseAttribute("position", "0, -348", this);
 		isOpening = false;
 	}
 
@@ -183,7 +182,7 @@ public class XUiC_EfficientBaseRepair : XUiController
 		isOpening = false;
 	}
 
-	public static void Open(LocalPlayerUI _playerUi, TileEntityEfficientBaseRepair tileEntity, World _world)
+	public static void Open(LocalPlayerUI _playerUi, TileEntityEfficientBaseRepair tileEntity)
 	{
 		XUiC_EfficientBaseRepair instance = (XUiC_EfficientBaseRepair)_playerUi.xui.FindWindowGroupByName(ID);
 
@@ -193,7 +192,7 @@ public class XUiC_EfficientBaseRepair : XUiController
 			return;
 		}
 
-		tileEntity.Refresh();
+		tileEntity.ForceRefresh();
 
 		instance.SetTileEntityChest("EfficientBaseRepair", tileEntity);
 

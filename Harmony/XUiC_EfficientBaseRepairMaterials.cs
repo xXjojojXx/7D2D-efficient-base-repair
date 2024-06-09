@@ -35,17 +35,6 @@ public class XUiC_EfficientBaseRepairMaterials : XUiController
     public override void OnOpen()
     {
         base.OnOpen();
-        // MaterialNames = Array.Empty<string>();
-
-        // for (int i = 0; i < MaterialNames.Length; i++)
-        // {
-        //     string text = XUi.UppercaseFirst(MaterialNames[i]);
-        //     if (Localization.Exists("lbl" + MaterialNames[i]))
-        //     {
-        //         text = Localization.Get("lbl" + MaterialNames[i]);
-        //     }
-        //     ((XUiV_Label)materialTitles[i].ViewComponent).Text = text + ":";
-        // }
         UpdateMaterials();
     }
 

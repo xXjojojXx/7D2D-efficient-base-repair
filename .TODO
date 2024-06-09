@@ -41,6 +41,7 @@ To be implemented (or not ?):
     ☐ find a way to avoid spamming the refresh button on server side
     ☐ find a way to change params without accessing xml files
     ☐ find a way to make the repairations slower
+    ☐ add action to repair the block
 
 To be fixed:
     ✔ The loot container can be accessed by two players at the same time @done(24-05-29 20:26)

@@ -55,7 +55,7 @@ namespace Harmony
                         }
                     }
 
-                    XUiC_EfficientBaseRepair.Open(_playerUI, _te as TileEntityEfficientBaseRepair, ___m_World);
+                    XUiC_EfficientBaseRepair.Open(_playerUI, _te as TileEntityEfficientBaseRepair);
                 }
 
                 // NOTE: i guess this code is responsible of crates locking, to prevent simultaeous access to multiple players ?

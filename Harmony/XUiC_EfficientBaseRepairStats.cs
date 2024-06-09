@@ -13,9 +13,17 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 
 	private XUiV_Button btnOn_Background;
 
+	private XUiController btnUpgrade;
+
+	private XUiV_Button btnUpgrade_Background;
+
 	private XUiV_Label lblOnOff;
 
 	private XUiV_Sprite sprOnOff;
+
+	private XUiV_Label lblUpgrade;
+
+	private XUiV_Sprite sprUpgrade;
 
 	private Color32 onColor = new Color32((byte)250, byte.MaxValue, (byte)163, byte.MaxValue);
 
@@ -24,6 +32,10 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 	private string turnOff => Localization.Get("xuiTurnOff");
 
 	private string turnOn => Localization.Get("xuiTurnOn");
+
+	private string UpgradeOnText => "Upgrade On";
+
+	private string UpgradeOffText => "Upgrade Off";
 
 	private TileEntityEfficientBaseRepair tileEntity;
 
@@ -53,8 +65,15 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 		btnOn_Background = (XUiV_Button)btnOn.GetChildById("clickable").ViewComponent;
 		btnOn_Background.Controller.OnPress += BtnOn_OnPress;
 
+		btnUpgrade = GetChildById("btnUpgrade");
+		btnUpgrade_Background = (XUiV_Button)btnUpgrade.GetChildById("clickable").ViewComponent;
+		btnUpgrade_Background.Controller.OnPress += BtnUpgrade_OnPress;
+
 		lblOnOff = (XUiV_Label)GetChildById("lblOnOff").ViewComponent;
 		sprOnOff = (XUiV_Sprite)GetChildById("sprOnOff").ViewComponent;
+
+		lblUpgrade = (XUiV_Label)GetChildById("lblUpgrade").ViewComponent;
+		sprUpgrade = (XUiV_Sprite)GetChildById("sprUpgrade").ViewComponent;
 
 		((XUiV_Label)GetChildById("lblRefresh").ViewComponent).Text = Localization.Get("xuiServerBrowserRefreshList");
 	}
@@ -84,10 +103,13 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 			.ViewComponent.ParseAttribute("cell_width", (max_width - 5).ToString(), this);
 
 		GetChildById("lblBlocksToRepair").ViewComponent.ParseAttribute("width", (max_width - 5).ToString(), this);
+		GetChildById("lblBlocksToUpgrade").ViewComponent.ParseAttribute("width", (max_width - 5).ToString(), this);
 		GetChildById("lblTotalDamages").ViewComponent.ParseAttribute("width", (max_width - 5).ToString(), this);
 		GetChildById("lblVisitedBlocks").ViewComponent.ParseAttribute("width", (max_width - 5).ToString(), this);
 		GetChildById("lblIterations").ViewComponent.ParseAttribute("width", (max_width - 5).ToString(), this);
 		GetChildById("lblTimer").ViewComponent.ParseAttribute("width", (max_width - 5).ToString(), this);
+
+		const int SPRITE_OFFSET = 80;
 
 		// button ON
 		XUiController btnOn = content.GetChildById("btnOn");
@@ -117,7 +139,37 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 		btnOn
 			.GetChildById("buttonRect")
 			.GetChildById("sprOnOff")
-			.ViewComponent.ParseAttribute("pos", $"{max_width / 2 - 70}, -2", this);
+			.ViewComponent.ParseAttribute("pos", $"{max_width / 2 - SPRITE_OFFSET}, -2", this);
+
+		// button UPGRADE
+		XUiController btnUpgrade = content.GetChildById("btnUpgrade");
+
+		btnUpgrade
+			.GetChildById("backgroundMain")
+			.ViewComponent.ParseAttribute("width", max_width.ToString(), this);
+
+		btnUpgrade
+			.GetChildById("background")
+			.ViewComponent.ParseAttribute("width", (max_width - 4).ToString(), this);
+
+		btnUpgrade
+			.GetChildById("buttonRect")
+			.ViewComponent.ParseAttribute("width", (max_width - 4).ToString(), this);
+
+		btnUpgrade
+			.GetChildById("buttonRect")
+			.GetChildById("clickable")
+			.ViewComponent.ParseAttribute("width", (max_width - 4).ToString(), this);
+
+		btnUpgrade
+			.GetChildById("buttonRect")
+			.GetChildById("lblUpgrade")
+			.ViewComponent.ParseAttribute("width", (max_width - 4).ToString(), this);
+
+		btnUpgrade
+			.GetChildById("buttonRect")
+			.GetChildById("sprUpgrade")
+			.ViewComponent.ParseAttribute("pos", $"{max_width / 2 - SPRITE_OFFSET}, -2", this);
 
 		// button REFRESH
 		XUiController btnRefresh = content.GetChildById("btnRefresh");
@@ -147,18 +199,43 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 		btnRefresh
 			.GetChildById("buttonRect")
 			.GetChildById("sprRefresh")
-			.ViewComponent.ParseAttribute("pos", $"{max_width / 2 - 70}, -2", this);
+			.ViewComponent.ParseAttribute("pos", $"{max_width / 2 - SPRITE_OFFSET}, -2", this);
 	}
 
 	private void BtnRefresh_OnPress(XUiController _sender, int _mouseButton)
 	{
-		tileEntity.Refresh();
+		tileEntity.ForceRefresh();
 		Manager.PlayInsidePlayerHead("UseActions/chest_tier4_open");
 	}
 
 	private void BtnOn_OnPress(XUiController _sender, int _mouseButton)
 	{
 		tileEntity.Switch();
+	}
+
+	private void BtnUpgrade_OnPress(XUiController _sender, int _mouseButton)
+	{
+		tileEntity.SwitchUpgrade();
+	}
+
+	private void RefreshUpgradeOn(bool upgradeOn)
+	{
+		if (upgradeOn)
+		{
+			lblUpgrade.Text = UpgradeOffText;
+			if (sprUpgrade != null)
+			{
+				sprUpgrade.Color = onColor;
+			}
+		}
+		else
+		{
+			lblUpgrade.Text = UpgradeOnText;
+			if (sprUpgrade != null)
+			{
+				sprUpgrade.Color = offColor;
+			}
+		}
 	}
 
 	private void RefreshIsOn(bool isOn)
@@ -180,6 +257,7 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 			}
 		}
 	}
+
 	private XUiV_Label GetLabel(string labelName)
 	{
 		return (XUiV_Label)GetChildById(labelName).ViewComponent;
@@ -188,6 +266,7 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 	private void RefreshStats()
 	{
 		GetLabel("lblBlocksToRepair").Text = $"{tileEntity.damagedBlockCount:N0} damaged blocks found.";
+		GetLabel("lblBlocksToUpgrade").Text = $"{tileEntity.upgradableBlockCount:N0} upgradable blocks found.";
 		GetLabel("lblTotalDamages").Text = $"{tileEntity.totalDamagesCount:N0} damages points to repair.";
 		GetLabel("lblVisitedBlocks").Text = $"{tileEntity.visitedBlocksCount:N0} blocks visited.";
 		GetLabel("lblIterations").Text = $"{tileEntity.bfsIterationsCount} iterations done.";
@@ -204,6 +283,7 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 				lastOn = tileEntity.IsOn;
 				RefreshIsOn(tileEntity.IsOn);
 			}
+			RefreshUpgradeOn(tileEntity.upgradeOn);
 			RefreshStats();
 			RefreshBindings();
 		}
@@ -214,8 +294,8 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 		base.OnOpen();
 		tileEntity.SetUserAccessing(_bUserAccessing: true);
 		RefreshIsOn(tileEntity.IsOn);
+		RefreshUpgradeOn(tileEntity.upgradeOn);
 		RefreshBindings();
-		tileEntity.SetModified();
 	}
 
 	public override void OnClose()
