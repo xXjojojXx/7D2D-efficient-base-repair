@@ -1,8 +1,8 @@
 @echo off
 
-call "%~dp0..\Scripts\release.cmd"
+call "%~dp0\start-local.cmd"
 
-if %ERRORLEVEL% neq 0 exit /b 1
+if ERRORLEVEL 1 exit /b 1
 
 IF NOT DEFINED PATH_7D2D_DEDI (
     echo env variable 'PATH_7D2D_DEDI' must be defined.
@@ -19,6 +19,8 @@ cd %MOD_PATH%\..
 
 cd ..
 
-taskkill /IM 7DaysToDieServer.exe /F
+taskkill /IM 7DaysToDieServer.exe /F >nul 2>&1
 
 call "startdedicated.bat"
+
+exit /b 0

@@ -45,7 +45,9 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	public bool upgradeOn;
 
-	private bool forceRefresh;
+	private bool forceFullRefresh;
+
+	private bool forceRefreshMaterials;
 
 	public bool IsOn => isOn;
 
@@ -502,7 +504,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	public void ForceRefresh()
 	{
-		forceRefresh = true;
+		forceFullRefresh = true;
 		setModified();
 	}
 
@@ -515,7 +517,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		bfsIterationsCount = 0;
 		visitedBlocksCount = 0;
 		totalDamagesCount = 0;
-		forceRefresh = false;
+		forceFullRefresh = false;
 
 		AnalyseStructure(ToWorldPos());
 		RefreshMaterialsStats();
@@ -523,6 +525,8 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	private void RefreshMaterialsStats()
 	{
+		forceRefreshMaterials = false;
+
 		if (blocksToRepair == null)
 			return;
 
@@ -567,7 +571,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 	public void Switch(bool forceRefresh_ = false)
 	{
 		if (forceRefresh_)
-			forceRefresh = true;
+			forceFullRefresh = true;
 
 		isOn = !isOn;
 		Logging($"Switch TileEntity to {isOn}");
@@ -578,6 +582,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 	public void SwitchUpgrade()
 	{
 		upgradeOn = !upgradeOn;
+		forceRefreshMaterials = true;
 		setModified();
 	}
 
@@ -590,7 +595,8 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			return;
 
 		upgradeOn = _br.ReadBoolean();
-		forceRefresh = _br.ReadBoolean();
+		forceRefreshMaterials = _br.ReadBoolean();
+		forceFullRefresh = _br.ReadBoolean();
 		damagedBlockCount = _br.ReadInt32();
 		totalDamagesCount = _br.ReadInt32();
 		visitedBlocksCount = _br.ReadInt32();
@@ -629,13 +635,13 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			return;
 
 		// force refresh on server side if he receives the param forceRefresh=true from client.
-		if (forceRefresh)
+		if (forceFullRefresh)
 		{
 			Log.Out("[EfficientBaseRepair] Refresh forced from server.");
 			RefreshStats(GameManager.Instance.World);
 			setModified();
 		}
-		else
+		else if (forceRefreshMaterials)
 		{
 			RefreshMaterialsStats();
 			setModified();
@@ -651,7 +657,8 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			return;
 
 		_bw.Write(upgradeOn);
-		_bw.Write(forceRefresh);
+		_bw.Write(forceRefreshMaterials);
+		_bw.Write(forceFullRefresh);
 		_bw.Write(damagedBlockCount);
 		_bw.Write(totalDamagesCount);
 		_bw.Write(visitedBlocksCount);
@@ -682,12 +689,12 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 		// trigger forceRefresh=true in single player mode
 		// TODO: try with SingletonMonoBehaviour<ConnectionManager>.Instance.IsSinglePlayer
-		if (forceRefresh)
+		if (forceFullRefresh)
 		{
 			Log.Out("[EfficientBaseRepair] Refresh forced from Client.");
 			RefreshStats(GameManager.Instance.World);
 		}
-		else
+		else if (forceRefreshMaterials)
 		{
 			RefreshMaterialsStats();
 		}
