@@ -11,7 +11,7 @@
             <property name="Stacknumber" value="10"/>
             <property name="Material" value="Mmetal_hard"/>
             <property name="Shape" value="ModelEntity"/>
-            <property name="LootList" value="storageCrate"/>
+            <property name="LootList" value="smallSafes"/>
             <property name="Model" value="@:Entities/LootContainers/tier4LootChestPrefab.prefab"/>
             <property name="PlacementDistance" value="25"/>
             <property name="AllowedRotations" value="No45"/>

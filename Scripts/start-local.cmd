@@ -14,6 +14,6 @@ cd %MOD_PATH%\..
 
 taskkill /IM 7DaysToDie.exe /F >nul 2>&1
 
-start "" "%PATH_7D2D%\7DaysToDie" -force-d3d11 -disablenativeinput -nogs -noeac
+@REM start "" "%PATH_7D2D%\7DaysToDie" -force-d3d11 -disablenativeinput -nogs -noeac
 
 exit /b 0
