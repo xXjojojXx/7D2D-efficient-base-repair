@@ -45,6 +45,8 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	public bool upgradeOn;
 
+	public bool isPowered;
+
 	private bool forceFullRefresh;
 
 	private bool forceRefreshMaterials;
@@ -590,11 +592,12 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 	{
 		base.read(_br, _eStreamMode);
 		isOn = _br.ReadBoolean();
+		upgradeOn = _br.ReadBoolean();
+		isPowered = _br.ReadBoolean();
 
 		if (_eStreamMode == StreamModeRead.Persistency)
 			return;
 
-		upgradeOn = _br.ReadBoolean();
 		forceRefreshMaterials = _br.ReadBoolean();
 		forceFullRefresh = _br.ReadBoolean();
 		damagedBlockCount = _br.ReadInt32();
@@ -652,11 +655,12 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 	{
 		base.write(_bw, _eStreamMode);
 		_bw.Write(isOn);
+		_bw.Write(upgradeOn);
+		_bw.Write(isPowered);
 
 		if (_eStreamMode == StreamModeWrite.Persistency)
 			return;
 
-		_bw.Write(upgradeOn);
 		_bw.Write(forceRefreshMaterials);
 		_bw.Write(forceFullRefresh);
 		_bw.Write(damagedBlockCount);
