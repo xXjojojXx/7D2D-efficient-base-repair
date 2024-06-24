@@ -69,7 +69,7 @@ class BlockEfficientBaseRepair : BlockSecureLoot
     }
 
     // copied from BlockSecureLoot
-    public override bool OnBlockActivated(string _commandName, WorldBase _world, int _cIdx, Vector3i _blockPos, BlockValue _blockValue, EntityAlive _player)
+	public override bool OnBlockActivated(string _commandName, WorldBase _world, int _cIdx, Vector3i _blockPos, BlockValue _blockValue, EntityPlayerLocal _player)
     {
 
         if (_blockValue.ischild)
@@ -138,7 +138,7 @@ class BlockEfficientBaseRepair : BlockSecureLoot
     }
 
     // copied from BlockSecureLoot
-    public override bool OnBlockActivated(WorldBase _world, int _cIdx, Vector3i _blockPos, BlockValue _blockValue, EntityAlive _player)
+    public override bool OnBlockActivated(WorldBase _world, int _cIdx, Vector3i _blockPos, BlockValue _blockValue, EntityPlayerLocal _player)
     {
         if (_blockValue.ischild)
         {
@@ -195,7 +195,7 @@ class BlockEfficientBaseRepair : BlockSecureLoot
     }
 
     // copied from BlockWorkStation
-    private void EventData_Event(TimerEventData timerData)
+    public new void EventData_Event(TimerEventData timerData)
     {
         World world = GameManager.Instance.World;
         object[] obj = (object[])timerData.Data;

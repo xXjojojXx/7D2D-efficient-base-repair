@@ -39,7 +39,7 @@ namespace Harmony
                 if (!(_te is TileEntityEfficientBaseRepair))
                     return true;
 
-                FastTags containerTags = FastTags.none;
+                FastTags<TagGroup.Global> containerTags = FastTags<TagGroup.Global>.none;
                 if (_playerUI != null)
                 {
                     if (_te.entityId != -1)
