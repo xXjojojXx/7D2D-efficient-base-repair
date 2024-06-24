@@ -305,7 +305,7 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 		if (!XUiC_CameraWindow.hackyIsOpeningMaximizedWindow)
 		{
 			tileEntity.SetUserAccessing(_bUserAccessing: false);
-			instance.TEUnlockServer(tileEntity.GetClrIdx(), blockPos, tileEntity.entityId);
+			instance.TEUnlockServer(tileEntity.GetClrIdx(), blockPos, tileEntity.entityId, false);
 			tileEntity.SetModified();
 		}
 		base.OnClose();
