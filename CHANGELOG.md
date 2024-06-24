@@ -14,6 +14,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- The mod is now compatible with version 1.0 of the game
+- A21 is not supported anymore
+
 ## [0.1.1] - 2024-06-09
 
 ### Fixed
