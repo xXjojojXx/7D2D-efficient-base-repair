@@ -1,6 +1,10 @@
+using System;
+using System.Collections.Generic;
 using System.Reflection;
+using Audio;
 using HarmonyLib;
 using Twitch;
+using UnityEngine;
 
 namespace Harmony
 {
@@ -11,6 +15,7 @@ namespace Harmony
             var harmony = new HarmonyLib.Harmony(_modInstance.Name);
             harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
+
 
         [HarmonyPatch(typeof(TileEntity))]
         [HarmonyPatch("Instantiate")]
@@ -26,6 +31,7 @@ namespace Harmony
                 return true;
             }
         }
+
 
         [HarmonyPatch(typeof(GameManager))]
         [HarmonyPatch("lootContainerOpened")]
@@ -64,6 +70,57 @@ namespace Harmony
                     __instance.lootManager.LootContainerOpened(_te, _entityIdThatOpenedIt, containerTags);
                     _te.bTouched = true;
                     _te.SetModified();
+                }
+
+                return false;
+            }
+        }
+
+
+        [HarmonyPatch(typeof(GameManager))]
+        [HarmonyPatch("TEUnlockServer")]
+        public class GameManager_TEUnlockServer
+        {
+            public static bool Prefix(GameManager __instance, int _clrIdx, Vector3i _blockPos, int _lootEntityId, bool _allowContainerDestroy = true)
+            {
+                if (!SingletonMonoBehaviour<ConnectionManager>.Instance.IsServer)
+                {
+                    SingletonMonoBehaviour<ConnectionManager>.Instance.SendToServer(NetPackageManager.GetPackage<NetPackageTELock>().Setup(NetPackageTELock.TELockType.UnlockServer, _clrIdx, _blockPos, _lootEntityId, -1, null, _allowContainerDestroy));
+                    return false;
+                }
+
+                TileEntity tileEntity = null;
+                if (_lootEntityId == -1)
+                {
+                    tileEntity = __instance.m_World.GetTileEntity(_blockPos);
+                }
+                else
+                {
+                    tileEntity = __instance.m_World.GetTileEntity(_lootEntityId);
+                    if (tileEntity == null)
+                    {
+                        foreach (KeyValuePair<ITileEntity, int> lockedTileEntity in __instance.lockedTileEntities)
+                        {
+                            if (lockedTileEntity.Key.EntityId == _lootEntityId)
+                            {
+                                __instance.lockedTileEntities.Remove(lockedTileEntity.Key);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (tileEntity != null)
+                {
+                    __instance.lockedTileEntities.Remove(tileEntity);
+
+                    if (tileEntity.GetTileEntityType() == (TileEntityType)191)
+                        return false;
+
+                    if (_allowContainerDestroy)
+                    {
+                        __instance.DestroyLootOnClose(tileEntity, _blockPos, _lootEntityId);
+                    }
                 }
 
                 return false;
