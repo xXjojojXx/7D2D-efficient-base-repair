@@ -187,6 +187,22 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		);
 	}
 
+	private bool IsCrate(BlockValue block)
+	{
+		string blockName = block.Block.GetBlockName();
+
+		if (blockName.StartsWith("cntWoodWritableCrate"))
+			return true;
+
+		if (blockName.StartsWith("cntIronWritableCrate"))
+			return true;
+
+		if (blockName.StartsWith("cntSteelWritableCrate"))
+			return true;
+
+		return false;
+	}
+
 	private Dictionary<string, int> GetUpgradeMaterialsForPos(Vector3i pos)
 	{
 		if (world.GetChunkFromWorldPos(pos) == null)
@@ -195,7 +211,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		BlockValue block = world.GetBlock(pos);
 		DynamicProperties upgradeProperties = block.Block.Properties;
 
-		if (block.isair || block.isWater || block.ischild)
+		if (block.isair || block.isWater || block.ischild || IsCrate(block))
 			return null;
 
 		if (!upgradeProperties.Values.ContainsKey("UpgradeBlock.Item"))
