@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.0.1] - 2024-06-27
+
+### Fixed
+
+- Prevents crates wiping by ignoring the upgrade of crates. (hotfix)
+
 ## [1.0.0] - 2024-06-24
 
 ### Fixed
@@ -70,6 +76,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 
 [unreleased]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/master...unreleased
+[1.0.1]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/1.0.0...1.0.1
 [1.0.0]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/0.1.1...1.0.0
 [0.1.1]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/0.1.0...0.1.1
 [0.1.0]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/0.0.3...0.1.0

@@ -246,14 +246,11 @@ class BlockEfficientBaseRepair : BlockSecureLoot
 
     public override void OnBlockRemoved(WorldBase world, Chunk _chunk, Vector3i _blockPos, BlockValue _blockValue)
     {
-        Log.Out($"[EfficientBaseRepair] OnBlockRemoved: {StackTraceUtility.ExtractStackTrace()}");
         base.OnBlockRemoved(world, _chunk, _blockPos, _blockValue);
     }
 
     public override DestroyedResult OnBlockDestroyedBy(WorldBase _world, int _clrIdx, Vector3i _blockPos, BlockValue _blockValue, int _entityId, bool _bUseHarvestTool)
     {
-        Log.Out($"[EfficientBaseRepair] OnBlockDestroyedBy: {StackTraceUtility.ExtractStackTrace()}");
-
         return base.OnBlockDestroyedBy(_world, _clrIdx, _blockPos, _blockValue, _entityId, _bUseHarvestTool);
     }
 }
