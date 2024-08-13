@@ -6,11 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-## [1.0.3] - 2024-07-13
+## [1.0.3] - 2024-08-13
 
 ### Fixed
 
 - Fix progression.xml: hammer and nailgun was not craftable after level 50.
+- Impossible to enable auto repair during blood moon.
+
+### Changed
+
+- Dynamic properties from xml are now stored in static field instead of loading them with the method 'Init'
 
 ## [1.0.2] - 2024-07-13
 
