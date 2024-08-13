@@ -1,7 +1,13 @@
-<!-- inspired by ocbClaimAutoRepair -->
 <configs>
 
     <set xpath="/progression/crafting_skills/crafting_skill[@name='craftingRepairTools']/@max_level">60</set>
+
+    <set xpath="/progression/crafting_skills/crafting_skill[@name='craftingRepairTools']/effect_group/passive_effect[@name='RecipeTagUnlocked' and @tags='meleeToolRepairT1ClawHammer']/@level">4,60</set>
+    <set xpath="/progression/crafting_skills/crafting_skill[@name='craftingRepairTools']/effect_group/passive_effect[@name='RecipeTagUnlocked' and @tags='meleeToolRepairT3Nailgun']/@level">26,60</set>
+
+    <set xpath="/progression/crafting_skills/crafting_skill[@name='craftingRepairTools']/effect_group/passive_effect[@name='CraftingTier' and @tags='meleeToolRepairT1ClawHammer']/@level">8,12,16,20,25,60</set>
+    <set xpath="/progression/crafting_skills/crafting_skill[@name='craftingRepairTools']/effect_group/passive_effect[@name='CraftingTier' and @tags='meleeToolRepairT3Nailgun']/@level">0,35,40,45,50,60</set>
+    <set xpath="/progression/crafting_skills/crafting_skill[@name='craftingRepairTools']/effect_group/passive_effect[@name='CraftingTier' and @tags='meleeToolRepairT3Nailgun']/@value">1,2,3,4,5,5</set>
 
     <insertafter xpath="/progression/crafting_skills/crafting_skill[@name='craftingRepairTools']/display_entry[@item='meleeToolRepairT3Nailgun']">
         <display_entry item="EfficientBaseRepair" has_quality="false" unlock_level="60"/>

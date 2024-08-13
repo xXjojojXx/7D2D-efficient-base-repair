@@ -7,25 +7,28 @@ using static Block;
 public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TODO: Implement IPowered interface
 {
 	/* XML PARAMS */
-	public int maxBfsIterations;
 
-	private bool needMaterialsForRepair;
+	public static readonly DynamicProperties properties = new BlockValue((uint)GetBlockByName("EfficientBaseRepair").blockID).Block.Properties;
 
-	private bool needMaterialsForUpgrade;
+	public static readonly int maxBfsIterations = properties.GetInt("MaxBfsIterations");
 
-	private bool activeDuringBloodMoon;
+	private static readonly bool needMaterialsForRepair = properties.GetBool("NeedsMaterialsForRepair");
 
-	public int repairRate;
+	private static readonly bool needMaterialsForUpgrade = properties.GetBool("NeedsMaterialsForUpgrade");
 
-	private int refreshRate;
+	private static readonly bool activeDuringBloodMoon = properties.GetBool("ActiveDuringBloodMoon");
 
-	public bool playRepairSound = true;
+	public static readonly int repairRate = properties.GetInt("RepairRate");
 
-	private bool autoTurnOff = false;
+	private static readonly int refreshRate = properties.GetInt("RefreshRate");
 
-	private int upgradeRate;
+	public static readonly bool playRepairSound = properties.GetBool("PlayRepairSound");
 
-	private bool keepPaintAfterUpgrade;
+	private static readonly bool autoTurnOff = properties.GetBool("AutoTurnOff");
+
+	private static readonly int upgradeRate = properties.GetInt("UpgradeRate");
+
+	private static readonly bool keepPaintAfterUpgrade = properties.GetBool("KeepPaintAfterUpgrade");
 
 	/* PUBLIC STATS */
 
@@ -59,7 +62,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	private string RepairSound(BlockValue block) => string.Format("ImpactSurface/metalhit{0}", block.Block.blockMaterial.SurfaceCategory);
 
-	private World world;
+	private static World world => GameManager.Instance.World;
 
 	public List<Vector3i> blocksToRepair;
 
@@ -72,24 +75,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 	public TileEntityEfficientBaseRepair(Chunk _chunk) : base(_chunk)
 	{
 		isOn = false;
-	}
-
-	private void Init(World _world)
-	{
-		world = _world;
-
-		DynamicProperties properties = _world.GetBlock(ToWorldPos()).Block.Properties;
-
-		maxBfsIterations = properties.GetInt("MaxBfsIterations");
-		needMaterialsForRepair = properties.GetBool("NeedsMaterialsForRepair");
-		needMaterialsForUpgrade = properties.GetBool("NeedsMaterialsForUpgrade");
-		repairRate = properties.GetInt("RepairRate");
-		refreshRate = properties.GetInt("RefreshRate");
-		playRepairSound = properties.GetBool("PlayRepairSound");
-		activeDuringBloodMoon = properties.GetBool("ActiveDuringBloodMoon");
-		autoTurnOff = properties.GetBool("AutoTurnOff");
-		upgradeRate = properties.GetInt("UpgradeRate");
-		keepPaintAfterUpgrade = properties.GetBool("KeepPaintAfterUpgrade");
 	}
 
 	public string RepairTime()
@@ -528,8 +513,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	private void RefreshStats(World world)
 	{
-		Init(world);
-
 		elapsedTicksSinceLastRefresh = 0;
 		damagedBlockCount = 0;
 		bfsIterationsCount = 0;
@@ -621,8 +604,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		visitedBlocksCount = _br.ReadInt32();
 		bfsIterationsCount = _br.ReadInt32();
 		upgradableBlockCount = _br.ReadInt32();
-		upgradeRate = _br.ReadInt32();
-		repairRate = _br.ReadInt32();
 
 		// send requiredMaterials from server to client, to update Materials panel.
 		requiredMaterials = new Dictionary<string, int>();
@@ -684,8 +665,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		_bw.Write(visitedBlocksCount);
 		_bw.Write(bfsIterationsCount);
 		_bw.Write(upgradableBlockCount);
-		_bw.Write(upgradeRate);
-		_bw.Write(repairRate);
 
 		if (requiredMaterials == null)
 			requiredMaterials = new Dictionary<string, int>();
@@ -722,6 +701,8 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	public bool BloodMoonActive(World _world)
 	{
+		Log.Out($"[EfficienBaseRepair] activeDuringBloodMoon={activeDuringBloodMoon}");
+
 		if (activeDuringBloodMoon)
 			return false;
 

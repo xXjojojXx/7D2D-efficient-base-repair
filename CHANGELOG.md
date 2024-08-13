@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.0.3] - 2024-08-13
+
+### Fixed
+
+- Fix progression.xml: hammer and nailgun was not craftable after level 50.
+- Impossible to enable auto repair during blood moon.
+
+### Changed
+
+- Dynamic properties from xml are now stored in static field instead of loading them with the method 'Init'
+
 ## [1.0.2] - 2024-07-13
 
 ### Fixed
@@ -82,6 +93,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 
 [unreleased]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/master...unreleased
+[1.0.3]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/1.0.2...1.0.3
 [1.0.2]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/1.0.1...1.0.2
 [1.0.1]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/1.0.0...1.0.1
 [1.0.0]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/0.1.1...1.0.0
