@@ -12,6 +12,7 @@ MKDIR .\EfficientBaseRepair
 
 xcopy Config EfficientBaseRepair\Config\ /s > nul
 xcopy *.dll EfficientBaseRepair\ > nul
+xcopy *.pdb EfficientBaseRepair\ > nul
 xcopy *.md EfficientBaseRepair\ > nul
 xcopy ModInfo.xml EfficientBaseRepair\ > nul
 
