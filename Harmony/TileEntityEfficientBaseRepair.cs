@@ -701,8 +701,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	public bool BloodMoonActive(World _world)
 	{
-		Log.Out($"[EfficienBaseRepair] activeDuringBloodMoon={activeDuringBloodMoon}");
-
 		if (activeDuringBloodMoon)
 			return false;
 
