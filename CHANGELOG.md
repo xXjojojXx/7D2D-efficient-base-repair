@@ -11,6 +11,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 
 - KeyNotFoundException was raised if the structure was modified while the repairing / upgrading process was pending
+- Fix crate emptying after update
+
+### Changed
+
+- (internal) change the way to repair repair blocks, by unsing vanilla Block.DamageBlock()
 
 ## [1.0.4] - 2024-09-17
 

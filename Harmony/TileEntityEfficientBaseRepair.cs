@@ -172,22 +172,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		);
 	}
 
-	private bool IsCrate(BlockValue block)
-	{
-		string blockName = block.Block.GetBlockName();
-
-		if (blockName.StartsWith("cntWoodWritableCrate"))
-			return true;
-
-		if (blockName.StartsWith("cntIronWritableCrate"))
-			return true;
-
-		if (blockName.StartsWith("cntSteelWritableCrate"))
-			return true;
-
-		return false;
-	}
-
 	private Dictionary<string, int> GetUpgradeMaterialsForPos(Vector3i pos)
 	{
 		if (world.GetChunkFromWorldPos(pos) == null)
@@ -196,7 +180,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		BlockValue block = world.GetBlock(pos);
 		DynamicProperties upgradeProperties = block.Block.Properties;
 
-		if (block.isair || block.isWater || block.ischild || IsCrate(block))
+		if (block.isair || block.isWater || block.ischild)
 			return null;
 
 		if (!upgradeProperties.Values.ContainsKey("UpgradeBlock.Item"))
@@ -365,16 +349,9 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		return (int)Mathf.Ceil(repairedDamages);
 	}
 
-	private void UpdateBlock(Chunk chunkFromWorldPos, BlockValue block, Vector3i pos, string audioClipName)
+	private void RepairBlock(int repairAmount, int clrIdx, BlockValue block, Vector3i pos, string audioClipName)
 	{
-		// BroadCast the changes done to the block (copied from ocbClaimAutoRepair)
-		world.SetBlock(chunkFromWorldPos.ClrIdx, pos, block, false, false);
-		world.SetBlockRPC(
-			chunkFromWorldPos.ClrIdx,
-			pos,
-			block,
-			block.Block.Density
-		);
+		block.Block.DamageBlock(GameManager.Instance.World, clrIdx, pos, block, repairAmount, 0);
 
 		if (!playRepairSound || audioClipName == string.Empty)
 			return;
@@ -390,7 +367,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	private int TryRepairBlock(World world, Vector3i pos, int maxRepairableDamages)
 	{
-		if (!(world.GetChunkFromWorldPos(pos) is Chunk chunkFromWorldPos))
+		if (!(world.GetChunkFromWorldPos(pos) is Chunk chunk))
 		{
 			Log.Warning("Can't retreive chunk from world position.");
 			return 0;
@@ -404,10 +381,9 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		if (repairableDamages <= 0)
 			return 0;
 
-		block.damage -= repairableDamages;
 		totalDamagesCount -= repairableDamages;
 
-		UpdateBlock(chunkFromWorldPos, block, pos, RepairSound(block));
+		RepairBlock(-repairableDamages, chunk.ClrIdx, block, pos, RepairSound(block));
 
 		return repairableDamages;
 	}
@@ -441,14 +417,11 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		TakeRepairMaterials(upgradeMaterials, needMaterialsForUpgrade);
 
 		BlockValue currentBlock = world.GetBlock(pos);
-		BlockValue upgradedBlock = currentBlock.Block.UpgradeBlock;
-
-		upgradedBlock.rotation = currentBlock.rotation;
 
 		if (!keepPaintAfterUpgrade)
 			GameManager.Instance.SetBlockTextureServer(pos, BlockFace.None, 0, -1);
 
-		UpdateBlock(chunk, upgradedBlock, pos, UpgradeSound);
+		RepairBlock(-1, chunk.ClrIdx, currentBlock, pos, UpgradeSound);
 		SetBlockUpgradable(pos);
 
 		return true;
