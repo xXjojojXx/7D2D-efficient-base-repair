@@ -287,6 +287,10 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 		foreach (KeyValuePair<string, int> entry in materials)
 		{
+			// can happen if the structure was modified since the last refresh
+			if (!requiredMaterials.ContainsKey(entry.Key))
+				requiredMaterials[entry.Key] = entry.Value;
+
 			if (needMaterials)
 			{
 				totalTaken += TakeRepairMaterial(entry.Key, entry.Value);
@@ -414,12 +418,12 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			return false;
 
 		Dictionary<string, int> availableMaterials = ItemsToDict();
-		Dictionary<string, int> requiredMaterials = GetUpgradeMaterialsForPos(pos);
+		Dictionary<string, int> upgradeMaterials = GetUpgradeMaterialsForPos(pos);
 
-		if (requiredMaterials == null)
+		if (upgradeMaterials == null)
 			return false;
 
-		foreach (var entry in requiredMaterials)
+		foreach (var entry in upgradeMaterials)
 		{
 			if (!needMaterialsForUpgrade)
 				continue;
@@ -428,13 +432,13 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 				return false;
 
 			int availableItemCount = availableMaterials[entry.Key];
-			int requiredItemCount = requiredMaterials[entry.Key];
+			int requiredItemCount = upgradeMaterials[entry.Key];
 
 			if (availableItemCount < requiredItemCount)
 				return false;
 		}
 
-		TakeRepairMaterials(requiredMaterials, needMaterialsForUpgrade);
+		TakeRepairMaterials(upgradeMaterials, needMaterialsForUpgrade);
 
 		BlockValue currentBlock = world.GetBlock(pos);
 		BlockValue upgradedBlock = currentBlock.Block.UpgradeBlock;
