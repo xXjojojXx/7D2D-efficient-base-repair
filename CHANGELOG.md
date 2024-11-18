@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - KeyNotFoundException was raised if the structure was modified while the repairing / upgrading process was pending
 - Fix crate emptying after update
+- Fix windows blocks reparing / upgrading
 
 ### Changed
 

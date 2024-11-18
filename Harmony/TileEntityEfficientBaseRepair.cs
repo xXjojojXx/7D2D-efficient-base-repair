@@ -183,16 +183,16 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		if (block.isair || block.isWater || block.ischild)
 			return null;
 
-		if (!upgradeProperties.Values.ContainsKey("UpgradeBlock.Item"))
-			return null;
+		var itemName = GetUpgradeItemName(block.Block);
+		var itemCount = upgradeProperties.GetInt("UpgradeBlock.ItemCount");
 
-		if (upgradeProperties.GetString("UpgradeBlock.Item") == "r")
+		if (itemName == "" || itemCount <= 0)
 			return null;
 
 		return new Dictionary<string, int>(){
 			{
-				upgradeProperties.GetString("UpgradeBlock.Item"),
-				upgradeProperties.GetInt("UpgradeBlock.ItemCount")
+				itemName,
+				itemCount
 			}
 		};
 	}
@@ -427,6 +427,19 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		return true;
 	}
 
+	private string GetUpgradeItemName(Block block)
+	{
+		// NOTE: copied from ItemActionRepair.GetUpgradeItemName()
+
+		string text = block.Properties.Values["UpgradeBlock.Item"];
+		if (text != null && text.Length == 1 && text[0] == 'r')
+		{
+			text = block.RepairItems[0].ItemName;
+		}
+
+		return text;
+	}
+
 	public void AnalyseStructure(Vector3i initial_pos)
 	{
 		blocksToRepair = new List<Vector3i>();
@@ -462,7 +475,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 					blocksToRepair.Add(pos);
 					totalDamagesCount += block.damage;
 				}
-				else if (block.Block.Properties.Values.ContainsKey("UpgradeBlock.Item"))
+				else if (block.Block.Properties.Values.ContainsKey("UpgradeBlock.UpgradeHitCount"))
 				{
 					blocksToUpgrade.Add(pos);
 				}
