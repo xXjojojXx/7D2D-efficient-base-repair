@@ -1,5 +1,7 @@
 @echo off
 
+echo PATH_7D2D: '%PATH_7D2D%'
+
 dotnet build --no-incremental .\EfficientBaseRepair.csproj
 
 if ERRORLEVEL 1 exit /b 1
