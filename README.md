@@ -1,4 +1,4 @@
-# 7 Days to Die - A21 - Efficient Base Repair
+# 7 Days to Die - Efficient Base Repair
 
 This mod, inspired by [ocbClaimAutoRepair](https://github.com/OCB7D2D/OcbClaimAutoRepair), adds a new block that allows you to efficiently repair your base while dynamically displaying useful repair statistics.
 
