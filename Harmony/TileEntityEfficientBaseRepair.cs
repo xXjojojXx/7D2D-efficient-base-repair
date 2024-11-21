@@ -70,6 +70,8 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	public Dictionary<string, int> requiredMaterials;
 
+	private List<BlockChangeInfo> blockChangeInfos = new List<BlockChangeInfo>();
+
 	public override TileEntityType GetTileEntityType() => (TileEntityType)191;
 
 	public TileEntityEfficientBaseRepair(Chunk _chunk) : base(_chunk)
@@ -349,7 +351,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		return (int)Mathf.Ceil(repairedDamages);
 	}
 
-	private void RepairBlock(int repairAmount, int clrIdx, BlockValue block, Vector3i pos, string audioClipName)
+	private void DamageBlock(int repairAmount, int clrIdx, BlockValue block, Vector3i pos, string audioClipName)
 	{
 		block.Block.DamageBlock(GameManager.Instance.World, clrIdx, pos, block, repairAmount, 0);
 
@@ -383,7 +385,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 		totalDamagesCount -= repairableDamages;
 
-		RepairBlock(-repairableDamages, chunk.ClrIdx, block, pos, RepairSound(block));
+		DamageBlock(-repairableDamages, chunk.ClrIdx, block, pos, RepairSound(block));
 
 		return repairableDamages;
 	}
@@ -417,15 +419,27 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		TakeRepairMaterials(upgradeMaterials, needMaterialsForUpgrade);
 
 		BlockValue currentBlock = world.GetBlock(pos);
+		Vector3i localPos = World.toBlock(pos);
 
-		if (!keepPaintAfterUpgrade)
-			GameManager.Instance.SetBlockTextureServer(pos, BlockFace.None, 0, -1);
+		var textureFull = chunk.GetTextureFull(localPos.x, localPos.y, localPos.z);
 
-		RepairBlock(-1, chunk.ClrIdx, currentBlock, pos, UpgradeSound);
+		DamageBlock(-1, chunk.ClrIdx, currentBlock, pos, UpgradeSound);
 		SetBlockUpgradable(pos);
+
+		if (keepPaintAfterUpgrade)
+		{
+			blockChangeInfos.Add(new BlockChangeInfo(
+				chunk.ClrIdx,
+				pos,
+				chunk.GetBlock(localPos.x, localPos.y, localPos.z),
+				chunk.GetDensity(localPos.x, localPos.y, localPos.z),
+				textureFull
+			));
+		}
 
 		return true;
 	}
+
 
 	private string GetUpgradeItemName(Block block)
 	{
@@ -796,6 +810,8 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 	{
 		base.UpdateTick(world);
 
+		blockChangeInfos.Clear();
+
 		if (!isOn || BloodMoonActive(world))
 			return;
 
@@ -812,6 +828,11 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 		wasModified |= RepairBlocks(world);
 		wasModified |= UpgradeBlocks(world);
+
+		if (blockChangeInfos.Count > 0)
+		{
+			GameManager.Instance.World.SetBlocksRPC(blockChangeInfos);
+		}
 
 		if (wasModified)
 		{
