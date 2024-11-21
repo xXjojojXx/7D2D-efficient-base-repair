@@ -188,7 +188,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		var itemName = GetUpgradeItemName(block.Block);
 		var itemCount = upgradeProperties.GetInt("UpgradeBlock.ItemCount");
 
-		if (itemName == "" || itemCount <= 0)
+		if (itemName is null || itemName == "" || itemCount <= 0)
 			return null;
 
 		return new Dictionary<string, int>(){
