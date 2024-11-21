@@ -6,7 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-## [1.0.6] -
+## [1.0.6] - 2024-11-21
+
+### Fixed
+
+- fix keepPaintAfterUpgradeOption
+- fix NullArgumentException raised from TileEntity.GetUpgradeMaterialsForPos()
 
 ## [1.0.5] - 2024-11-19
 
