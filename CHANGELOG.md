@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.0.0] - 2025-05-01
+
 ## [1.0.6] - 2024-11-21
 
 ### Fixed
@@ -119,6 +121,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 
 [unreleased]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/master...unreleased
+[2.0.0]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/1.0.6...2.0.0
 [1.0.6]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/1.0.5...1.0.6
 [1.0.5]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/1.0.4...1.0.5
 [1.0.4]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/1.0.3...1.0.4

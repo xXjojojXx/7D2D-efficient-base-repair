@@ -1,4 +1,4 @@
-<modconfig>
+<modconfig version="0">
 
     <property name="maxBfsIterations" value="1000" />           <!-- The max number of bfs iterations (more iterations will require more CPU ressources) -->
     <property name="needsMaterialsForRepair" value="true" />    <!-- Set this param to false to repair even if you miss the repair materials -->

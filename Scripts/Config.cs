@@ -4,9 +4,9 @@ public class Config
 
     public static int maxBfsIterations = config.GetInt("maxBfsIterations");
 
-    public static bool needMaterialsForRepair = config.GetBool("needMaterialsForRepair");
+    public static bool needsMaterialsForRepair = config.GetBool("needsMaterialsForRepair");
 
-    public static bool needMaterialsForUpgrade = config.GetBool("needMaterialsForUpgrade");
+    public static bool needsMaterialsForUpgrade = config.GetBool("needsMaterialsForUpgrade");
 
     public static bool activeDuringBloodMoon = config.GetBool("activeDuringBloodMoon");
 

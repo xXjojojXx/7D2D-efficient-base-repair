@@ -10,9 +10,9 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	private int upgradeRate => Config.upgradeRate;
 
-	private bool needMaterialsForRepair => Config.needMaterialsForRepair;
+	private bool needMaterialsForRepair => Config.needsMaterialsForRepair;
 
-	private bool needMaterialsForUpgrade = Config.needMaterialsForUpgrade;
+	private bool needMaterialsForUpgrade = Config.needsMaterialsForUpgrade;
 
 	private int maxBfsIterations => Config.maxBfsIterations;
 
