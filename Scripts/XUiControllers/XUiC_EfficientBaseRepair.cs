@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class XUiC_EfficientBaseRepair : XUiController
 {
+	private const string windowName = "EfficientBaseRepair";
+
 	private XUiC_LootWindow lootWindow;
 
 	private XUiC_EfficientBaseRepairStats statsWindow;
@@ -18,8 +20,6 @@ public class XUiC_EfficientBaseRepair : XUiController
 	private float openTimeLeft;
 
 	private XUiC_Timer timerWindow;
-
-	public static string ID = "EfficientBaseRepair";
 
 	private float totalOpenTime;
 
@@ -184,7 +184,7 @@ public class XUiC_EfficientBaseRepair : XUiController
 
 	public static void Open(LocalPlayerUI _playerUi, TileEntityEfficientBaseRepair tileEntity)
 	{
-		XUiC_EfficientBaseRepair instance = (XUiC_EfficientBaseRepair)_playerUi.xui.FindWindowGroupByName(ID);
+		XUiC_EfficientBaseRepair instance = (XUiC_EfficientBaseRepair)_playerUi.xui.FindWindowGroupByName(windowName);
 
 		if (instance == null)
 		{
@@ -196,6 +196,6 @@ public class XUiC_EfficientBaseRepair : XUiController
 
 		instance.SetTileEntityChest("EfficientBaseRepair", tileEntity);
 
-		_playerUi.windowManager.Open(ID, _bModal: true);
+		_playerUi.windowManager.Open(windowName, _bModal: true);
 	}
 }

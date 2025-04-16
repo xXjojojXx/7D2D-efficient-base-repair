@@ -50,7 +50,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	public List<Vector3i> blocksToRepair;
 
-	List<Vector3i> blocksToUpgrade = new List<Vector3i>();
+	public List<Vector3i> blocksToUpgrade = new List<Vector3i>();
 
 	public Dictionary<string, int> requiredMaterials;
 
@@ -145,7 +145,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	private bool IsBlockIgnored(BlockValue block)
 	{
-
 		if (block.damage > 0)
 			return false;
 
@@ -437,6 +436,11 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		return text;
 	}
 
+	private bool CanUpgradeBlock(BlockValue block)
+	{
+		return block.Block.Properties.Values.ContainsKey("UpgradeBlock.UpgradeHitCount");
+	}
+
 	public void AnalyseStructure(Vector3i initial_pos)
 	{
 		blocksToRepair = new List<Vector3i>();
@@ -447,10 +451,8 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 		int iterations = maxBfsIterations;
 
-		while (neighbors.Count > 0 && iterations > 0)
+		while (neighbors.Count > 0 && iterations-- > 0)
 		{
-			iterations--;
-
 			List<Vector3i> neighbors_temp = new List<Vector3i>(neighbors);
 			neighbors = new List<Vector3i>();
 
@@ -472,7 +474,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 					blocksToRepair.Add(pos);
 					totalDamagesCount += block.damage;
 				}
-				else if (block.Block.Properties.Values.ContainsKey("UpgradeBlock.UpgradeHitCount"))
+				else if (CanUpgradeBlock(block))
 				{
 					blocksToUpgrade.Add(pos);
 				}

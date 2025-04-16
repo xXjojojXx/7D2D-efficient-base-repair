@@ -7,9 +7,8 @@ class BlockEfficientBaseRepair : BlockSecureLoot
 {
     private static readonly Logging.Logger logger = Logging.CreateLogger<BlockEfficientBaseRepair>();
 
-    private Vector2i LootSize => Config.lootSize;
-
     private const string TURN_ON_CMD = "EfficientBaseRepairTurnOn";
+
     private const string TURN_OFF_CMD = "EfficientBaseRepairTurnOff";
 
     public override void OnBlockAdded(WorldBase _world, Chunk _chunk, Vector3i _blockPos, BlockValue _blockValue)
@@ -25,7 +24,7 @@ class BlockEfficientBaseRepair : BlockSecureLoot
             lootListName = lootList
         };
 
-        tileEntity.SetContainerSize(LootSize);
+        tileEntity.SetContainerSize(Config.lootSize);
         _chunk.AddTileEntity(tileEntity);
     }
 
@@ -81,7 +80,7 @@ class BlockEfficientBaseRepair : BlockSecureLoot
             case TURN_OFF_CMD:
                 if (tileEntity.BloodMoonActive(_world as World))
                 {
-                    BloodMoonDenied(_player as EntityPlayerLocal);
+                    BloodMoonDenied(_player);
                     return false;
                 }
 
