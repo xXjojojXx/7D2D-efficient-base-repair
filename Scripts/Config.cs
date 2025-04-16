@@ -1,6 +1,6 @@
 public class Config
 {
-    private static readonly ModConfig config = new ModConfig("EfficientBaseRepair");
+    private static readonly ModConfig config = new ModConfig("EfficientBaseRepair", version: 0, save: false);
 
     public static int maxBfsIterations = config.GetInt("maxBfsIterations");
 
