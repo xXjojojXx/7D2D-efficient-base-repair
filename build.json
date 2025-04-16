@@ -5,5 +5,8 @@
         "ModInfo.xml",
         "ModConfig.xml",
         "Config"
+    ],
+    "prefabs": [
+        "EfficientBaseRepair/*.*"
     ]
 }
