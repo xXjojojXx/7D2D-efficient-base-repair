@@ -5,6 +5,8 @@ using UnityEngine;
 
 class BlockEfficientBaseRepair : BlockSecureLoot
 {
+    private static readonly Logging.Logger logger = Logging.CreateLogger<BlockEfficientBaseRepair>();
+
     private Vector2i LootSize => Config.lootSize;
 
     private const string TURN_ON_CMD = "EfficientBaseRepairTurnOn";
@@ -114,7 +116,12 @@ class BlockEfficientBaseRepair : BlockSecureLoot
                 }
 
             case "Search":
-                if (!tileEntity.IsLocked() || tileEntity.IsUserAllowed(PlatformManager.InternalLocalUserIdentifier))
+
+                bool isLocked = tileEntity.IsLocked();
+                bool isAllowed = tileEntity.IsUserAllowed(PlatformManager.InternalLocalUserIdentifier);
+                bool isPlaytesting = GameUtils.IsPlaytesting();
+
+                if (!isLocked || isAllowed || isPlaytesting)
                 {
                     return OnBlockActivated(_world, _cIdx, _blockPos, _blockValue, _player);
                 }

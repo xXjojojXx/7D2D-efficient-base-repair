@@ -424,7 +424,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		return true;
 	}
 
-
 	private string GetUpgradeItemName(Block block)
 	{
 		// NOTE: copied from ItemActionRepair.GetUpgradeItemName()
