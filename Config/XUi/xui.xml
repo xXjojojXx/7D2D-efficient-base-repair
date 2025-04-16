@@ -6,11 +6,11 @@
             open_backpack_on_open="true"
             close_compass_on_open="true"
         >
-            <window name="craftingInfoPanel"/>
-			<window name="windowLooting"/>
-			<window name="windowNonPagingHeader"/>
-			<window name="WindowEfficientBaseRepairStats"/>
-			<window name="windowEfficientBaseRepairMaterials"/>
+            <window name="craftingInfoPanel" />
+            <window name="windowLooting" />
+            <window name="windowNonPagingHeader" />
+            <window name="WindowEfficientBaseRepairStats" />
+            <window name="windowEfficientBaseRepairMaterials" />
         </window_group>
 
     </append>
