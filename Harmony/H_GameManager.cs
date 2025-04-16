@@ -84,7 +84,7 @@ public class GameManager_TEUnlockServer
         {
             __instance.lockedTileEntities.Remove(tileEntity);
 
-            if (tileEntity.GetTileEntityType() == (TileEntityType)191)
+            if (tileEntity.GetTileEntityType() == Config.tileEntityType)
                 return false;
 
             if (_allowContainerDestroy)

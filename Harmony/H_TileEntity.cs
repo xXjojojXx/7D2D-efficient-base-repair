@@ -7,7 +7,7 @@ public class TileEntity_Instantiate
 {
     public static bool Prefix(TileEntityType type, Chunk _chunk, ref TileEntity __result)
     {
-        if (type == (TileEntityType)191)
+        if (type == Config.tileEntityType)
         {
             __result = new TileEntityEfficientBaseRepair(_chunk);
             return false;

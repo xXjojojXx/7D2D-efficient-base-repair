@@ -56,7 +56,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	private List<BlockChangeInfo> blockChangeInfos = new List<BlockChangeInfo>();
 
-	public override TileEntityType GetTileEntityType() => (TileEntityType)191;
+	public override TileEntityType GetTileEntityType() => Config.tileEntityType;
 
 	public TileEntityEfficientBaseRepair(Chunk _chunk) : base(_chunk)
 	{

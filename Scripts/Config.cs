@@ -23,4 +23,6 @@ public class Config
     public static bool keepPaintAfterUpgrade = config.GetBool("keepPaintAfterUpgrade");
 
     public static Vector2i lootSize = config.GetVector2i("lootSize");
+
+    public const TileEntityType tileEntityType = (TileEntityType)191;
 }
