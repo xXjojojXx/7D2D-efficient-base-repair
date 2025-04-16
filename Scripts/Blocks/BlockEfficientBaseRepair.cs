@@ -5,16 +5,7 @@ using UnityEngine;
 
 class BlockEfficientBaseRepair : BlockSecureLoot
 {
-    private Vector2i LootSize
-    {
-        get
-        {
-            return new Vector2i(
-                Properties.GetInt("LootSizeX"),
-                Properties.GetInt("LootSizeY")
-            );
-        }
-    }
+    private Vector2i LootSize => Config.lootSize;
 
     private const string TURN_ON_CMD = "EfficientBaseRepairTurnOn";
     private const string TURN_OFF_CMD = "EfficientBaseRepairTurnOff";
@@ -243,14 +234,4 @@ class BlockEfficientBaseRepair : BlockSecureLoot
         }
     }
 
-
-    public override void OnBlockRemoved(WorldBase world, Chunk _chunk, Vector3i _blockPos, BlockValue _blockValue)
-    {
-        base.OnBlockRemoved(world, _chunk, _blockPos, _blockValue);
-    }
-
-    public override DestroyedResult OnBlockDestroyedBy(WorldBase _world, int _clrIdx, Vector3i _blockPos, BlockValue _blockValue, int _entityId, bool _bUseHarvestTool)
-    {
-        return base.OnBlockDestroyedBy(_world, _clrIdx, _blockPos, _blockValue, _entityId, _bUseHarvestTool);
-    }
 }

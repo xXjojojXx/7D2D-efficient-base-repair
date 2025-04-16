@@ -6,31 +6,15 @@ using static Block;
 
 public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TODO: Implement IPowered interface
 {
-	/* XML PARAMS */
+	private int repairRate => Config.repairRate;
 
-	public static readonly DynamicProperties properties = new BlockValue((uint)GetBlockByName("EfficientBaseRepair").blockID).Block.Properties;
+	private int upgradeRate => Config.upgradeRate;
 
-	public static readonly int maxBfsIterations = properties.GetInt("MaxBfsIterations");
+	private bool needMaterialsForRepair => Config.needMaterialsForRepair;
 
-	private static readonly bool needMaterialsForRepair = properties.GetBool("NeedsMaterialsForRepair");
+	private bool needMaterialsForUpgrade = Config.needMaterialsForUpgrade;
 
-	private static readonly bool needMaterialsForUpgrade = properties.GetBool("NeedsMaterialsForUpgrade");
-
-	private static readonly bool activeDuringBloodMoon = properties.GetBool("ActiveDuringBloodMoon");
-
-	public static readonly int repairRate = properties.GetInt("RepairRate");
-
-	private static readonly int refreshRate = properties.GetInt("RefreshRate");
-
-	public static readonly bool playRepairSound = properties.GetBool("PlayRepairSound");
-
-	private static readonly bool autoTurnOff = properties.GetBool("AutoTurnOff");
-
-	private static readonly int upgradeRate = properties.GetInt("UpgradeRate");
-
-	private static readonly bool keepPaintAfterUpgrade = properties.GetBool("KeepPaintAfterUpgrade");
-
-	/* PUBLIC STATS */
+	private int maxBfsIterations => Config.maxBfsIterations;
 
 	public int damagedBlockCount = 0;
 
@@ -355,7 +339,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 	{
 		block.Block.DamageBlock(GameManager.Instance.World, clrIdx, pos, block, repairAmount, 0);
 
-		if (!playRepairSound || audioClipName == string.Empty)
+		if (!Config.playRepairSound || audioClipName == string.Empty)
 			return;
 
 		// play material specific sound (copied from ocbClaimAutoRepair)
@@ -426,7 +410,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		DamageBlock(-1, chunk.ClrIdx, currentBlock, pos, UpgradeSound);
 		SetBlockUpgradable(pos);
 
-		if (keepPaintAfterUpgrade)
+		if (Config.keepPaintAfterUpgrade)
 		{
 			blockChangeInfos.Add(new BlockChangeInfo(
 				chunk.ClrIdx,
@@ -705,7 +689,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	public bool BloodMoonActive(World _world)
 	{
-		if (activeDuringBloodMoon)
+		if (Config.activeDuringBloodMoon)
 			return false;
 
 		if (_world.aiDirector == null)
@@ -815,7 +799,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		if (!isOn || BloodMoonActive(world))
 			return;
 
-		if (blocksToRepair == null || (elapsedTicksSinceLastRefresh >= refreshRate && refreshRate > 0))
+		if (blocksToRepair == null || (elapsedTicksSinceLastRefresh >= Config.refreshRate && Config.refreshRate > 0))
 			RefreshStats(world);
 
 		if (blocksToRepair == null)
@@ -838,7 +822,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		{
 			setModified();
 		}
-		else if (autoTurnOff)
+		else if (Config.autoTurnOff)
 		{
 			isOn = false;
 			setModified();
