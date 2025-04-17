@@ -8,26 +8,26 @@
   <property name="DifficultyTier" value="0" />
   <property name="ShowQuestClearCount" value="1" />
   <property name="TraderArea" value="False" />
-  <property name="PrefabSize" value="45, 3, 45" />
+  <property name="PrefabSize" value="39, 4, 21" />
   <property name="RotationToFaceNorth" value="2" />
   <property name="YOffset" value="-1" />
   <property name="Zoning" value="none" />
   <property name="EditorGroups" value="EfficientBaseRepair" />
   <property name="Tags" value="test, testonly" />
   <property class="Stats">
-    <property name="TotalVertices" value="127645" />
-    <property name="TotalTriangles" value="47656" />
+    <property name="TotalVertices" value="135070" />
+    <property name="TotalTriangles" value="46584" />
     <property class="BlockEntities">
-      <property name="Vertices" value="121457" />
-      <property name="Triangles" value="38764" />
+      <property name="Vertices" value="131134" />
+      <property name="Triangles" value="42156" />
     </property>
     <property class="ChunkMeshes0">
-      <property name="Vertices" value="872" />
-      <property name="Triangles" value="436" />
+      <property name="Vertices" value="1376" />
+      <property name="Triangles" value="724" />
     </property>
     <property class="ChunkMeshes1">
-      <property name="Vertices" value="0" />
-      <property name="Triangles" value="0" />
+      <property name="Vertices" value="384" />
+      <property name="Triangles" value="192" />
     </property>
     <property class="ChunkMeshes2">
       <property name="Vertices" value="0" />
@@ -42,15 +42,20 @@
       <property name="Triangles" value="0" />
     </property>
     <property class="ChunkMeshes5">
-      <property name="Vertices" value="5316" />
-      <property name="Triangles" value="8456" />
+      <property name="Vertices" value="2176" />
+      <property name="Triangles" value="3512" />
     </property>
   </property>
   <property class="IndexedBlockOffsets">
     <property class="TraderOnOff">
-      <property name="0" value="17, 2, 6" />
-      <property name="1" value="19, 2, 6" />
-      <property name="2" value="20, 2, 6" />
+      <property name="0" value="11, 2, 6" />
+      <property name="1" value="13, 2, 6" />
+      <property name="2" value="14, 2, 6" />
+      <property name="3" value="10, 1, 11" />
+      <property name="4" value="15, 1, 11" />
+      <property name="5" value="15, 2, 6" />
+      <property name="6" value="3, 1, 14" />
+      <property name="7" value="5, 1, 14" />
     </property>
   </property>
 </prefab>
