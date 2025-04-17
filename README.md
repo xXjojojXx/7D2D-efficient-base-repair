@@ -71,18 +71,18 @@ The full structure analysis will be done at different moments:
 Once the installation is done, go to [ModConfig.xml](./ModConfig.xml) and take a look at the available parameters.
 
 ```xml
-<property name="MaxBfsIterations" value="1000" />            <!-- The max number of bfs iterations (more iterations will require more CPU ressources) -->
-<property name="NeedsMaterialsForRepair" value="true" />     <!-- Set this param to false to repair even if you miss the repair materials -->
-<property name="NeedsMaterialsForUpgrade" value="true" />    <!-- Set this param to false to upgrade even if you miss the upgrade materials -->
-<property name="LootSizeX" value="6" />                      <!-- Number of columns of the loot container -->
-<property name="LootSizeY" value="5" />                      <!-- Number of rows of the loot container -->
-<property name="RefreshRate" value="0" />                    <!-- The number of game ticks between two auto refresh (set to 0 to disable auto refresh) -->
-<property name="RepairRate" value="100" />                   <!-- The amount of damage which can be repaired for one game tick (set to 0 for instant repairs) -->
-<property name="UpgradeRate" value="1" />                    <!-- The number of blocks which can be upgraded during one game tick (set to 0 to for instant upgrades) -->
-<property name="PlayRepairSound" value="true" />             <!-- Set to false to disable the hammer sound on the current block which is being repaired -->
-<property name="ActiveDuringBloodMoon" value="false" />      <!-- Set to true to enable the auto repair during the blood moon-->
-<property name="AutoTurnOff" value="true" />                 <!-- Auto turn off if no more blocks can be repaired -->
-<property name="KeepPaintAfterUpgrade" value="true" />       <!-- If enabled, the upgraded block will keep his original paint, else his texture will be set to the upgrade block texture -->
+    <property name="maxBfsIterations" value="1000" />           <!-- The max number of bfs iterations (more iterations will require more CPU ressources) -->
+    <property name="needsMaterialsForRepair" value="true" />    <!-- Set this param to false to repair even if you miss the repair materials -->
+    <property name="needsMaterialsForUpgrade" value="true" />   <!-- Set this param to false to upgrade even if you miss the upgrade materials -->
+    <property name="refreshRate" value="0" />                   <!-- The number of game ticks between two auto refresh (set to 0 to disable auto refresh) -->
+    <property name="repairRate" value="100" />                  <!-- The amount of damage which can be repaired for one game tick (set to 0 for instant repairs) -->
+    <property name="upgradeRate" value="1" />                   <!-- The number of blocks which can be upgraded during one game tick (set to 0 to for instant upgrades) -->
+    <property name="playRepairSound" value="true" />            <!-- Set to false to disable the hammer sound on the current block which is being repaired -->
+    <property name="activeDuringBloodMoon" value="false" />     <!-- Set to true to enable the auto repair during the blood moon-->
+    <property name="autoTurnOff" value="true" />                <!-- Auto turn off if no more blocks can be repaired -->
+    <property name="keepPaintAfterUpgrade" value="true" />      <!-- If enabled, the upgraded block will keep his original paint, else his texture will be set to the upgrade block texture -->
+    <property name="lootSize" value="6,5" />                    <!-- Number of columns of the loot container -->
+    <property name="upgradeSound" value="nailgun_fire" />       <!-- The sound played when a block is upgraded -->
 ```
 
 Once you have set up your own balancing options, restart the game or the dedicated server.
