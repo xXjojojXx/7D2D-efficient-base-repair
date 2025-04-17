@@ -866,6 +866,11 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 
 			tileEntity.CurrentFuel += (ushort)fuelTaken;
 			wasModified = true;
+
+			if (Config.turnOnAfterRefuel && tileEntity.HasSlottedItems())
+			{
+				(tileEntity.PowerItem as PowerSource).IsOn = true;
+			}
 		}
 
 		return wasModified;
@@ -908,8 +913,8 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 
 			if (wasReloaded)
 			{
-				tileEntity.IsLocked = true;
 				tileEntity.ItemSlots = itemSlots;
+				tileEntity.IsLocked |= Config.turnOnAfterReload;
 			}
 		}
 

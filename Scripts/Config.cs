@@ -18,6 +18,10 @@ public class Config
 
     public static bool autoTurnOff = config.GetBool("autoTurnOff");
 
+    public static bool turnOnAfterReload = config.GetBool("turnOnAfterReload");
+
+    public static bool turnOnAfterRefuel = config.GetBool("turnOnAfterRefuel");
+
     public static int upgradeRate = config.GetInt("upgradeRate");
 
     public static bool keepPaintAfterUpgrade = config.GetBool("keepPaintAfterUpgrade");
