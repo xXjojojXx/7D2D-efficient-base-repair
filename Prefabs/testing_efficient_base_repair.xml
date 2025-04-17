@@ -15,15 +15,15 @@
   <property name="EditorGroups" value="EfficientBaseRepair" />
   <property name="Tags" value="test, testonly" />
   <property class="Stats">
-    <property name="TotalVertices" value="135070" />
-    <property name="TotalTriangles" value="46584" />
+    <property name="TotalVertices" value="153105" />
+    <property name="TotalTriangles" value="54941" />
     <property class="BlockEntities">
-      <property name="Vertices" value="131134" />
-      <property name="Triangles" value="42156" />
+      <property name="Vertices" value="148633" />
+      <property name="Triangles" value="50245" />
     </property>
     <property class="ChunkMeshes0">
-      <property name="Vertices" value="1376" />
-      <property name="Triangles" value="724" />
+      <property name="Vertices" value="1912" />
+      <property name="Triangles" value="992" />
     </property>
     <property class="ChunkMeshes1">
       <property name="Vertices" value="384" />
@@ -48,14 +48,14 @@
   </property>
   <property class="IndexedBlockOffsets">
     <property class="TraderOnOff">
-      <property name="0" value="11, 2, 6" />
-      <property name="1" value="13, 2, 6" />
-      <property name="2" value="14, 2, 6" />
-      <property name="3" value="10, 1, 11" />
-      <property name="4" value="15, 1, 11" />
-      <property name="5" value="15, 2, 6" />
-      <property name="6" value="3, 1, 14" />
-      <property name="7" value="5, 1, 14" />
+      <property name="0" value="6, 1, 14" />
+      <property name="1" value="7, 1, 11" />
+      <property name="2" value="12, 1, 11" />
+      <property name="3" value="14, 1, 14" />
+    </property>
+    <property class="POILight">
+      <property name="0" value="21, 2, 4" />
+      <property name="1" value="23, 2, 4" />
     </property>
   </property>
 </prefab>
