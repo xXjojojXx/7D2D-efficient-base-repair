@@ -28,7 +28,7 @@ public class Logging
 
         private string ObjectsToString(object[] objects)
         {
-            return string.Join(" ", objects.Select(obj => obj.ToString()));
+            return string.Join(" ", objects.Select(obj => obj?.ToString()));
         }
 
         public void Debug(params object[] objects)
