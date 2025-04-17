@@ -8,8 +8,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 {
 	private static readonly Logging.Logger logger = Logging.CreateLogger<TileEntityEfficientBaseRepair>();
 
-	public override TileEntityType GetTileEntityType() => Config.tileEntityType;
-
 	private const string propAmmoGasCan = "ammoGasCan";
 
 	private const float tickDuration_s = 2f;
@@ -53,8 +51,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 	public readonly Dictionary<string, int> requiredMaterials = new Dictionary<string, int>();
 
 	public TileEntityEfficientBaseRepair(Chunk _chunk) : base(_chunk) { }
-
-	public bool HasOwner() => this.ownerID != null;
 
 	public string RepairTime()
 	{
@@ -640,116 +636,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 		setModified();
 	}
 
-	public override void read(PooledBinaryReader _br, StreamModeRead _eStreamMode)
-	{
-		base.read(_br, _eStreamMode);
-		IsOn = _br.ReadBoolean();
-		UpgradeOn = _br.ReadBoolean();
-		IsPowered = _br.ReadBoolean();
-
-		if (_eStreamMode == StreamModeRead.Persistency)
-			return;
-
-		forceRefreshMaterials = _br.ReadBoolean();
-		forceFullRefresh = _br.ReadBoolean();
-		DamagedBlockCount = _br.ReadInt32();
-		TotalDamagesCount = _br.ReadInt32();
-		VisitedBlocksCount = _br.ReadInt32();
-		BfsIterationsCount = _br.ReadInt32();
-		UpgradableBlockCount = _br.ReadInt32();
-
-		// send requiredMaterials from server to client, to update Materials panel.
-		requiredMaterials.Clear();
-
-		int requiredMaterialsCount = _br.ReadInt32();
-		if (requiredMaterialsCount > 0)
-		{
-			for (int i = 0; i < requiredMaterialsCount; i++)
-			{
-				string itemName = _br.ReadString();
-				int itemCount = _br.ReadInt32();
-
-				requiredMaterials[itemName] = itemCount;
-			}
-		}
-
-		// NOTE: reading again items allows to bypass the bUserAccessing condition from base-classes
-		// -> allows the TileEntity to take items from containers, even if the user is accessing the container
-		// -> /!\ may cause unknown issues on concurency access to the container
-		int itemsCount = _br.ReadInt32();
-		if (itemsCount > 0)
-		{
-			for (int i = 0; i < itemsCount; i++)
-			{
-				items[i].Read(_br);
-			}
-		}
-
-		if (_eStreamMode == StreamModeRead.FromServer)
-			return;
-
-		// force refresh on server side if he receives the param forceRefresh=true from client.
-		if (forceFullRefresh)
-		{
-			logger.Info("Refresh forced from server.");
-			RefreshStats();
-			setModified();
-		}
-		else if (forceRefreshMaterials)
-		{
-			RefreshMaterialsStats();
-			setModified();
-		}
-	}
-
-	public override void write(PooledBinaryWriter _bw, StreamModeWrite _eStreamMode)
-	{
-		base.write(_bw, _eStreamMode);
-		_bw.Write(IsOn);
-		_bw.Write(UpgradeOn);
-		_bw.Write(IsPowered);
-
-		if (_eStreamMode == StreamModeWrite.Persistency)
-			return;
-
-		_bw.Write(forceRefreshMaterials);
-		_bw.Write(forceFullRefresh);
-		_bw.Write(DamagedBlockCount);
-		_bw.Write(TotalDamagesCount);
-		_bw.Write(VisitedBlocksCount);
-		_bw.Write(BfsIterationsCount);
-		_bw.Write(UpgradableBlockCount);
-		_bw.Write(requiredMaterials.Count);
-
-		foreach (KeyValuePair<string, int> entry in requiredMaterials)
-		{
-			_bw.Write(entry.Key);
-			_bw.Write(entry.Value);
-		}
-
-		// see the note in the read method upper
-		_bw.Write(items.Length);
-		foreach (ItemStack stack in items)
-		{
-			stack.Clone().Write(_bw);
-		}
-
-		if (_eStreamMode == StreamModeWrite.ToServer)
-			return;
-
-		// trigger forceRefresh=true in single player mode
-		// TODO: try with SingletonMonoBehaviour<ConnectionManager>.Instance.IsSinglePlayer
-		if (forceFullRefresh)
-		{
-			logger.Info("Refresh forced from Client.");
-			RefreshStats();
-		}
-		else if (forceRefreshMaterials)
-		{
-			RefreshMaterialsStats();
-		}
-	}
-
 	public bool BloodMoonActive(World _world)
 	{
 		if (Config.activeDuringBloodMoon)
@@ -919,6 +805,118 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 		}
 
 		return wasModified;
+	}
+
+	public override TileEntityType GetTileEntityType() => Config.tileEntityType;
+
+	public override void read(PooledBinaryReader _br, StreamModeRead _eStreamMode)
+	{
+		base.read(_br, _eStreamMode);
+		IsOn = _br.ReadBoolean();
+		UpgradeOn = _br.ReadBoolean();
+		IsPowered = _br.ReadBoolean();
+
+		if (_eStreamMode == StreamModeRead.Persistency)
+			return;
+
+		forceRefreshMaterials = _br.ReadBoolean();
+		forceFullRefresh = _br.ReadBoolean();
+		DamagedBlockCount = _br.ReadInt32();
+		TotalDamagesCount = _br.ReadInt32();
+		VisitedBlocksCount = _br.ReadInt32();
+		BfsIterationsCount = _br.ReadInt32();
+		UpgradableBlockCount = _br.ReadInt32();
+
+		// send requiredMaterials from server to client, to update Materials panel.
+		requiredMaterials.Clear();
+
+		int requiredMaterialsCount = _br.ReadInt32();
+		if (requiredMaterialsCount > 0)
+		{
+			for (int i = 0; i < requiredMaterialsCount; i++)
+			{
+				string itemName = _br.ReadString();
+				int itemCount = _br.ReadInt32();
+
+				requiredMaterials[itemName] = itemCount;
+			}
+		}
+
+		// NOTE: reading again items allows to bypass the bUserAccessing condition from base-classes
+		// -> allows the TileEntity to take items from containers, even if the user is accessing the container
+		// -> /!\ may cause unknown issues on concurency access to the container
+		int itemsCount = _br.ReadInt32();
+		if (itemsCount > 0)
+		{
+			for (int i = 0; i < itemsCount; i++)
+			{
+				items[i].Read(_br);
+			}
+		}
+
+		if (_eStreamMode == StreamModeRead.FromServer)
+			return;
+
+		// force refresh on server side if he receives the param forceRefresh=true from client.
+		if (forceFullRefresh)
+		{
+			logger.Info("Refresh forced from server.");
+			RefreshStats();
+			setModified();
+		}
+		else if (forceRefreshMaterials)
+		{
+			RefreshMaterialsStats();
+			setModified();
+		}
+	}
+
+	public override void write(PooledBinaryWriter _bw, StreamModeWrite _eStreamMode)
+	{
+		base.write(_bw, _eStreamMode);
+		_bw.Write(IsOn);
+		_bw.Write(UpgradeOn);
+		_bw.Write(IsPowered);
+
+		if (_eStreamMode == StreamModeWrite.Persistency)
+			return;
+
+		_bw.Write(forceRefreshMaterials);
+		_bw.Write(forceFullRefresh);
+		_bw.Write(DamagedBlockCount);
+		_bw.Write(TotalDamagesCount);
+		_bw.Write(VisitedBlocksCount);
+		_bw.Write(BfsIterationsCount);
+		_bw.Write(UpgradableBlockCount);
+		_bw.Write(requiredMaterials.Count);
+
+		foreach (KeyValuePair<string, int> entry in requiredMaterials)
+		{
+			_bw.Write(entry.Key);
+			_bw.Write(entry.Value);
+		}
+
+		// see the note in the read method upper
+		_bw.Write(items.Length);
+		foreach (ItemStack stack in items)
+		{
+			stack.Clone().Write(_bw);
+		}
+
+		if (_eStreamMode == StreamModeWrite.ToServer)
+			return;
+
+		// trigger forceRefresh=true in single player mode
+		// TODO: try with SingletonMonoBehaviour<ConnectionManager>.Instance.IsSinglePlayer
+		if (forceFullRefresh)
+		{
+			logger.Info("Refresh forced from Client.");
+			RefreshStats();
+		}
+		else if (forceRefreshMaterials)
+		{
+			RefreshMaterialsStats();
+		}
 	}
 
 	public override void UpdateTick(World world)
