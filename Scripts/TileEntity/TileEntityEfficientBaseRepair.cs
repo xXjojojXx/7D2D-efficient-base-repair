@@ -4,46 +4,37 @@ using System.Collections.Generic;
 using System;
 using static Block;
 
-public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TODO: Implement IPowered interface
+public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TODO: Implement IPowered interface
 {
 	private static readonly Logging.Logger logger = Logging.CreateLogger<TileEntityEfficientBaseRepair>();
 
-	private int repairRate => Config.repairRate;
+	public override TileEntityType GetTileEntityType() => Config.tileEntityType;
 
-	private int upgradeRate => Config.upgradeRate;
+	private const string propAmmoGasCan = "ammoGasCan";
 
-	private bool needMaterialsForRepair => Config.needsMaterialsForRepair;
+	private const float tickDuration_s = 2f;
 
-	private bool needMaterialsForUpgrade = Config.needsMaterialsForUpgrade;
+	public int DamagedBlockCount { get; private set; }
 
-	private int maxBfsIterations => Config.maxBfsIterations;
+	public int UpgradableBlockCount { get; private set; }
 
-	public int damagedBlockCount = 0;
+	public int VisitedBlocksCount { get; private set; }
 
-	public int upgradableBlockCount = 0;
+	public int BfsIterationsCount { get; private set; }
 
-	public int visitedBlocksCount = 0;
+	public int TotalDamagesCount { get; private set; }
 
-	public int bfsIterationsCount = 0;
+	public int ElapsedTicksSinceLastRefresh { get; private set; }
 
-	public int totalDamagesCount = 0;
+	public bool IsOn { get; private set; }
 
-	/* CLASS ATTRIBUTES */
-	private bool isOn;
+	public bool UpgradeOn { get; private set; }
 
-	public bool upgradeOn;
-
-	public bool isPowered;
+	public bool IsPowered { get; private set; }
 
 	private bool forceFullRefresh;
 
 	private bool forceRefreshMaterials;
-
-	public bool IsOn => isOn;
-
-	private int elapsedTicksSinceLastRefresh = 0;
-
-	private string UpgradeSound => "nailgun_fire";
 
 	private string RepairSound(BlockValue block) => string.Format("ImpactSurface/metalhit{0}", block.Block.blockMaterial.SurfaceCategory);
 
@@ -57,29 +48,24 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	public readonly List<Vector3i> blocksToReload = new List<Vector3i>();
 
+	private readonly List<BlockChangeInfo> blockChangeInfos = new List<BlockChangeInfo>();
+
 	public readonly Dictionary<string, int> requiredMaterials = new Dictionary<string, int>();
 
-	private List<BlockChangeInfo> blockChangeInfos = new List<BlockChangeInfo>();
+	public TileEntityEfficientBaseRepair(Chunk _chunk) : base(_chunk) { }
 
-	public override TileEntityType GetTileEntityType() => Config.tileEntityType;
-
-	public TileEntityEfficientBaseRepair(Chunk _chunk) : base(_chunk)
-	{
-		isOn = false;
-	}
+	public bool HasOwner() => this.ownerID != null;
 
 	public string RepairTime()
 	{
-		const float tickDuration_s = 2f;
-
 		float repairTime_s = 0f;
 		float upgradeTime_s = 0f;
 
-		if (repairRate > 0)
-			repairTime_s = (float)(totalDamagesCount * tickDuration_s) / repairRate;
+		if (Config.repairRate > 0)
+			repairTime_s = (float)(TotalDamagesCount * tickDuration_s) / Config.repairRate;
 
-		if (upgradeRate > 0 && upgradeOn)
-			upgradeTime_s = (float)(upgradableBlockCount * tickDuration_s) / upgradeRate;
+		if (Config.upgradeRate > 0 && UpgradeOn)
+			upgradeTime_s = (float)(UpgradableBlockCount * tickDuration_s) / Config.upgradeRate;
 
 		return TimeSpan.FromSeconds(repairTime_s + upgradeTime_s).ToString(@"hh\:mm\:ss");
 	}
@@ -301,7 +287,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			int availableItemCount = itemsDict.TryGetValue(item.ItemName, out availableItemCount) ? availableItemCount : 0;
 
 			// stop trying to repair the block if one material is missing
-			if (needMaterialsForRepair && availableItemCount < targetItemCount)
+			if (Config.needsMaterialsForRepair && availableItemCount < targetItemCount)
 			{
 				return 0;
 			}
@@ -310,7 +296,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			totalRequired += (int)Mathf.Ceil(item.Count * blockDamagePerc);
 		}
 
-		int totalTaken = TakeRepairMaterials(materialsToTake, needMaterialsForRepair);
+		int totalTaken = TakeRepairMaterials(materialsToTake, Config.needsMaterialsForRepair);
 
 		float repairedDamages = (float)block.damage * totalTaken / totalRequired;
 
@@ -343,7 +329,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		if (repairableDamages <= 0)
 			return 0;
 
-		totalDamagesCount -= repairableDamages;
+		TotalDamagesCount -= repairableDamages;
 
 		RepairBlock(repairableDamages, chunk.ClrIdx, block, pos, RepairSound(block));
 
@@ -363,7 +349,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 		foreach (var entry in upgradeMaterials)
 		{
-			if (!needMaterialsForUpgrade)
+			if (!Config.needsMaterialsForUpgrade)
 				continue;
 
 			if (!availableMaterials.ContainsKey(entry.Key))
@@ -376,14 +362,14 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 				return false;
 		}
 
-		TakeRepairMaterials(upgradeMaterials, needMaterialsForUpgrade);
+		TakeRepairMaterials(upgradeMaterials, Config.needsMaterialsForUpgrade);
 
 		BlockValue currentBlock = world.GetBlock(pos);
 		Vector3i localPos = World.toBlock(pos);
 
 		var textureFull = chunk.GetTextureFull(localPos.x, localPos.y, localPos.z);
 
-		RepairBlock(1, chunk.ClrIdx, currentBlock, pos, UpgradeSound);
+		RepairBlock(1, chunk.ClrIdx, currentBlock, pos, Config.upgradeSound);
 		SetBlockUpgradable(pos);
 
 		if (Config.keepPaintAfterUpgrade)
@@ -418,14 +404,40 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		return block.Block.Properties.Values.ContainsKey("UpgradeBlock.UpgradeHitCount");
 	}
 
-	private bool CanRefuelBlock(BlockValue block)
+	private bool CanRefuelBlock(TileEntity te)
 	{
-		return block.Block.Properties.Values.ContainsKey("MaxFuel");
+		if (!(te is TileEntityPowerSource tileEntity))
+			return false;
+
+		// don't handle tileEntities which don't belong to the efficientBaseRepair block owner
+		if (tileEntity.ownerID != null && !tileEntity.ownerID.Equals(this.ownerID))
+			return false;
+
+		return tileEntity.CurrentFuel < tileEntity.MaxFuel;
 	}
 
-	private bool CanReloadBlock(BlockValue block)
+	private bool CanReloadBlock(TileEntity te)
 	{
-		return block.Block.Properties.Values.ContainsKey("AmmoItem");
+		if (!(te is TileEntityPoweredRangedTrap tileEntity))
+			return false;
+
+		// don't handle tileEntities which don't belong to the efficientBaseRepair block owner
+		if (tileEntity.ownerID != null && !tileEntity.ownerID.Equals(this.ownerID))
+			return false;
+
+		foreach (var itemStack in tileEntity.ItemSlots)
+		{
+			if (itemStack.IsEmpty())
+				return true;
+
+			var stackSize = itemStack.itemValue.ItemClass.Stacknumber.Value;
+			var itemCount = itemStack.count;
+
+			if (itemCount < stackSize)
+				return true;
+		}
+
+		return false;
 	}
 
 	public void AnalyseStructure(Vector3i initial_pos)
@@ -438,6 +450,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		List<Vector3i> neighbors = GetNeighbors(initial_pos);
 		Dictionary<string, int> visited = new Dictionary<string, int>();
 
+		int maxBfsIterations = Config.maxBfsIterations;
 		int iterations = maxBfsIterations;
 
 		while (neighbors.Count > 0 && iterations-- > 0)
@@ -461,27 +474,29 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 				if (block.damage > 0)
 				{
 					blocksToRepair.Add(pos);
-					totalDamagesCount += block.damage;
+					TotalDamagesCount += block.damage;
 				}
 				else if (CanUpgradeBlock(block))
 				{
 					blocksToUpgrade.Add(pos);
 				}
 
-				if (CanRefuelBlock(block))
+				var tileEntity = world.GetTileEntity(pos);
+
+				if (CanRefuelBlock(tileEntity))
 					blocksToRefuel.Add(pos);
 
-				if (CanReloadBlock(block))
+				if (CanReloadBlock(tileEntity))
 					blocksToReload.Add(pos);
 
 				neighbors.AddRange(GetNeighbors(pos));
 			}
 		}
 
-		damagedBlockCount = blocksToRepair.Count;
-		bfsIterationsCount = maxBfsIterations - iterations;
-		visitedBlocksCount = visited.Count;
-		upgradableBlockCount = blocksToUpgrade.Count;
+		DamagedBlockCount = blocksToRepair.Count;
+		BfsIterationsCount = maxBfsIterations - iterations;
+		VisitedBlocksCount = visited.Count;
+		UpgradableBlockCount = blocksToUpgrade.Count;
 
 		logger.Info($"blocksToRepair  : {blocksToRepair.Count}");
 		logger.Info($"blocksToUpgrade : {blocksToUpgrade.Count}");
@@ -499,11 +514,11 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	private void RefreshStats()
 	{
-		elapsedTicksSinceLastRefresh = 0;
-		damagedBlockCount = 0;
-		bfsIterationsCount = 0;
-		visitedBlocksCount = 0;
-		totalDamagesCount = 0;
+		ElapsedTicksSinceLastRefresh = 0;
+		DamagedBlockCount = 0;
+		BfsIterationsCount = 0;
+		VisitedBlocksCount = 0;
+		TotalDamagesCount = 0;
 		forceFullRefresh = false;
 
 		AnalyseStructure(ToWorldPos());
@@ -531,7 +546,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	private void RefreshUpgradeItems()
 	{
-		if (!upgradeOn)
+		if (!UpgradeOn)
 			return;
 
 		foreach (Vector3i position in blocksToUpgrade)
@@ -553,8 +568,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	private void RefreshRefuelItems()
 	{
-		const string propAmmoGasCan = "ammoGasCan";
-
 		foreach (var pos in blocksToRefuel)
 		{
 			if (!(world.GetTileEntity(pos) is TileEntityPowerSource tileEntity))
@@ -614,15 +627,15 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		if (forceRefresh_)
 			forceFullRefresh = true;
 
-		isOn = !isOn;
+		IsOn = !IsOn;
 
-		Manager.PlayInsidePlayerHead(isOn ? "switch_up" : "switch_down");
+		Manager.PlayInsidePlayerHead(IsOn ? "switch_up" : "switch_down");
 		setModified();
 	}
 
 	public void SwitchUpgrade()
 	{
-		upgradeOn = !upgradeOn;
+		UpgradeOn = !UpgradeOn;
 		forceRefreshMaterials = true;
 		setModified();
 	}
@@ -630,20 +643,20 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 	public override void read(PooledBinaryReader _br, StreamModeRead _eStreamMode)
 	{
 		base.read(_br, _eStreamMode);
-		isOn = _br.ReadBoolean();
-		upgradeOn = _br.ReadBoolean();
-		isPowered = _br.ReadBoolean();
+		IsOn = _br.ReadBoolean();
+		UpgradeOn = _br.ReadBoolean();
+		IsPowered = _br.ReadBoolean();
 
 		if (_eStreamMode == StreamModeRead.Persistency)
 			return;
 
 		forceRefreshMaterials = _br.ReadBoolean();
 		forceFullRefresh = _br.ReadBoolean();
-		damagedBlockCount = _br.ReadInt32();
-		totalDamagesCount = _br.ReadInt32();
-		visitedBlocksCount = _br.ReadInt32();
-		bfsIterationsCount = _br.ReadInt32();
-		upgradableBlockCount = _br.ReadInt32();
+		DamagedBlockCount = _br.ReadInt32();
+		TotalDamagesCount = _br.ReadInt32();
+		VisitedBlocksCount = _br.ReadInt32();
+		BfsIterationsCount = _br.ReadInt32();
+		UpgradableBlockCount = _br.ReadInt32();
 
 		// send requiredMaterials from server to client, to update Materials panel.
 		requiredMaterials.Clear();
@@ -692,20 +705,20 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 	public override void write(PooledBinaryWriter _bw, StreamModeWrite _eStreamMode)
 	{
 		base.write(_bw, _eStreamMode);
-		_bw.Write(isOn);
-		_bw.Write(upgradeOn);
-		_bw.Write(isPowered);
+		_bw.Write(IsOn);
+		_bw.Write(UpgradeOn);
+		_bw.Write(IsPowered);
 
 		if (_eStreamMode == StreamModeWrite.Persistency)
 			return;
 
 		_bw.Write(forceRefreshMaterials);
 		_bw.Write(forceFullRefresh);
-		_bw.Write(damagedBlockCount);
-		_bw.Write(totalDamagesCount);
-		_bw.Write(visitedBlocksCount);
-		_bw.Write(bfsIterationsCount);
-		_bw.Write(upgradableBlockCount);
+		_bw.Write(DamagedBlockCount);
+		_bw.Write(TotalDamagesCount);
+		_bw.Write(VisitedBlocksCount);
+		_bw.Write(BfsIterationsCount);
+		_bw.Write(UpgradableBlockCount);
 		_bw.Write(requiredMaterials.Count);
 
 		foreach (KeyValuePair<string, int> entry in requiredMaterials)
@@ -747,7 +760,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 		bool bloodMoonActive = _world.aiDirector.BloodMoonComponent.BloodMoonActive;
 
-		if (bloodMoonActive && isOn)
+		if (bloodMoonActive && IsOn)
 			Switch();
 
 		return bloodMoonActive;
@@ -761,9 +774,9 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			return;
 
 		blocksToUpgrade.Add(position);
-		upgradableBlockCount++;
+		UpgradableBlockCount++;
 
-		if (!upgradeOn)
+		if (!UpgradeOn)
 			return;
 
 		foreach (KeyValuePair<string, int> entry in upgradeMaterials)
@@ -777,7 +790,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	private bool RepairBlocks(World world)
 	{
-		int repairableDamages = repairRate > 0 ? repairRate : int.MaxValue;
+		int repairableDamages = Config.repairRate > 0 ? Config.repairRate : int.MaxValue;
 		int totalRepairedDamages = 0;
 
 		foreach (Vector3i position in new List<Vector3i>(blocksToRepair))
@@ -792,11 +805,11 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			if (block.damage == 0)
 			{
 				blocksToRepair.Remove(position);
-				damagedBlockCount--;
+				DamagedBlockCount--;
 				SetBlockUpgradable(position);
 			}
 
-			if (repairableDamages <= 0 && repairRate > 0)
+			if (repairableDamages <= 0 && Config.repairRate > 0)
 				break;
 		}
 
@@ -808,10 +821,10 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	private bool UpgradeBlocks(World world)
 	{
-		if (!upgradeOn)
+		if (!UpgradeOn)
 			return false;
 
-		int upgradeCountTarget = upgradeRate > 0 ? upgradeRate : int.MaxValue;
+		int upgradeCountTarget = Config.upgradeRate > 0 ? Config.upgradeRate : int.MaxValue;
 		int upgradedBlocksCount = 0;
 
 		foreach (Vector3i position in new List<Vector3i>(blocksToUpgrade))
@@ -819,7 +832,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 			if (!TryUpgradeBlock(world, position))
 				continue;
 
-			upgradableBlockCount--;
+			UpgradableBlockCount--;
 			upgradeCountTarget--;
 			upgradedBlocksCount++;
 
@@ -837,46 +850,70 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 	private bool RefuelBlocks(World world)
 	{
-		// bool wasModified = false;
+		bool wasModified = false;
 
-		// foreach (var pos in blocksToRefuel)
-		// {
-		// 	if (world.GetTileEntity(pos) is TileEntityPowerSource tileEntity)
-		// 	{
-		// 		tileEntity.CurrentFuel = tileEntity.MaxFuel;
-		// 		wasModified = true;
-		// 	}
-		// }
+		foreach (var pos in blocksToRefuel)
+		{
+			if (!(world.GetTileEntity(pos) is TileEntityPowerSource tileEntity))
+				continue;
 
-		return false;
+			var requiredFuel = tileEntity.MaxFuel - tileEntity.CurrentFuel;
+			var fuelTaken = TakeRepairMaterial(propAmmoGasCan, requiredFuel);
+
+			// no more fuel available, we stop here
+			if (fuelTaken == 0)
+				break;
+
+			tileEntity.CurrentFuel += (ushort)fuelTaken;
+			wasModified = true;
+		}
+
+		return wasModified;
 	}
 
 	private bool ReloadBlocks(World world)
 	{
-		// bool wasModified = false;
+		bool wasModified = false;
 
-		// foreach (var pos in blocksToReload)
-		// {
-		// 	if (world.GetTileEntity(pos) is TileEntityPoweredRangedTrap tileEntity)
-		// 	{
-		// 		var ammoType = tileEntity.AmmoItem;
+		foreach (var pos in blocksToReload)
+		{
+			if (!(world.GetTileEntity(pos) is TileEntityPoweredRangedTrap tileEntity))
+				continue;
 
-		// 		foreach (var itemStack in tileEntity.ItemSlots)
-		// 		{
-		// 			if (itemStack is null)
-		// 			{
+			var ammoType = tileEntity.AmmoItem;
+			var itemName = ammoType.Name;
+			var maxStackSize = ammoType.Stacknumber.Value;
+			var itemSlots = tileEntity.ItemSlots;
+			var wasReloaded = false;
 
-		// 			}
-		// 			var stacknumber = itemStack?.itemValue?.ItemClass?.Stacknumber;
+			foreach (var itemStack in itemSlots)
+			{
+				var requiredAmmos = itemStack.IsEmpty() ? maxStackSize : maxStackSize - itemStack.count;
 
-		// 			logger.Info($"{tileEntity.blockValue.Block.blockName}: stacknumber {stacknumber?.Value}, ammoType {ammoType.Name}, isLocked {tileEntity.IsLocked}");
-		// 		}
+				if (requiredAmmos <= 0)
+					continue;
 
-		// 		// tileEntity.IsLocked = true;
-		// 	}
-		// }
+				var ammoTaken = TakeRepairMaterial(itemName, requiredAmmos);
 
-		return false;
+				// no more ammo available, we stop here
+				if (ammoTaken <= 0)
+					break;
+
+				itemStack.count += ammoTaken;
+				itemStack.itemValue.type = ammoType.Id;
+
+				wasModified = true;
+				wasReloaded = true;
+			}
+
+			if (wasReloaded)
+			{
+				tileEntity.IsLocked = true;
+				tileEntity.ItemSlots = itemSlots;
+			}
+		}
+
+		return wasModified;
 	}
 
 	public override void UpdateTick(World world)
@@ -885,10 +922,10 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 
 		blockChangeInfos.Clear();
 
-		if (!isOn || BloodMoonActive(world))
+		if (!IsOn || BloodMoonActive(world))
 			return;
 
-		if (elapsedTicksSinceLastRefresh >= Config.refreshRate && Config.refreshRate > 0)
+		if (ElapsedTicksSinceLastRefresh >= Config.refreshRate && Config.refreshRate > 0)
 			RefreshStats();
 
 		bool wasModified = false;
@@ -909,10 +946,10 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer //TOD
 		}
 		else if (Config.autoTurnOff)
 		{
-			isOn = false;
+			IsOn = false;
 			setModified();
 		}
 
-		elapsedTicksSinceLastRefresh++;
+		ElapsedTicksSinceLastRefresh++;
 	}
 }

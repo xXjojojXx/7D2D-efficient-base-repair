@@ -265,11 +265,11 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 
 	private void RefreshStats()
 	{
-		GetLabel("lblBlocksToRepair").Text = $"{tileEntity.damagedBlockCount:N0} damaged blocks found.";
-		GetLabel("lblBlocksToUpgrade").Text = $"{tileEntity.upgradableBlockCount:N0} upgradable blocks found.";
-		GetLabel("lblTotalDamages").Text = $"{tileEntity.totalDamagesCount:N0} damages points to repair.";
-		GetLabel("lblVisitedBlocks").Text = $"{tileEntity.visitedBlocksCount:N0} blocks visited.";
-		GetLabel("lblIterations").Text = $"{tileEntity.bfsIterationsCount} iterations done.";
+		GetLabel("lblBlocksToRepair").Text = $"{tileEntity.DamagedBlockCount:N0} damaged blocks found.";
+		GetLabel("lblBlocksToUpgrade").Text = $"{tileEntity.UpgradableBlockCount:N0} upgradable blocks found.";
+		GetLabel("lblTotalDamages").Text = $"{tileEntity.TotalDamagesCount:N0} damages points to repair.";
+		GetLabel("lblVisitedBlocks").Text = $"{tileEntity.VisitedBlocksCount:N0} blocks visited.";
+		GetLabel("lblIterations").Text = $"{tileEntity.BfsIterationsCount} iterations done.";
 		GetLabel("lblTimer").Text = $"Repair time {tileEntity.RepairTime()}";
 	}
 
@@ -283,7 +283,7 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 				lastOn = tileEntity.IsOn;
 				RefreshIsOn(tileEntity.IsOn);
 			}
-			RefreshUpgradeOn(tileEntity.upgradeOn);
+			RefreshUpgradeOn(tileEntity.UpgradeOn);
 			RefreshStats();
 			RefreshBindings();
 		}
@@ -294,7 +294,7 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 		base.OnOpen();
 		tileEntity.SetUserAccessing(_bUserAccessing: true);
 		RefreshIsOn(tileEntity.IsOn);
-		RefreshUpgradeOn(tileEntity.upgradeOn);
+		RefreshUpgradeOn(tileEntity.UpgradeOn);
 		RefreshBindings();
 	}
 
