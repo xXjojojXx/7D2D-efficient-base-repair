@@ -74,6 +74,9 @@ class BlockEfficientBaseRepair : BlockSecureLoot
         if (!(_world.GetTileEntity(_cIdx, _blockPos) is TileEntityEfficientBaseRepair tileEntity))
             return false;
 
+        if (tileEntity.ownerID is null)
+            tileEntity.SetOwner(PlatformManager.InternalLocalUserIdentifier);
+
         switch (_commandName)
         {
             case TURN_ON_CMD:
@@ -118,9 +121,8 @@ class BlockEfficientBaseRepair : BlockSecureLoot
 
                 bool isLocked = tileEntity.IsLocked();
                 bool isAllowed = tileEntity.IsUserAllowed(PlatformManager.InternalLocalUserIdentifier);
-                bool isPlaytesting = GameUtils.IsPlaytesting();
 
-                if (!isLocked || isAllowed || isPlaytesting)
+                if (!isLocked || isAllowed)
                 {
                     return OnBlockActivated(_world, _cIdx, _blockPos, _blockValue, _player);
                 }
