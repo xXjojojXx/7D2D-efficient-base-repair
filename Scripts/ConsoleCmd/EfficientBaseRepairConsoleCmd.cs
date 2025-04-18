@@ -19,7 +19,10 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
     public override string getHelp()
     {
         return @"EfficientBaseRepair commands:
-            - blablabla
+            - isChild: log the selected blockValue.isChild
+            - neighbors: select all neighbors of the selected block
+            - clear: clear all selection boxes
+            - material, mat: fill the opened EfficientBaseRepair crate with required materials
         ";
     }
 
