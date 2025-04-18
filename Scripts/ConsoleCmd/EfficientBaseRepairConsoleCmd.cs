@@ -90,6 +90,32 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
         activeBoxNames.Clear();
     }
 
+    private void CmdMaterial()
+    {
+        var playerUI = GameManager.Instance.World.GetPrimaryPlayer().playerUI;
+        var xuiController = playerUI.xui.GetChildByType<XUiC_EfficientBaseRepair>();
+
+        if (xuiController is null || !xuiController.IsOpen)
+        {
+            logger.Error("No EfficientBaseRepair crate is open.");
+            return;
+        }
+
+        var tileEntity = xuiController.TileEntity;
+
+        foreach (var material in tileEntity.requiredMaterials)
+        {
+            var itemName = material.Key;
+            var itemCount = material.Value;
+
+            var itemType = ItemClass.nameToItem[itemName].Id;
+            var itemValue = new ItemValue(itemType);
+            var itemStack = new ItemStack(itemValue, itemCount);
+
+            tileEntity.AddItem(itemStack);
+        }
+    }
+
     public override void Execute(List<string> _params, CommandSenderInfo _senderInfo)
     {
         var args = _params.ToArray();
@@ -113,6 +139,11 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
 
             case "clear":
                 CmdClearBoxes();
+                break;
+
+            case "material":
+            case "mat":
+                CmdMaterial();
                 break;
 
             default:

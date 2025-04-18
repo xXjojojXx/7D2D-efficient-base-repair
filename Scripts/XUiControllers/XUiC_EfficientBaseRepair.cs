@@ -13,7 +13,7 @@ public class XUiC_EfficientBaseRepair : XUiController
 
 	private XUiC_WindowNonPagingHeader nonPagingHeaderWindow;
 
-	private TileEntityEfficientBaseRepair te;
+	public TileEntityEfficientBaseRepair TileEntity { get; private set; }
 
 	private bool isOpening;
 
@@ -39,7 +39,7 @@ public class XUiC_EfficientBaseRepair : XUiController
 
 	public void SetTileEntityChest(string _lootContainerName, TileEntityEfficientBaseRepair _te)
 	{
-		te = _te;
+		TileEntity = _te;
 		lootWindow.SetTileEntityChest(_lootContainerName, _te);
 	}
 
@@ -76,9 +76,9 @@ public class XUiC_EfficientBaseRepair : XUiController
 			{
 				return;
 			}
-			if (te.bWasTouched || openTimeLeft <= 0f)
+			if (TileEntity.bWasTouched || openTimeLeft <= 0f)
 			{
-				if (!te.bWasTouched && !te.bPlayerStorage && !te.bPlayerBackpack)
+				if (!TileEntity.bWasTouched && !TileEntity.bPlayerStorage && !TileEntity.bPlayerBackpack)
 				{
 					base.xui.playerUI.entityPlayer.Progression.AddLevelExp(base.xui.playerUI.entityPlayer.gameStage, "_xpFromLoot", Progression.XPTypes.Looting);
 				}
@@ -99,9 +99,9 @@ public class XUiC_EfficientBaseRepair : XUiController
 
 	public override void OnOpen()
 	{
-		if (te.entityId != -1)
+		if (TileEntity.entityId != -1)
 		{
-			Entity entity = GameManager.Instance.World.GetEntity(te.entityId);
+			Entity entity = GameManager.Instance.World.GetEntity(TileEntity.entityId);
 			if (EffectManager.GetValue(PassiveEffects.DisableLoot, null, 0f, base.xui.playerUI.entityPlayer, null, entity.EntityClass.Tags) > 0f)
 			{
 				Manager.PlayInsidePlayerHead("twitch_no_attack");
@@ -113,7 +113,7 @@ public class XUiC_EfficientBaseRepair : XUiController
 				return;
 			}
 		}
-		else if (EffectManager.GetValue(PassiveEffects.DisableLoot, null, 0f, base.xui.playerUI.entityPlayer, null, te.blockValue.Block.Tags) > 0f)
+		else if (EffectManager.GetValue(PassiveEffects.DisableLoot, null, 0f, base.xui.playerUI.entityPlayer, null, TileEntity.blockValue.Block.Tags) > 0f)
 		{
 			Manager.PlayInsidePlayerHead("twitch_no_attack");
 			GUIWindowManager windowManager2 = base.xui.playerUI.windowManager;
@@ -138,26 +138,26 @@ public class XUiC_EfficientBaseRepair : XUiController
 		timerWindow = base.xui.GetChildByType<XUiC_Timer>();
 		timerWindow.currentOpenEventText = Localization.Get("xuiOpeningLoot");
 		isOpening = true;
-		LootContainer lootContainer = LootContainer.GetLootContainer(te.lootListName);
+		LootContainer lootContainer = LootContainer.GetLootContainer(TileEntity.lootListName);
 		if (lootContainer == null || lootContainer.soundClose == null)
 		{
 			return;
 		}
-		Vector3 position = te.ToWorldPos().ToVector3() + Vector3.one * 0.5f;
-		if (te.entityId != -1 && GameManager.Instance.World != null)
+		Vector3 position = TileEntity.ToWorldPos().ToVector3() + Vector3.one * 0.5f;
+		if (TileEntity.entityId != -1 && GameManager.Instance.World != null)
 		{
-			Entity entity2 = GameManager.Instance.World.GetEntity(te.entityId);
+			Entity entity2 = GameManager.Instance.World.GetEntity(TileEntity.entityId);
 			if (entity2 != null)
 			{
 				position = entity2.GetPosition();
 			}
 		}
 
-		statsWindow.TileEntity = te;
+		statsWindow.TileEntity = TileEntity;
 		statsWindow.SetWidth(lootWindow.ViewComponent.Size.x);
 		statsWindow.OnOpen();
 
-		MaterialsWindow.tileEntity = te;
+		MaterialsWindow.tileEntity = TileEntity;
 		MaterialsWindow.OnOpen();
 
 		Manager.BroadcastPlayByLocalPlayer(position, "UseActions/chest_tier4_open");
@@ -167,15 +167,15 @@ public class XUiC_EfficientBaseRepair : XUiController
 	{
 		base.OnClose();
 		base.xui.playerUI.windowManager.CloseIfOpen("backpack");
-		te.ToWorldPos();
+		TileEntity.ToWorldPos();
 		if (isOpening)
 		{
 			base.xui.playerUI.windowManager.Close("timer");
 		}
-		if (openTimeLeft > 0f && !te.bWasTouched)
+		if (openTimeLeft > 0f && !TileEntity.bWasTouched)
 		{
-			te.bTouched = false;
-			te.SetModified();
+			TileEntity.bTouched = false;
+			TileEntity.SetModified();
 		}
 		lootWindow.CloseContainer(ignoreCloseSound);
 		lootWindow.ViewComponent.IsVisible = false;
