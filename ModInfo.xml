@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <xml>
 	<Name value="EfficientBaseRepair" />
-	<DisplayName value="EfficientBaseRepair Block"/>
-	<Description value="Auto repairs your base" />
+	<DisplayName value="EfficientBaseRepair" />
+	<Description value="A modlet to automate base repairs, upgrades, and automatically refuel or reload blocks like generators, traps, and more." />
 	<Author value="VisualDev-FR" />
-	<Version value="1.0.4" />
+	<Version value="1.1.0" />
 	<Website value="https://github.com/VisualDev-FR/efficient-base-repair-" />
 </xml>

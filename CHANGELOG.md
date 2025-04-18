@@ -6,7 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-## [2.0.0] - 2025-05-01
+## [1.1.0] - 2025-04-19
+
+### Fixed
+
+- Fixed multiblocks being ignored when no connection exists on the parent block.
+
+### Changed
+
+- Moved EfficientBaseRepair parameters from `blocks.xml` to [`ModConfig.xml`](./ModConfig.xml).
+
+### Added
+
+- Added automatic refueling for power source blocks (generators).
+- Added automatic reloading for ranged blocks (turrets, dart traps, etc.).
+- Added a new console command entry for debugging. Use `help ebr` to view documentation.
+- Added a new testing prefab: `efficientbaserepair_testing_01` — useful for testing or understanding how the mod works.
+- Added a new [Logging](./Scripts/Utils/Logging.cs) system.
+- Added a new [ModConfig](./Scripts/Utils/ModConfig.cs) system.
+
 
 ## [1.0.6] - 2024-11-21
 
@@ -121,7 +139,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 
 [unreleased]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/master...unreleased
-[2.0.0]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/1.0.6...2.0.0
+[1.1.0]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/1.0.6...1.1.0
 [1.0.6]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/1.0.5...1.0.6
 [1.0.5]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/1.0.4...1.0.5
 [1.0.4]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/1.0.3...1.0.4
