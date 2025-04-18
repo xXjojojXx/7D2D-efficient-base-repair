@@ -2,6 +2,7 @@ using Audio;
 using UnityEngine;
 using System.Collections.Generic;
 using System;
+using System.Linq;
 using static Block;
 
 public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TODO: Implement IPowered interface
@@ -90,44 +91,70 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 		return itemsDict;
 	}
 
-	private List<Vector3i> GetNeighbors(Vector3i pos)
+	private static bool IsInBounds(Vector3i p, Vector3i bmin, Vector3i bmax)
 	{
-		return new List<Vector3i>
+		return p.x >= bmin.x && p.x <= bmax.x &&
+			   p.y >= bmin.y && p.y <= bmax.y &&
+			   p.z >= bmin.z && p.z <= bmax.z;
+	}
+
+	private static IEnumerable<Vector3i> GetNeighbors(Vector3i pos)
+	{
+		var neighbor = Vector3i.zero;
+
+		foreach (var offset in BFSUtils.offsets)
 		{
-			new Vector3i(pos.x + 1, pos.y, pos.z),
-			new Vector3i(pos.x - 1, pos.y, pos.z),
+			neighbor.x = pos.x + offset.x;
+			neighbor.y = pos.y + offset.y;
+			neighbor.z = pos.z + offset.z;
 
-			new Vector3i(pos.x, pos.y + 1, pos.z),
-			new Vector3i(pos.x, pos.y - 1, pos.z),
+			yield return neighbor;
+		}
+	}
 
-			new Vector3i(pos.x, pos.y, pos.z + 1),
-			new Vector3i(pos.x, pos.y, pos.z - 1),
+	public static IEnumerable<Vector3i> GetNeighbors(Vector3i pos, BlockValue blockValue)
+	{
+		if (!blockValue.Block.isMultiBlock || blockValue.Block.multiBlockPos is null)
+		{
+			foreach (var neighbor in GetNeighbors(pos))
+			{
+				yield return neighbor;
+			}
 
-			new Vector3i(pos.x, pos.y + 1, pos.z + 1),
-			new Vector3i(pos.x, pos.y - 1, pos.z + 1),
-			new Vector3i(pos.x, pos.y + 1, pos.z - 1),
-			new Vector3i(pos.x, pos.y - 1, pos.z - 1),
+			yield break;
+		}
 
-			new Vector3i(pos.x + 1, pos.y, pos.z + 1),
-			new Vector3i(pos.x - 1, pos.y, pos.z + 1),
-			new Vector3i(pos.x + 1, pos.y, pos.z - 1),
-			new Vector3i(pos.x - 1, pos.y, pos.z - 1),
+		var start = blockValue.ischild ? blockValue.Block.multiBlockPos.GetParentPos(pos, blockValue) : pos;
+		var parent = GameManager.Instance.World.GetBlock(start);
+		var bounds = blockValue.Block.multiBlockPos.CalcBounds(blockValue.type, parent.rotation);
 
-			new Vector3i(pos.x + 1, pos.y + 1, pos.z),
-			new Vector3i(pos.x + 1, pos.y - 1, pos.z),
-			new Vector3i(pos.x - 1, pos.y + 1, pos.z),
-			new Vector3i(pos.x - 1, pos.y - 1, pos.z),
+		var position = Vector3i.zero;
+		var bmin = Vector3i.zero;
+		var bmax = Vector3i.zero;
 
-			new Vector3i(pos.x + 1, pos.y + 1, pos.z + 1),
-			new Vector3i(pos.x + 1, pos.y - 1, pos.z + 1),
-			new Vector3i(pos.x + 1, pos.y + 1, pos.z - 1),
-			new Vector3i(pos.x + 1, pos.y - 1, pos.z - 1),
+		bmin.RoundToInt(bounds.min);
+		bmax.RoundToInt(bounds.max);
 
-			new Vector3i(pos.x - 1, pos.y + 1, pos.z + 1),
-			new Vector3i(pos.x - 1, pos.y - 1, pos.z + 1),
-			new Vector3i(pos.x - 1, pos.y + 1, pos.z - 1),
-			new Vector3i(pos.x - 1, pos.y - 1, pos.z - 1),
-		};
+		for (int x = bmin.x; x <= bmax.x; x++)
+		{
+			for (int y = bmin.y; y <= bmax.y; y++)
+			{
+				for (int z = bmin.z; z <= bmax.z; z++)
+				{
+					position.x = start.x + x;
+					position.y = start.y + y;
+					position.z = start.z + z;
+
+					foreach (var neighbor in GetNeighbors(position))
+					{
+						if (!IsInBounds(neighbor, bmin, bmax))
+						{
+							yield return neighbor;
+						}
+					}
+				}
+			}
+		}
 	}
 
 	private bool IsBlockIgnored(BlockValue block)
@@ -146,7 +173,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 
 	private Dictionary<string, int> GetUpgradeMaterialsForPos(Vector3i pos)
 	{
-		if (world.GetChunkFromWorldPos(pos) == null)
+		if (world.GetChunkFromWorldPos(pos) is null)
 			return null;
 
 		BlockValue block = world.GetBlock(pos);
@@ -171,7 +198,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 
 	private Dictionary<string, int> GetRepairMaterialsForPos(Vector3i pos)
 	{
-		if (world.GetChunkFromWorldPos(pos) == null)
+		if (world.GetChunkFromWorldPos(pos) is null)
 			return null;
 
 		BlockValue block = world.GetBlock(pos);
@@ -443,50 +470,53 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 		blocksToRefuel.Clear();
 		blocksToReload.Clear();
 
-		List<Vector3i> neighbors = GetNeighbors(initial_pos);
-		Dictionary<string, int> visited = new Dictionary<string, int>();
+		var queue = new HashSet<Vector3i>(GetNeighbors(initial_pos));
+		var visited = new HashSet<Vector3i> { initial_pos };
 
 		int maxBfsIterations = Config.maxBfsIterations;
 		int iterations = maxBfsIterations;
 
-		while (neighbors.Count > 0 && iterations-- > 0)
+		while (queue.Count > 0 && iterations-- > 0)
 		{
-			List<Vector3i> neighbors_temp = new List<Vector3i>(neighbors);
-			neighbors = new List<Vector3i>();
+			var pos = queue.First();
 
-			foreach (Vector3i pos in neighbors_temp)
+			queue.Remove(pos);
+
+			if (visited.Contains(pos))
+				continue;
+
+			var block = world.GetBlock(pos);
+			var tileEntity = world.GetTileEntity(pos);
+
+			if (block.ischild && blockValue.Block.multiBlockPos != null)
 			{
-				BlockValue block = world.GetBlock(pos);
-
-				bool isIgnored = IsBlockIgnored(block);
-				bool isVisited = visited.ContainsKey(pos.ToString());
-
-				if (!isVisited)
-					visited.Add(pos.ToString(), 0);
-
-				if (isIgnored || isVisited || block.ischild)
-					continue;
-
-				if (block.damage > 0)
-				{
-					blocksToRepair.Add(pos);
-					TotalDamagesCount += block.damage;
-				}
-				else if (CanUpgradeBlock(block))
-				{
-					blocksToUpgrade.Add(pos);
-				}
-
-				var tileEntity = world.GetTileEntity(pos);
-
-				if (CanRefuelBlock(tileEntity))
-					blocksToRefuel.Add(pos);
-
-				if (CanReloadBlock(tileEntity))
-					blocksToReload.Add(pos);
-
-				neighbors.AddRange(GetNeighbors(pos));
+				pos = blockValue.Block.multiBlockPos.GetParentPos(pos, blockValue);
+				block = world.GetBlock(pos);
+				tileEntity = world.GetTileEntity(pos);
 			}
+
+			visited.Add(pos);
+
+			if (IsBlockIgnored(block))
+				continue;
+
+			if (block.damage > 0)
+			{
+				blocksToRepair.Add(pos);
+				TotalDamagesCount += block.damage;
+			}
+			else if (CanUpgradeBlock(block))
+			{
+				blocksToUpgrade.Add(pos);
+			}
+
+			if (CanRefuelBlock(tileEntity))
+				blocksToRefuel.Add(pos);
+
+			if (CanReloadBlock(tileEntity))
+				blocksToReload.Add(pos);
+
+			queue.UnionWith(GetNeighbors(pos, block));
 		}
 
 		DamagedBlockCount = blocksToRepair.Count;

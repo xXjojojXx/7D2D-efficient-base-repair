@@ -2,7 +2,7 @@ public class Config
 {
     private static readonly ModConfig config = new ModConfig("EfficientBaseRepair", version: 0, save: false);
 
-    public static int maxBfsIterations = config.GetInt("maxBfsIterations");
+    public static int maxBfsIterations = 1000 * config.GetInt("maxBfsIterations");
 
     public static bool needsMaterialsForRepair = config.GetBool("needsMaterialsForRepair");
 

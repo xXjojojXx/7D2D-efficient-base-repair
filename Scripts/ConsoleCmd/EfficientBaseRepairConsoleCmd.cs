@@ -4,6 +4,8 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
 {
     private static readonly Logging.Logger logger = Logging.CreateLogger("EfficientBaseRepairConsoleCmd");
 
+    public static readonly List<string> activeBoxNames = new List<string>();
+
     public override string[] getCommands()
     {
         return new string[] { "efficientbaserepair", "ebr" };
@@ -20,6 +22,74 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
             - blablabla
         ";
     }
+
+    public static SelectionCategory GetSelectionCategory()
+    {
+        var selectionBoxCategory = "BlockSelectionUtils";
+        var sbm = SelectionBoxManager.Instance;
+
+        if (!sbm.categories.ContainsKey(selectionBoxCategory))
+        {
+            sbm.CreateCategory(
+                _name: selectionBoxCategory,
+                _colSelected: SelectionBoxManager.ColSelectionActive,
+                _colUnselected: SelectionBoxManager.ColSelectionInactive,
+                _colFaceSelected: SelectionBoxManager.ColSelectionFaceSel,
+                _bCollider: false,
+                _tag: null
+            );
+        }
+
+        return sbm.categories[selectionBoxCategory];
+    }
+
+    private void SelectBlock(Vector3i pos)
+    {
+        var selectionCat = GetSelectionCategory();
+        var boxName = pos.ToString();
+
+        SelectionBox box = selectionCat.AddBox(boxName, pos, Vector3i.one);
+        box.SetVisible(true);
+        box.SetSizeVisibility(_visible: true);
+
+        selectionCat.SetVisible(true);
+
+        activeBoxNames.Add(boxName);
+    }
+
+    private void CmdIsChild()
+    {
+        var position = BlockToolSelection.Instance.m_selectionStartPoint;
+        var isChild = GameManager.Instance.World.GetBlock(position).ischild;
+
+        logger.Info(isChild);
+    }
+
+    private void CmdNeighbors()
+    {
+        var position = BlockToolSelection.Instance.m_selectionStartPoint;
+        var blockValue = GameManager.Instance.World.GetBlock(position);
+
+        SelectionBoxManager.Instance.Deactivate();
+
+        foreach (var pos in TileEntityEfficientBaseRepair.GetNeighbors(position, blockValue))
+        {
+            SelectBlock(pos);
+        }
+    }
+
+    private void CmdClearBoxes()
+    {
+        var selectionCat = GetSelectionCategory();
+
+        foreach (var name in activeBoxNames)
+        {
+            selectionCat.RemoveBox(name);
+        }
+
+        activeBoxNames.Clear();
+    }
+
     public override void Execute(List<string> _params, CommandSenderInfo _senderInfo)
     {
         var args = _params.ToArray();
@@ -32,6 +102,19 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
 
         switch (args[0].ToLower())
         {
+            case "ischild":
+                CmdIsChild();
+                break;
+
+            case "neighbor":
+            case "neighbors":
+                CmdNeighbors();
+                break;
+
+            case "clear":
+                CmdClearBoxes();
+                break;
+
             default:
                 logger.Error($"Invalid or not implemented command: '{_params[0]}'");
                 break;
