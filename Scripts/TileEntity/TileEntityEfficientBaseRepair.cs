@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using static Block;
 
+
 public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TODO: Implement IPowered interface
 {
 	private static readonly Logging.Logger logger = Logging.CreateLogger<TileEntityEfficientBaseRepair>();
@@ -624,11 +625,11 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 
 			var ammoType = tileEntity.AmmoItem;
 			var itemName = ammoType.Name;
-			var maxStackSize = ammoType.Stacknumber.Value;
+			var itemStackSize = ammoType.Stacknumber.Value;
 
 			foreach (var itemStack in tileEntity.ItemSlots)
 			{
-				var requiredAmmos = itemStack.IsEmpty() ? maxStackSize : maxStackSize - itemStack.count;
+				var requiredAmmos = EBRUtils.GetMissingItemCount(itemStack, itemStackSize);
 
 				if (requiredAmmos <= 0)
 					continue;
@@ -675,7 +676,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 		if (Config.activeDuringBloodMoon)
 			return false;
 
-		if (_world.aiDirector == null)
+		if (_world.aiDirector is null)
 			return false;
 
 		bool bloodMoonActive = _world.aiDirector.BloodMoonComponent.BloodMoonActive;
@@ -690,7 +691,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 	{
 		Dictionary<string, int> upgradeMaterials = GetUpgradeMaterialsForPos(position);
 
-		if (upgradeMaterials == null)
+		if (upgradeMaterials is null)
 			return;
 
 		blocksToUpgrade.Add(position);
@@ -708,7 +709,107 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 		}
 	}
 
-	private bool RepairBlocks(World world)
+	/// <summary>
+	/// Calculates the distribution of available ammo items to powered ranged traps that require reloading.
+	///
+	/// For each trap in the reload list, the method checks if it needs ammo and if that ammo is available.
+	/// It then records how many traps require each type of ammo and creates a list of distribution entries.
+	///
+	/// Finally, it adjusts the ammo count for each entry based on the total available ammo and the number of traps sharing it,
+	/// ensuring a fair distribution.
+	/// </summary>
+	/// <returns>
+	/// A list of <see cref="DistributionData"/> objects representing how much ammo should be assigned to each trap.
+	/// </returns>
+	private List<DistributionData> CalcReloadDistribution()
+	{
+		var distribDatas = new List<DistributionData>();
+		var distribCountByItem = new Dictionary<string, int>();
+		var availableItems = ItemsToDict();
+
+		foreach (var blockPos in blocksToReload)
+		{
+			if (!(world.GetTileEntity(blockPos) is TileEntityPoweredRangedTrap tileEntity))
+				continue;
+
+			if (!availableItems.ContainsKey(tileEntity.AmmoItem.Name))
+				continue;
+
+			var itemName = tileEntity.AmmoItem.Name;
+			var itemStackSize = tileEntity.ammoItem.Stacknumber.Value;
+			var requiredAmmos = tileEntity.ItemSlots.Sum(stack => EBRUtils.GetMissingItemCount(stack, itemStackSize));
+
+			if (requiredAmmos <= 0)
+				continue;
+
+			if (!distribCountByItem.ContainsKey(itemName))
+				distribCountByItem[itemName] = 0;
+
+			distribCountByItem[itemName] += 1;
+
+			distribDatas.Add(new DistributionData()
+			{
+				tileEntity = tileEntity,
+				itemClass = tileEntity.ammoItem,
+				itemCount = requiredAmmos,
+			});
+		}
+
+		foreach (var data in distribDatas)
+		{
+			// Intentionally not checking key here: if the item is missing, it indicates a critical bug.
+			var itemName = data.itemClass.Name;
+			var availableItemCount = availableItems[itemName];
+
+			data.itemCount = Utils.FastMin(data.itemCount, availableItemCount / distribCountByItem[itemName]);
+		}
+
+		distribDatas.RemoveAll(data => data.itemCount <= 0);
+
+		return distribDatas;
+	}
+
+	/// <summary>
+	/// Merges two arrays of <see cref="ItemStack"/> into a new array of stacks with properly distributed item counts.
+	///
+	/// The total number of items from both input arrays is calculated and redistributed into new stacks,
+	/// each capped by the maximum stack size defined in the given <see cref="ItemClass"/>.
+	///
+	/// An assertion is triggered if any items are left undistributed after the merge, which should never happen.
+	/// </summary>
+	/// <param name="stacks1">The first array of item stacks to merge.</param>
+	/// <param name="stacks2">The second array of item stacks to merge.</param>
+	/// <param name="itemClass">The class of the item, used to determine max stack size and ID.</param>
+	/// <returns>
+	/// A new array of <see cref="ItemStack"/> with items redistributed evenly across stacks.
+	/// </returns>
+	private ItemStack[] MergeItemStacks(ItemStack[] stacks1, ItemStack[] stacks2, ItemClass itemClass)
+	{
+		var merged = new List<ItemStack>();
+		var totalItemCount = 0;
+
+		totalItemCount += stacks1.Sum(stack => stack.count);
+		totalItemCount += stacks2.Sum(stack => stack.count);
+
+		for (int i = 0; i < stacks1.Length; i++)
+		{
+			var itemStack = new ItemStack()
+			{
+				itemValue = new ItemValue(itemClass.Id),
+				count = Utils.FastMin(totalItemCount, itemClass.Stacknumber.Value),
+			};
+
+			totalItemCount -= itemStack.count;
+
+			merged.Add(itemStack);
+		}
+
+		EBRUtils.Assert(totalItemCount == 0, totalItemCount.ToString());
+
+		return merged.ToArray();
+	}
+
+	private bool RepairBlocks()
 	{
 		int repairableDamages = Config.repairRate > 0 ? Config.repairRate : int.MaxValue;
 		int totalRepairedDamages = 0;
@@ -739,7 +840,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 		return totalRepairedDamages > 0;
 	}
 
-	private bool UpgradeBlocks(World world)
+	private bool UpgradeBlocks()
 	{
 		if (!UpgradeOn)
 			return false;
@@ -768,7 +869,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 		return upgradedBlocksCount > 0;
 	}
 
-	private bool RefuelBlocks(World world)
+	private bool RefuelBlocks()
 	{
 		bool wasModified = false;
 
@@ -796,46 +897,28 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 		return wasModified;
 	}
 
-	private bool ReloadBlocks(World world)
+	private bool ReloadBlocks()
 	{
-		bool wasModified = false;
+		var distributionDatas = CalcReloadDistribution();
+		var wasModified = false;
 
-		foreach (var pos in blocksToReload)
+		foreach (var distributionData in distributionDatas)
 		{
-			if (!(world.GetTileEntity(pos) is TileEntityPoweredRangedTrap tileEntity))
+			if (!(distributionData.tileEntity is TileEntityPoweredRangedTrap tileEntity))
 				continue;
 
-			var ammoType = tileEntity.AmmoItem;
-			var itemName = ammoType.Name;
-			var maxStackSize = ammoType.Stacknumber.Value;
-			var itemSlots = tileEntity.ItemSlots;
-			var wasReloaded = false;
+			var ammoTaken = TakeRepairMaterial(distributionData.itemClass.Name, distributionData.itemCount);
 
-			foreach (var itemStack in itemSlots)
+			EBRUtils.Assert(ammoTaken > 0, $"ammoTaken: {ammoTaken} / {distributionData.itemCount}");
+
+			tileEntity.ItemSlots = MergeItemStacks(tileEntity.ItemSlots, distributionData.ToItemStacks(), tileEntity.AmmoItem);
+
+			if (Config.turnOnAfterReload)
 			{
-				var requiredAmmos = itemStack.IsEmpty() ? maxStackSize : maxStackSize - itemStack.count;
-
-				if (requiredAmmos <= 0)
-					continue;
-
-				var ammoTaken = TakeRepairMaterial(itemName, requiredAmmos);
-
-				// no more ammo available, we stop here
-				if (ammoTaken <= 0)
-					break;
-
-				itemStack.count += ammoTaken;
-				itemStack.itemValue.type = ammoType.Id;
-
-				wasModified = true;
-				wasReloaded = true;
+				tileEntity.IsLocked = true;
 			}
 
-			if (wasReloaded)
-			{
-				tileEntity.ItemSlots = itemSlots;
-				tileEntity.IsLocked |= Config.turnOnAfterReload;
-			}
+			wasModified = true;
 		}
 
 		return wasModified;
@@ -967,10 +1050,10 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 
 		bool wasModified = false;
 
-		wasModified |= RefuelBlocks(world);
-		wasModified |= ReloadBlocks(world);
-		wasModified |= RepairBlocks(world);
-		wasModified |= UpgradeBlocks(world);
+		wasModified |= RefuelBlocks();
+		wasModified |= ReloadBlocks();
+		wasModified |= RepairBlocks();
+		wasModified |= UpgradeBlocks();
 
 		if (blockChangeInfos.Count > 0)
 		{
