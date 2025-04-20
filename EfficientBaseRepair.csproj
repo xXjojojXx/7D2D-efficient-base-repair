@@ -1,6 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -13,80 +15,87 @@
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
+
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>portable</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>.\</OutputPath>
+    <OutputPath>.\build</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>.\build</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+
   <ItemGroup>
+
     <Reference Include="0Harmony">
       <HintPath>$(PATH_7D2D)\Mods\0_TFP_Harmony\0Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
+
     <Reference Include="Assembly-CSharp">
       <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
+
     <Reference Include="LogLibrary">
       <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\LogLibrary.dll</HintPath>
       <Private>False</Private>
     </Reference>
+
     <Reference Include="System.Xml">
       <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\System.Xml.dll</HintPath>
       <Private>False</Private>
     </Reference>
+
     <Reference Include="System">
       <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\System.dll</HintPath>
       <Private>False</Private>
     </Reference>
+
     <Reference Include="System.Xml.Linq">
       <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\System.Xml.Linq.dll</HintPath>
       <Private>False</Private>
     </Reference>
+
     <Reference Include="UnityEngine">
       <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
+
     <Reference Include="UnityEngine.AudioModule">
       <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>$(PATH_7D2D)\7DaysToDie_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+
   </ItemGroup>
+
+  <!-- scripts -->
   <ItemGroup>
-    <Compile Include="Harmony\EfficientBaseRepair.cs" />
-    <Compile Include="Harmony\BlockEfficientBaseRepair.cs" />
-    <Compile Include="Harmony\TileEntityEfficientBaseRepair.cs" />
-    <Compile Include="Harmony\XUiC_EfficientBaseRepair.cs" />
-    <Compile Include="Harmony\XUiC_EfficientBaseRepairStats.cs" />
-    <Compile Include="Harmony\XUiC_EfficientBaseRepairMaterials.cs" />
-    <Compile Include="Harmony\AssemblyInfo.cs" />
+    <Compile Include=".\Scripts\**\*.cs" />
+    <Compile Include=".\Harmony\**\*.cs" />
   </ItemGroup>
-  <ItemGroup />
-  <ItemGroup>
-    <Content Include="Config\blocks.xml" />
-    <Content Include="ModInfo.xml" />
-    <Content Include="Readme.txt" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
   <PropertyGroup>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>false</Deterministic>
   </PropertyGroup>
+
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\Tools\Directory.Build.targets" Condition="Exists('$(SolutionDir)\Tools\Directory.Build.targets')" />
+
 </Project>

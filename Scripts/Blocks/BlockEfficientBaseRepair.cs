@@ -5,18 +5,10 @@ using UnityEngine;
 
 class BlockEfficientBaseRepair : BlockSecureLoot
 {
-    private Vector2i LootSize
-    {
-        get
-        {
-            return new Vector2i(
-                Properties.GetInt("LootSizeX"),
-                Properties.GetInt("LootSizeY")
-            );
-        }
-    }
+    private static readonly Logging.Logger logger = Logging.CreateLogger<BlockEfficientBaseRepair>();
 
     private const string TURN_ON_CMD = "EfficientBaseRepairTurnOn";
+
     private const string TURN_OFF_CMD = "EfficientBaseRepairTurnOff";
 
     public override void OnBlockAdded(WorldBase _world, Chunk _chunk, Vector3i _blockPos, BlockValue _blockValue)
@@ -32,7 +24,7 @@ class BlockEfficientBaseRepair : BlockSecureLoot
             lootListName = lootList
         };
 
-        tileEntity.SetContainerSize(LootSize);
+        tileEntity.SetContainerSize(Config.lootSize);
         _chunk.AddTileEntity(tileEntity);
     }
 
@@ -82,13 +74,16 @@ class BlockEfficientBaseRepair : BlockSecureLoot
         if (!(_world.GetTileEntity(_cIdx, _blockPos) is TileEntityEfficientBaseRepair tileEntity))
             return false;
 
+        if (tileEntity.ownerID is null)
+            tileEntity.SetOwner(PlatformManager.InternalLocalUserIdentifier);
+
         switch (_commandName)
         {
             case TURN_ON_CMD:
             case TURN_OFF_CMD:
                 if (tileEntity.BloodMoonActive(_world as World))
                 {
-                    BloodMoonDenied(_player as EntityPlayerLocal);
+                    BloodMoonDenied(_player);
                     return false;
                 }
 
@@ -123,7 +118,11 @@ class BlockEfficientBaseRepair : BlockSecureLoot
                 }
 
             case "Search":
-                if (!tileEntity.IsLocked() || tileEntity.IsUserAllowed(PlatformManager.InternalLocalUserIdentifier))
+
+                bool isLocked = tileEntity.IsLocked();
+                bool isAllowed = tileEntity.IsUserAllowed(PlatformManager.InternalLocalUserIdentifier);
+
+                if (!isLocked || isAllowed)
                 {
                     return OnBlockActivated(_world, _cIdx, _blockPos, _blockValue, _player);
                 }
@@ -243,14 +242,4 @@ class BlockEfficientBaseRepair : BlockSecureLoot
         }
     }
 
-
-    public override void OnBlockRemoved(WorldBase world, Chunk _chunk, Vector3i _blockPos, BlockValue _blockValue)
-    {
-        base.OnBlockRemoved(world, _chunk, _blockPos, _blockValue);
-    }
-
-    public override DestroyedResult OnBlockDestroyedBy(WorldBase _world, int _clrIdx, Vector3i _blockPos, BlockValue _blockValue, int _entityId, bool _bUseHarvestTool)
-    {
-        return base.OnBlockDestroyedBy(_world, _clrIdx, _blockPos, _blockValue, _entityId, _bUseHarvestTool);
-    }
 }

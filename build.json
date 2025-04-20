@@ -1,0 +1,12 @@
+{
+    "name": "EfficientBaseRepair",
+    "csproj": "EfficientBaseRepair.csproj",
+    "include": [
+        "ModInfo.xml",
+        "ModConfig.xml",
+        "Config"
+    ],
+    "prefabs": [
+        "EfficientBaseRepair/*.*"
+    ]
+}
