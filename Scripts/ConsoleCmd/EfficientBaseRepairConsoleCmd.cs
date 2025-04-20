@@ -21,8 +21,9 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
         return @"EfficientBaseRepair commands:
             - isChild: log the selected blockValue.isChild
             - neighbors: select all neighbors of the selected block
-            - clear: clear all selection boxes
+            - clear: clear all selection boxes added by command 'neighbors'
             - material, mat: fill the opened EfficientBaseRepair crate with required materials
+            - setfuel <value>: set the given fuel amount into the opened powerSource item
         ";
     }
 
@@ -95,8 +96,7 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
 
     private void CmdMaterial()
     {
-        var playerUI = GameManager.Instance.World.GetPrimaryPlayer().playerUI;
-        var xuiController = playerUI.xui.GetChildByType<XUiC_EfficientBaseRepair>();
+        var xuiController = EBRUtils.GetXuiController<XUiC_EfficientBaseRepair>();
 
         if (xuiController is null || !xuiController.IsOpen)
         {
@@ -117,6 +117,31 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
 
             tileEntity.AddItem(itemStack);
         }
+    }
+
+    private void CmdSetFuel(string[] args)
+    {
+        var xuiController = EBRUtils.GetXuiController<XUiC_PowerSourceStats>();
+
+        if (xuiController is null || !xuiController.IsOpen)
+        {
+            logger.Error("No power source item is open");
+            return;
+        }
+
+        if (args.Length < 2)
+        {
+            logger.Error("Missing argument: fuel value (integer)");
+            return;
+        }
+
+        if (!ushort.TryParse(args[1], out var value))
+        {
+            logger.Error($"Invalid argument: '{args[1]}'");
+            return;
+        }
+
+        xuiController.tileEntity.CurrentFuel = value;
     }
 
     public override void Execute(List<string> _params, CommandSenderInfo _senderInfo)
@@ -147,6 +172,10 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
             case "material":
             case "mat":
                 CmdMaterial();
+                break;
+
+            case "setfuel":
+                CmdSetFuel(args);
                 break;
 
             default:

@@ -19,4 +19,9 @@ public static class EBRUtils
 
         return stackSize - stack.count;
     }
+
+    public static T GetXuiController<T>() where T : XUiController
+    {
+        return GameManager.Instance.World.GetPrimaryPlayer().playerUI.xui.GetChildByType<T>();
+    }
 }
