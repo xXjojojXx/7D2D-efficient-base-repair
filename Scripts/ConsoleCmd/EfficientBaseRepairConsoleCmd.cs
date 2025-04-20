@@ -23,7 +23,7 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
             - neighbors: select all neighbors of the selected block
             - clear: clear all selection boxes added by command 'neighbors'
             - material, mat: fill the opened EfficientBaseRepair crate with required materials
-            - setfuel <value>: set the given fuel amount into the opened powerSource item
+            - setfuel <value>: set the given fuel amount into the opened powerSource item. If no value is given, a random value is choosen.
         ";
     }
 
@@ -129,19 +129,12 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
             return;
         }
 
-        if (args.Length < 2)
+        if (args.Length < 2 || !int.TryParse(args[1], out var value))
         {
-            logger.Error("Missing argument: fuel value (integer)");
-            return;
+            value = new System.Random().Next(xuiController.tileEntity.MaxFuel);
         }
 
-        if (!ushort.TryParse(args[1], out var value))
-        {
-            logger.Error($"Invalid argument: '{args[1]}'");
-            return;
-        }
-
-        xuiController.tileEntity.CurrentFuel = value;
+        xuiController.tileEntity.CurrentFuel = (ushort)value;
     }
 
     public override void Execute(List<string> _params, CommandSenderInfo _senderInfo)
