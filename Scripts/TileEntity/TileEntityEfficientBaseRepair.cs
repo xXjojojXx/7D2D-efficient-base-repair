@@ -745,6 +745,41 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 		return distributionDatas;
 	}
 
+	private List<DistributionData> CalcRefuelDistribution()
+	{
+		var distribSolvers = new Dictionary<string, DistributionSolver>();
+		var inventoryItems = ItemsToDict();
+
+		foreach (var blockPos in blocksToRefuel)
+		{
+			if (!(world.GetTileEntity(blockPos) is TileEntityPowerSource tileEntity))
+				continue;
+
+			if (!inventoryItems.ContainsKey(propAmmoGasCan))
+				continue;
+
+			var itemClass = ItemClass.nameToItem[propAmmoGasCan];
+			var itemStackSize = tileEntity.MaxFuel;
+			var itemCount = tileEntity.CurrentFuel;
+
+			if (itemCount >= itemStackSize)
+				continue;
+
+			if (!distribSolvers.ContainsKey(itemClass.Name))
+				distribSolvers[itemClass.Name] = new DistributionSolver(itemClass, itemStackSize);
+
+			distribSolvers[itemClass.Name].AddDatas(tileEntity, itemCount, 1);
+		}
+
+		var distributionDatas = distribSolvers.Values
+			.SelectMany(solver => solver.CalcDistributionDatas(inventoryItems[solver.itemClass.Name]))
+			.ToList();
+
+		distributionDatas.RemoveAll(data => data.TotalAdded <= 0);
+
+		return distributionDatas;
+	}
+
 	private bool RepairBlocks()
 	{
 		int repairableDamages = Config.repairRate > 0 ? Config.repairRate : int.MaxValue;
@@ -807,27 +842,29 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 
 	private bool RefuelBlocks()
 	{
-		bool wasModified = false;
+		var distributionDatas = CalcRefuelDistribution();
+		var wasModified = false;
 
-		foreach (var pos in blocksToRefuel)
+		foreach (var distribData in distributionDatas)
 		{
-			if (!(world.GetTileEntity(pos) is TileEntityPowerSource tileEntity))
+			if (!(distribData.tileEntity is TileEntityPowerSource tileEntity))
 				continue;
 
-			var requiredFuel = tileEntity.MaxFuel - tileEntity.CurrentFuel;
-			var fuelTaken = TakeRepairMaterial(propAmmoGasCan, requiredFuel);
+			logger.Debug(distribData);
 
-			// no more fuel available, we stop here
-			if (fuelTaken == 0)
-				break;
+			var fuelTaken = TakeRepairMaterial(propAmmoGasCan, distribData.TotalAdded);
+
+			EBRUtils.Assert(fuelTaken == distribData.TotalAdded, $"fuel taken: {fuelTaken} / {distribData.TotalAdded}");
 
 			tileEntity.CurrentFuel += (ushort)fuelTaken;
-			wasModified = true;
 
 			if (Config.turnOnAfterRefuel && tileEntity.HasSlottedItems())
 			{
 				(tileEntity.PowerItem as PowerSource).IsOn = true;
 			}
+
+			tileEntity.SetModified();
+			wasModified = true;
 		}
 
 		return wasModified;
@@ -847,7 +884,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 
 			var ammoTaken = TakeRepairMaterial(distributionData.itemClass.Name, distributionData.TotalAdded);
 
-			EBRUtils.Assert(ammoTaken == distributionData.TotalAdded, $"ammoTaken: {ammoTaken}, totalAdded: {distributionData.TotalAdded}");
+			EBRUtils.Assert(ammoTaken == distributionData.TotalAdded, $"ammoTaken: {ammoTaken} / {distributionData.TotalAdded}");
 
 			tileEntity.ItemSlots = distributionData.ToItemStacks();
 
