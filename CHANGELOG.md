@@ -14,7 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
-- Moved EfficientBaseRepair parameters from `blocks.xml` to [`ModConfig.xml`](./ModConfig.xml).
+- Moved EfficientBaseRepair parameters from `Config/blocks.xml` to [`ModConfig.xml`](./ModConfig.xml).
 
 ### Added
 
@@ -24,7 +24,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Added a new testing prefab: `efficientbaserepair_testing_01` — useful for testing or understanding how the mod works.
 - Added a new [Logging](./Scripts/Utils/Logging.cs) system.
 - Added a new [ModConfig](./Scripts/Utils/ModConfig.cs) system.
-
+- Added a new parameter `turnOnAfterReload` in ModConfig.xml
+- Added a new parameter `turnOnAfterRefuel` in ModConfig.xml
 
 ## [1.0.6] - 2024-11-21
 
