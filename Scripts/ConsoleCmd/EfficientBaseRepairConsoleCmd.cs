@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
 {
@@ -137,6 +139,22 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
         xuiController.tileEntity.CurrentFuel = (ushort)value;
     }
 
+    private void CmdSetConfig(string[] args)
+    {
+        ModConfig.SetValue<Config>(args[1], args[2]);
+    }
+
+    private void CmdGetConfig(string[] args)
+    {
+        var fieldName = args.Length > 1 ? args[1] : "";
+        var value = ModConfig.GetValue<Config>(fieldName);
+
+        if (value != null)
+        {
+            Log.Out(value.ToString());
+        }
+    }
+
     public override void Execute(List<string> _params, CommandSenderInfo _senderInfo)
     {
         var args = _params.ToArray();
@@ -169,6 +187,16 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
 
             case "setfuel":
                 CmdSetFuel(args);
+                break;
+
+            case "setconfig":
+            case "set":
+                CmdSetConfig(args);
+                break;
+
+            case "getconfig":
+            case "get":
+                CmdGetConfig(args);
                 break;
 
             default:

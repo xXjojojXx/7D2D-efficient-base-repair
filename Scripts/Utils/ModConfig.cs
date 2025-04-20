@@ -1,12 +1,17 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Xml;
 using UnityEngine;
 
 
 public class ModConfig
 {
+    [AttributeUsage(AttributeTargets.Field)]
+    public class ReadOnlyAttribute : Attribute { }
+
     private readonly Dictionary<string, string> properties = new Dictionary<string, string>();
 
     private readonly XmlDocument document;
@@ -42,6 +47,42 @@ public class ModConfig
 
         properties = ParseProperties(document);
     }
+
+    public static void SetValue<T>(string fieldName, string fieldValue, bool save = false)
+    {
+        var field = typeof(T).GetField(fieldName, BindingFlags.Public | BindingFlags.Static);
+
+        if (field.IsDefined(typeof(ReadOnlyAttribute), false))
+        {
+            Logging.Error($"field '{fieldName}' is readOnly");
+            return;
+        }
+
+        field.SetValue(null, Convert.ChangeType(fieldValue, field.FieldType));
+
+        if (save)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public static object GetValue<T>(string fieldName = "")
+    {
+        if (fieldName == "")
+        {
+            foreach (var f in typeof(Config).GetFields())
+            {
+                Log.Out($"{f.Name} ......... {f.GetValue(null)}");
+            }
+
+            return null;
+        }
+
+        return typeof(T)
+            .GetField(fieldName, BindingFlags.Public | BindingFlags.Static)
+            .GetValue(null);
+    }
+
 
     public int GetVersion(XmlDocument document)
     {
