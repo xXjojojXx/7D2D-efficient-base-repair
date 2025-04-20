@@ -856,6 +856,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 				tileEntity.IsLocked = true;
 			}
 
+			tileEntity.setModified();
 			wasModified = true;
 		}
 
