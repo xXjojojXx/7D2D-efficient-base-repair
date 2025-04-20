@@ -54,7 +54,7 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 
 	public TileEntityEfficientBaseRepair(Chunk _chunk) : base(_chunk) { }
 
-	public string RepairTime()
+	public string CalcRepairTime()
 	{
 		float repairTime_s = 0f;
 		float upgradeTime_s = 0f;
@@ -77,7 +77,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 
 		foreach (ItemStack stack in items)
 		{
-
 			if (stack.itemValue.ItemClass == null)
 				continue;
 
@@ -709,104 +708,41 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 		}
 	}
 
-	/// <summary>
-	/// Calculates the distribution of available ammo items to powered ranged traps that require reloading.
-	///
-	/// For each trap in the reload list, the method checks if it needs ammo and if that ammo is available.
-	/// It then records how many traps require each type of ammo and creates a list of distribution entries.
-	///
-	/// Finally, it adjusts the ammo count for each entry based on the total available ammo and the number of traps sharing it,
-	/// ensuring a fair distribution.
-	/// </summary>
-	/// <returns>
-	/// A list of <see cref="DistributionData"/> objects representing how much ammo should be assigned to each trap.
-	/// </returns>
 	private List<DistributionData> CalcReloadDistribution()
 	{
-		var distribDatas = new List<DistributionData>();
-		var distribCountByItem = new Dictionary<string, int>();
-		var availableItems = ItemsToDict();
+		var distribSolvers = new Dictionary<string, DistributionSolver>();
+		var inventoryItems = ItemsToDict();
 
 		foreach (var blockPos in blocksToReload)
 		{
 			if (!(world.GetTileEntity(blockPos) is TileEntityPoweredRangedTrap tileEntity))
 				continue;
 
-			if (!availableItems.ContainsKey(tileEntity.AmmoItem.Name))
+			if (!inventoryItems.ContainsKey(tileEntity.AmmoItem.Name))
 				continue;
 
-			var itemName = tileEntity.AmmoItem.Name;
-			var itemStackSize = tileEntity.ammoItem.Stacknumber.Value;
-			var requiredAmmos = tileEntity.ItemSlots.Sum(stack => EBRUtils.GetMissingItemCount(stack, itemStackSize));
+			var itemClass = tileEntity.AmmoItem;
+			var itemClassName = itemClass.Name;
+			var itemStackSize = itemClass.Stacknumber.Value * tileEntity.ItemSlots.Length;
+			var itemCount = tileEntity.ItemSlots.Sum(itemStack => itemStack.count);
+			var requiredAmmos = tileEntity.ItemSlots.Sum(stack => EBRUtils.GetMissingItemCount(stack, itemClass.Stacknumber.Value));
 
-			if (requiredAmmos <= 0)
+			if (requiredAmmos <= 0 || itemCount >= itemStackSize)
 				continue;
 
-			if (!distribCountByItem.ContainsKey(itemName))
-				distribCountByItem[itemName] = 0;
+			if (!distribSolvers.ContainsKey(itemClassName))
+				distribSolvers[itemClassName] = new DistributionSolver(itemClass, itemStackSize);
 
-			distribCountByItem[itemName] += 1;
-
-			distribDatas.Add(new DistributionData()
-			{
-				tileEntity = tileEntity,
-				itemClass = tileEntity.ammoItem,
-				itemCount = requiredAmmos,
-			});
+			distribSolvers[itemClassName].AddDatas(tileEntity, itemCount, tileEntity.ItemSlots.Length);
 		}
 
-		foreach (var data in distribDatas)
-		{
-			// Intentionally not checking key here: if the item is missing, it indicates a critical bug.
-			var itemName = data.itemClass.Name;
-			var availableItemCount = availableItems[itemName];
+		var distributionDatas = distribSolvers.Values
+			.SelectMany(solver => solver.CalcDistributionDatas(inventoryItems[solver.itemClass.Name]))
+			.ToList();
 
-			data.itemCount = Utils.FastMin(data.itemCount, availableItemCount / distribCountByItem[itemName]);
-		}
+		distributionDatas.RemoveAll(data => data.TotalAdded <= 0);
 
-		distribDatas.RemoveAll(data => data.itemCount <= 0);
-
-		return distribDatas;
-	}
-
-	/// <summary>
-	/// Merges two arrays of <see cref="ItemStack"/> into a new array of stacks with properly distributed item counts.
-	///
-	/// The total number of items from both input arrays is calculated and redistributed into new stacks,
-	/// each capped by the maximum stack size defined in the given <see cref="ItemClass"/>.
-	///
-	/// An assertion is triggered if any items are left undistributed after the merge, which should never happen.
-	/// </summary>
-	/// <param name="stacks1">The first array of item stacks to merge.</param>
-	/// <param name="stacks2">The second array of item stacks to merge.</param>
-	/// <param name="itemClass">The class of the item, used to determine max stack size and ID.</param>
-	/// <returns>
-	/// A new array of <see cref="ItemStack"/> with items redistributed evenly across stacks.
-	/// </returns>
-	private ItemStack[] MergeItemStacks(ItemStack[] stacks1, ItemStack[] stacks2, ItemClass itemClass)
-	{
-		var merged = new List<ItemStack>();
-		var totalItemCount = 0;
-
-		totalItemCount += stacks1.Sum(stack => stack.count);
-		totalItemCount += stacks2.Sum(stack => stack.count);
-
-		for (int i = 0; i < stacks1.Length; i++)
-		{
-			var itemStack = new ItemStack()
-			{
-				itemValue = new ItemValue(itemClass.Id),
-				count = Utils.FastMin(totalItemCount, itemClass.Stacknumber.Value),
-			};
-
-			totalItemCount -= itemStack.count;
-
-			merged.Add(itemStack);
-		}
-
-		EBRUtils.Assert(totalItemCount == 0, totalItemCount.ToString());
-
-		return merged.ToArray();
+		return distributionDatas;
 	}
 
 	private bool RepairBlocks()
@@ -907,11 +843,13 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 			if (!(distributionData.tileEntity is TileEntityPoweredRangedTrap tileEntity))
 				continue;
 
-			var ammoTaken = TakeRepairMaterial(distributionData.itemClass.Name, distributionData.itemCount);
+			logger.Debug(distributionData);
 
-			EBRUtils.Assert(ammoTaken > 0, $"ammoTaken: {ammoTaken} / {distributionData.itemCount}");
+			var ammoTaken = TakeRepairMaterial(distributionData.itemClass.Name, distributionData.TotalAdded);
 
-			tileEntity.ItemSlots = MergeItemStacks(tileEntity.ItemSlots, distributionData.ToItemStacks(), tileEntity.AmmoItem);
+			EBRUtils.Assert(ammoTaken == distributionData.TotalAdded, $"ammoTaken: {ammoTaken}, totalAdded: {distributionData.TotalAdded}");
+
+			tileEntity.ItemSlots = distributionData.ToItemStacks();
 
 			if (Config.turnOnAfterReload)
 			{

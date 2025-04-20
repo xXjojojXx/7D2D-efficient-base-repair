@@ -1,34 +1,62 @@
-using System;
-using System.Collections.Generic;
+using System.Linq;
+using UnityEngine.Assertions;
 
 public class DistributionData
 {
-    public TileEntity tileEntity;
+    public readonly TileEntity tileEntity;
 
-    public ItemClass itemClass;
+    public readonly ItemClass itemClass;
 
-    public int itemCount;
+    public readonly int stackSize;
+
+    public readonly int stackCount;
+
+    public int ItemCount { get; set; }
+
+    public int TotalAdded { get; set; }
+
+    public DistributionData(TileEntity tileEntity, ItemClass itemClass, int itemCount, int stackSize, int stackCount)
+    {
+        EBRUtils.Assert(stackCount > 0, "stackCount must be greater than 0");
+
+        this.tileEntity = tileEntity;
+        this.itemClass = itemClass;
+        this.stackSize = stackSize;
+        this.stackCount = stackCount;
+        this.ItemCount = itemCount;
+    }
 
     public ItemStack[] ToItemStacks()
     {
-        if (itemCount <= 0)
-        {
-            return Array.Empty<ItemStack>();
-        }
-
-        var itemStacks = new List<ItemStack>();
-        var maxStackSize = itemClass.Stacknumber.Value;
-        var remainingItems = itemCount;
+        var remainingItems = ItemCount;
+        var itemStackSize = itemClass.Stacknumber.Value;
         var itemValue = new ItemValue(itemClass.Id);
+        var itemStacks = new ItemStack[stackCount];
 
-        while (remainingItems > 0)
+        for (int i = 0; i < stackCount; i++)
         {
-            var itemCount = Utils.FastMin(remainingItems, maxStackSize);
+            var itemCount = Utils.FastMin(remainingItems, itemStackSize);
             remainingItems -= itemCount;
 
-            itemStacks.Add(new ItemStack(itemValue, itemCount));
+            itemStacks[i] = new ItemStack(itemValue, itemCount);
         }
 
-        return itemStacks.ToArray();
+        EBRUtils.Assert(remainingItems == 0, $"remaining items: {remainingItems}");
+
+        return itemStacks;
+    }
+
+    public string ItemStacksToString()
+    {
+        var values = ToItemStacks()
+            .Select(stack => stack.count.ToString())
+            .ToArray();
+
+        return $"[{string.Join(", ", values)}]";
+    }
+
+    public override string ToString()
+    {
+        return $"[{tileEntity.ToWorldPos(),12}] item: {itemClass.Name}, size: {stackSize}, count: {ItemCount}, added: {TotalAdded}, stacks: {ItemStacksToString()}";
     }
 }

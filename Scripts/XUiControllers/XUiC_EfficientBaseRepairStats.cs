@@ -270,7 +270,7 @@ public class XUiC_EfficientBaseRepairStats : XUiController
 		GetLabel("lblTotalDamages").Text = $"{tileEntity.TotalDamagesCount:N0} damages points to repair.";
 		GetLabel("lblVisitedBlocks").Text = $"{tileEntity.VisitedBlocksCount:N0} blocks visited.";
 		GetLabel("lblIterations").Text = $"{tileEntity.BfsIterationsCount} iterations done.";
-		GetLabel("lblTimer").Text = $"Repair time {tileEntity.RepairTime()}";
+		GetLabel("lblTimer").Text = $"Repair time {tileEntity.CalcRepairTime()}";
 	}
 
 	public override void Update(float _dt)
