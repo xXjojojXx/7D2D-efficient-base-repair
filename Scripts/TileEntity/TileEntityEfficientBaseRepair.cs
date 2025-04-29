@@ -432,6 +432,9 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 		if (!(te is TileEntityPowerSource tileEntity))
 			return false;
 
+		if (!(tileEntity.PowerItem is PowerGenerator))
+			return false;
+
 		// don't handle tileEntities which don't belong to the efficientBaseRepair block owner
 		if (tileEntity.ownerID != null && !tileEntity.ownerID.Equals(this.ownerID))
 			return false;
