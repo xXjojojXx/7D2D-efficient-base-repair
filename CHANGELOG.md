@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.1.1] - 2025-05-04
+
+### Fixed
+
+- Fixed NullReferenceExceptions when a solar pannel is connected to the structure
+
 ## [1.1.0] - 2025-04-20
 
 ### Fixed
@@ -14,7 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
-- Moved EfficientBaseRepair parameters from `blocks.xml` to [`ModConfig.xml`](./ModConfig.xml).
+- Moved EfficientBaseRepair parameters from `Config/blocks.xml` to [`ModConfig.xml`](./ModConfig.xml).
 
 ### Added
 
@@ -24,7 +30,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Added a new testing prefab: `efficientbaserepair_testing_01` — useful for testing or understanding how the mod works.
 - Added a new [Logging](./Scripts/Utils/Logging.cs) system.
 - Added a new [ModConfig](./Scripts/Utils/ModConfig.cs) system.
-
+- Added a new parameter `turnOnAfterReload` in ModConfig.xml
+- Added a new parameter `turnOnAfterRefuel` in ModConfig.xml
 
 ## [1.0.6] - 2024-11-21
 
@@ -139,6 +146,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 
 [unreleased]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/master...unreleased
+[1.1.1]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/1.1.0...1.1.1
 [1.1.0]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/1.0.6...1.1.0
 [1.0.6]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/1.0.5...1.0.6
 [1.0.5]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/1.0.4...1.0.5

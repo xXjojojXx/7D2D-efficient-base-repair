@@ -28,7 +28,9 @@ public class Config
 
     public static string upgradeSound = config.GetProperty("upgradeSound");
 
+    [ModConfig.ReadOnly]
     public static Vector2i lootSize = config.GetVector2i("lootSize");
 
+    [ModConfig.ReadOnly]
     public const TileEntityType tileEntityType = (TileEntityType)191;
 }
