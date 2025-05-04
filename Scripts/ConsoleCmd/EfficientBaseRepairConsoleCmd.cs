@@ -141,13 +141,13 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
 
     private void CmdSetConfig(string[] args)
     {
-        ModConfig.SetValue<Config>(args[1], args[2]);
+        ModConfig.SetField<Config>(args[1], args[2]);
     }
 
     private void CmdGetConfig(string[] args)
     {
         var fieldName = args.Length > 1 ? args[1] : "";
-        var value = ModConfig.GetValue<Config>(fieldName);
+        var value = ModConfig.GetField<Config>(fieldName);
 
         if (value != null)
         {
