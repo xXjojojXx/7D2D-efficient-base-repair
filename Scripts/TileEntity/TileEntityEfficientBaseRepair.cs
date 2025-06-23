@@ -10,6 +10,8 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 {
 	private static readonly Logging.Logger logger = Logging.CreateLogger<TileEntityEfficientBaseRepair>();
 
+	public override TileEntityType GetTileEntityType() => Config.tileEntityType;
+
 	private const string propAmmoGasCan = "ammoGasCan";
 
 	private const float tickDuration_s = 2f;
@@ -902,8 +904,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 
 		return wasModified;
 	}
-
-	public override TileEntityType GetTileEntityType() => Config.tileEntityType;
 
 	public override void read(PooledBinaryReader _br, StreamModeRead _eStreamMode)
 	{
