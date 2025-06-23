@@ -34,7 +34,7 @@ public class ModConfig
         this.version = version;
 
         this.userDataConfigPath = $"{GameIO.GetUserGameDataDir()}/{modName}.ModConfig.xml";
-        this.modConfigPath = Path.GetFullPath($"{modPath}/../ModConfig.xml");
+        this.modConfigPath = Path.GetFullPath($"{modPath}/ModConfig.xml");
 
         if (!File.Exists(modConfigPath))
             throw new FileNotFoundException($"Can't find ModConfig.xml for mod '{modName}'");
