@@ -389,10 +389,9 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 
 		TakeRepairMaterials(upgradeMaterials, Config.needsMaterialsForUpgrade);
 
+		TextureFullArray textureFull = GameManager.Instance.World.GetTextureFullArray(pos.x, pos.y, pos.z);
 		BlockValue currentBlock = world.GetBlock(pos);
 		Vector3i localPos = World.toBlock(pos);
-
-		var textureFull = chunk.GetTextureFull(localPos.x, localPos.y, localPos.z);
 
 		RepairBlock(1, chunk.ClrIdx, currentBlock, pos, Config.upgradeSound);
 		SetBlockUpgradable(pos);
