@@ -1,6 +1,6 @@
 public class Config
 {
-    private static readonly ModConfig config = new ModConfig("EfficientBaseRepair", version: 0, save: false);
+    private static readonly ModConfig config = new ModConfig(version: 0, save: false);
 
     public static int maxBfsIterations = config.GetInt("maxBfsIterations");
 
@@ -26,7 +26,7 @@ public class Config
 
     public static bool keepPaintAfterUpgrade = config.GetBool("keepPaintAfterUpgrade");
 
-    public static string upgradeSound = config.GetProperty("upgradeSound");
+    public static string upgradeSound = config.GetString("upgradeSound");
 
     [ModConfig.ReadOnly]
     public static Vector2i lootSize = config.GetVector2i("lootSize");

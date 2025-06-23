@@ -10,6 +10,8 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 {
 	private static readonly Logging.Logger logger = Logging.CreateLogger<TileEntityEfficientBaseRepair>();
 
+	public override TileEntityType GetTileEntityType() => Config.tileEntityType;
+
 	private const string propAmmoGasCan = "ammoGasCan";
 
 	private const float tickDuration_s = 2f;
@@ -387,10 +389,9 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 
 		TakeRepairMaterials(upgradeMaterials, Config.needsMaterialsForUpgrade);
 
+		TextureFullArray textureFull = GameManager.Instance.World.GetTextureFullArray(pos.x, pos.y, pos.z);
 		BlockValue currentBlock = world.GetBlock(pos);
 		Vector3i localPos = World.toBlock(pos);
-
-		var textureFull = chunk.GetTextureFull(localPos.x, localPos.y, localPos.z);
 
 		RepairBlock(1, chunk.ClrIdx, currentBlock, pos, Config.upgradeSound);
 		SetBlockUpgradable(pos);
@@ -902,8 +903,6 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 
 		return wasModified;
 	}
-
-	public override TileEntityType GetTileEntityType() => Config.tileEntityType;
 
 	public override void read(PooledBinaryReader _br, StreamModeRead _eStreamMode)
 	{

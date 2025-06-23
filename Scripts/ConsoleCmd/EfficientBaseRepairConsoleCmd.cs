@@ -26,6 +26,8 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
             - clear: clear all selection boxes added by command 'neighbors'
             - material, mat: fill the opened EfficientBaseRepair crate with required materials
             - setfuel <value>: set the given fuel amount into the opened powerSource item. If no value is given, a random value is choosen.
+            - getconfig <name>: show the value of the given ebr parameter. The name is case-sensitive and must be defined in ModConfig.xml, ex: `get repairRate`
+            - setconfig <name> <value>: set the value of the given ebr parameter, ex: `set repairRate 100`
         ";
     }
 
@@ -141,13 +143,13 @@ public class EfficientBaseRepairConsoleCmd : ConsoleCmdAbstract
 
     private void CmdSetConfig(string[] args)
     {
-        ModConfig.SetValue<Config>(args[1], args[2]);
+        ModConfig.SetField<Config>(args[1], args[2]);
     }
 
     private void CmdGetConfig(string[] args)
     {
         var fieldName = args.Length > 1 ? args[1] : "";
-        var value = ModConfig.GetValue<Config>(fieldName);
+        var value = ModConfig.GetField<Config>(fieldName);
 
         if (value != null)
         {
