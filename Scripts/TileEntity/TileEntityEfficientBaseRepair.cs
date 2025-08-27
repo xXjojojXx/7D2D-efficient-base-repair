@@ -626,7 +626,14 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 			if (!(world.GetTileEntity(pos) is TileEntityPoweredRangedTrap tileEntity))
 				continue;
 
-			var ammoType = tileEntity.AmmoItem;
+			ItemClass ammoType = RangedTrapHelper.GetFirstAllowedAmmo(tileEntity);
+
+			if (ammoType == null)
+			{
+				logger.Warning($"No ammos type found for block '{tileEntity.blockValue.Block.blockName}'");
+				continue;
+			}
+
 			var itemName = ammoType.Name;
 			var itemStackSize = ammoType.Stacknumber.Value;
 
@@ -722,20 +729,21 @@ public class TileEntityEfficientBaseRepair : TileEntitySecureLootContainer // TO
 			if (!(world.GetTileEntity(blockPos) is TileEntityPoweredRangedTrap tileEntity))
 				continue;
 
-			if (!inventoryItems.ContainsKey(tileEntity.AmmoItem.Name))
+			ItemClass ammoType = RangedTrapHelper.GetFirstAllowedAmmo(tileEntity);
+
+			if (ammoType == null || !inventoryItems.ContainsKey(ammoType.Name))
 				continue;
 
-			var itemClass = tileEntity.AmmoItem;
-			var itemClassName = itemClass.Name;
-			var itemStackSize = itemClass.Stacknumber.Value * tileEntity.ItemSlots.Length;
+			var itemClassName = ammoType.Name;
+			var itemStackSize = ammoType.Stacknumber.Value * tileEntity.ItemSlots.Length;
 			var itemCount = tileEntity.ItemSlots.Sum(itemStack => itemStack.count);
-			var requiredAmmos = tileEntity.ItemSlots.Sum(stack => EBRUtils.GetMissingItemCount(stack, itemClass.Stacknumber.Value));
+			var requiredAmmos = tileEntity.ItemSlots.Sum(stack => EBRUtils.GetMissingItemCount(stack, ammoType.Stacknumber.Value));
 
 			if (requiredAmmos <= 0 || itemCount >= itemStackSize)
 				continue;
 
 			if (!distribSolvers.ContainsKey(itemClassName))
-				distribSolvers[itemClassName] = new DistributionSolver(itemClass, itemStackSize);
+				distribSolvers[itemClassName] = new DistributionSolver(ammoType, itemStackSize);
 
 			distribSolvers[itemClassName].AddDatas(tileEntity, itemCount, tileEntity.ItemSlots.Length);
 		}
