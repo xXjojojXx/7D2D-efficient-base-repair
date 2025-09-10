@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## 2.0.2 - 2025-09-10
+
+### Fixed
+- Fixed OutOfBoundsException when there is more required materials than anticipated in xui
+- Fixed compatibility issues for V2.3b9
+
 ## 2.0.1 - 2025-08-27
 
 ### Fixed
@@ -139,6 +145,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 
 [unreleased]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/master...unreleased
+[2.0.2]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/2.0.1...2.0.2
 [2.0.1]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/2.0.0...2.0.1
 [2.0.0]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/1.1.0...2.0.0
 [1.1.1]: https://github.com/VisualDev-FR/7D2D-efficient-base-repair/compare/1.1.0...1.1.1
