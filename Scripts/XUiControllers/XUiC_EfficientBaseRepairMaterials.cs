@@ -66,6 +66,10 @@ public class XUiC_EfficientBaseRepairMaterials : XUiController
             if (requiredMaterialsCount <= 0)
                 continue;
 
+            // can happen if there more repair materials than the anticipated max amount of material sprites
+            if (index > materialSprites.Length)
+                continue;
+
             XUiV_Sprite sprite = (XUiV_Sprite)materialSprites[index].ViewComponent;
             sprite.ParseAttribute("sprite", iconName, materialSprites[index]);
 
