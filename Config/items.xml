@@ -1,0 +1,29 @@
+<configs>
+    <append xpath="/items">
+        <item name="EfficientBaseRepair">
+            <property name="Extends" value="questMasterItem" />
+            <property name="CustomIcon" value="cntHardenedChestSecure" />
+            <property name="CustomIconTint" value="255,255,255" />
+            <property name="HoldType" value="45" />
+            <property name="Meshfile" value="#@modfolder:Resources/EfficientBaseRepair.unity3d?EfficientBaseRepair" />
+            <property name="DropMeshfile" value="#@modfolder:Resources/EfficientBaseRepair.unity3d?EfficientBaseRepairPrefab" />
+            <property name="Material" value="Mmetal" />
+            <property name="Stacknumber" value="10" />
+            <property name="Weight" value="50" />
+            <property name="UnlockedBy" value="craftingRepairTools" />
+            <property name="EconomicValue" value="1000" />
+            <property name="Group" value="Building,TCB" />
+            <property name="DisplayType" value="blockHardened" />
+            <property name="DescriptionKey" value="efficientBaseRepairDesc" />
+            
+            <property name="ActionSkillGroup" value="Building" />
+            
+            <property class="Action0">
+                <property name="Class" value="PlaceBlock" />
+                <property name="Create_item" value="EfficientBaseRepair" />
+                <property name="Sound_start" value="PlaceBlock/woodplace" />
+            </property>
+        </item>
+    </append>
+</configs>
+
